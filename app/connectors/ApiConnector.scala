@@ -16,12 +16,17 @@
 
 package connectors
 
+import api.submission.Header.scope
+import api.submission._
 import config.AppConfig
+import generated.{CC007CType, MESSAGE_FROM_TRADERSequence, MessageType007, PhaseIDtype}
 import models.UserAnswers
 import play.api.Logging
 import play.api.http.HeaderNames
 import play.api.mvc.Result
 import play.api.mvc.Results.{BadRequest, InternalServerError}
+import scalaxb.DataRecord
+import scalaxb.`package`.toXML
 import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier, HttpClient, HttpErrorFunctions, HttpResponse}
 
 import javax.inject.Inject
@@ -34,10 +39,33 @@ class ApiConnector @Inject() (httpClient: HttpClient, appConfig: AppConfig)(impl
     HeaderNames.CONTENT_TYPE -> "application/xml"
   )
 
+  def createPayload(userAnswers: UserAnswers): CC007CType = {
+    val message: MESSAGE_FROM_TRADERSequence = Header.message
+    val messageType: MessageType007          = Header.messageType
+    val correlationIdentifier                = Header.correlationIdentifier
+    val transitOperation                     = TransitOperation.transform(userAnswers)
+    val authorisations                       = Authorisations.transform(userAnswers)
+    val customsOfficeOfDestination           = DestinationDetails.customsOfficeOfDestination(userAnswers)
+    val traderAtDestination                  = DestinationDetails.traderAtDestination(userAnswers)
+    val consignment                          = Consignment.transform(userAnswers)
+
+    CC007CType(
+      message,
+      messageType,
+      correlationIdentifier,
+      transitOperation,
+      authorisations,
+      customsOfficeOfDestination,
+      traderAtDestination,
+      consignment,
+      attributes = Map("@PhaseID" -> DataRecord(PhaseIDtype.fromString("NCTS5.0", scope)))
+    )
+  }
+
   def submitDeclaration(userAnswers: UserAnswers)(implicit hc: HeaderCarrier): Future[Either[Result, HttpResponse]] = {
 
     val declarationUrl  = s"${appConfig.apiUrl}/movements/arrivals"
-    val payload: String = "TODO"
+    val payload: String = toXML[CC007CType](createPayload(userAnswers), "ncts:CC007C", scope).toString
 
     httpClient
       .POSTString[HttpResponse](declarationUrl, payload, requestHeaders)

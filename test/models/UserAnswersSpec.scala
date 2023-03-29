@@ -26,7 +26,7 @@ class UserAnswersSpec extends SpecBase {
 
   private val userAnswers = UserAnswers(
     metadata = Metadata(
-      lrn = lrn,
+      mrn = mrn,
       eoriNumber = eoriNumber,
       data = Json.obj(),
       tasks = Map(
@@ -48,7 +48,7 @@ class UserAnswersSpec extends SpecBase {
       val json: JsValue = Json.parse(s"""
           |{
           |    "_id" : "$uuid",
-          |    "lrn" : "$lrn",
+          |    "mrn" : "$mrn",
           |    "eoriNumber" : "$eoriNumber",
           |    "data" : {},
           |    "tasks" : {
@@ -83,7 +83,7 @@ class UserAnswersSpec extends SpecBase {
       val json: JsValue = Json.parse(s"""
           |{
           |    "_id" : "$uuid",
-          |    "lrn" : "$lrn",
+          |    "mrn" : "$mrn",
           |    "eoriNumber" : "$eoriNumber",
           |    "data" : {},
           |    "tasks" : {

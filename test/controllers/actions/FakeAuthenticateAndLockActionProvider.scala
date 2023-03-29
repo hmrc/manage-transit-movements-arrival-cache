@@ -24,7 +24,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 class FakeAuthenticateAndLockActionProvider extends AuthenticateAndLockActionProvider {
 
-  override def apply(lrn: String): ActionBuilder[AuthenticatedRequest, AnyContent] = {
+  override def apply(mrn: String): ActionBuilder[AuthenticatedRequest, AnyContent] = {
     val defaultActionBuilder = DefaultActionBuilder(Helpers.stubBodyParser())
     val authenticate         = new FakeAuthenticateAction("eori")
     val lock                 = new FakeLockAction()

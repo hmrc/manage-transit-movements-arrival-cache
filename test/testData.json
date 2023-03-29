@@ -1,0 +1,72 @@
+{
+  "_id" : "6920d9ad-fdef-43bf-a153-1de6100ed228",
+  "movementReferenceNumber" : "04TAJC68CC4PEKJ4J0",
+  "eoriNumber" : "GB12345678",
+  "data" : {
+    "identification" : {
+      "destinationOffice" : {
+        "id" : "GB000142",
+        "name" : "Belfast EPU",
+        "phoneNumber" : "+44 (0)3000 523068"
+      },
+      "identificationNumber" : "GB123456789000",
+      "isSimplifiedProcedure" : "normal"
+    },
+    "locationOfGoods" : {
+      "typeOfLocation" : "authorisedPlace",
+      "qualifierOfIdentification" : "customsOffice",
+      "qualifierOfIdentificationDetails" : {
+        "customsOffice" : {
+          "id" : "GB000142",
+          "name" : "Belfast EPU",
+          "phoneNumber" : "+44 (0)3000 523068"
+        }
+      }
+    },
+    "incidentFlag" : true,
+    "incidents" : [
+      {
+        "incidentCountry" : {
+          "code" : "FR",
+          "description" : "France"
+        },
+        "incidentCode" : "partiallyOrFullyUnloaded",
+        "incidentText" : "foo",
+        "addEndorsement" : true,
+        "endorsement" : {
+          "date" : "2022-01-01",
+          "authority" : "bar",
+          "country" : {
+            "code" : "FR",
+            "description" : "France"
+          },
+          "location" : "foobar"
+        },
+        "qualifierOfIdentification" : "unlocode",
+        "unLocode" : {
+          "unLocodeExtendedCode" : "DEAAL",
+          "name" : "Aalen"
+        },
+        "equipments" : [
+          {
+            "containerIdentificationNumberYesNo" : true,
+            "containerIdentificationNumber" : "1",
+            "addSealsYesNo" : true,
+            "seals" : [
+              {
+                "sealIdentificationNumber" : "1"
+              }
+            ],
+            "addGoodsItemNumberYesNo" : true,
+            "itemNumbers" : [
+              {
+                "itemNumber" : "1"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "lastUpdated" : ISODate("2023-03-29T15:30:03.901+0000")
+}

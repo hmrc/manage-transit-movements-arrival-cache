@@ -27,9 +27,9 @@ import java.util.UUID
 
 class CacheControllerSpec extends CacheRepositorySpecBase {
 
-  "GET /user-answers/:lrn" when {
+  "GET /user-answers/:mrn" when {
 
-    val url = s"$baseUrl/manage-transit-movements-arrival-cache/user-answers/$lrn"
+    val url = s"$baseUrl/manage-transit-movements-arrival-cache/user-answers/$mrn"
 
     "document does not exist" should {
       "respond with 404 status" in {
@@ -69,7 +69,7 @@ class CacheControllerSpec extends CacheRepositorySpecBase {
 
   "POST /user-answers" when {
 
-    val url = s"$baseUrl/manage-transit-movements-arrival-cache/user-answers/$lrn"
+    val url = s"$baseUrl/manage-transit-movements-arrival-cache/user-answers/$mrn"
 
     "document successfully written to mongo" should {
       "respond with 200 status" in {
@@ -85,7 +85,7 @@ class CacheControllerSpec extends CacheRepositorySpecBase {
         val results = findAll().futureValue
         results.size shouldBe 1
         val result = results.head
-        result.lrn shouldBe metadata.lrn
+        result.mrn shouldBe metadata.mrn
         result.eoriNumber shouldBe metadata.eoriNumber
         result.metadata shouldBe metadata
       }
@@ -136,13 +136,13 @@ class CacheControllerSpec extends CacheRepositorySpecBase {
       "respond with 200 status" in {
         val response = wsClient
           .url(url)
-          .put(JsString(lrn))
+          .put(JsString(mrn))
           .futureValue
 
         response.status shouldBe 200
 
         val filters = Filters.and(
-          Filters.eq("lrn", lrn),
+          Filters.eq("mrn", mrn),
           Filters.eq("eoriNumber", eoriNumber)
         )
         val results = find(filters).futureValue
@@ -173,9 +173,9 @@ class CacheControllerSpec extends CacheRepositorySpecBase {
     }
   }
 
-  "DELETE /user-answers/:lrn" when {
+  "DELETE /user-answers/:mrn" when {
 
-    val url = s"$baseUrl/manage-transit-movements-arrival-cache/user-answers/$lrn"
+    val url = s"$baseUrl/manage-transit-movements-arrival-cache/user-answers/$mrn"
 
     "document exists" should {
       "remove document and respond with 200 status" in {
@@ -236,7 +236,7 @@ class CacheControllerSpec extends CacheRepositorySpecBase {
 
         (response.json \ "userAnswers").as[Seq[JsObject]].length shouldBe 2
 
-        val lrnResults = response.json \ "userAnswers" \\ "lrn"
+        val lrnResults = response.json \ "userAnswers" \\ "mrn"
 
         lrnResults.head.validate[String].get shouldBe "AB123"
         lrnResults(1).validate[String].get shouldBe "CD123"

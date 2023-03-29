@@ -22,7 +22,7 @@ import play.api.mvc.{ActionBuilder, AnyContent, DefaultActionBuilder}
 import javax.inject.Inject
 
 trait AuthenticateAndLockActionProvider {
-  def apply(lrn: String): ActionBuilder[AuthenticatedRequest, AnyContent]
+  def apply(mrn: String): ActionBuilder[AuthenticatedRequest, AnyContent]
 }
 
 object AuthenticateAndLockActionProvider {
@@ -33,7 +33,7 @@ object AuthenticateAndLockActionProvider {
     buildDefault: DefaultActionBuilder
   ) extends AuthenticateAndLockActionProvider {
 
-    override def apply(lrn: String): ActionBuilder[AuthenticatedRequest, AnyContent] =
-      buildDefault andThen authenticate andThen lock(lrn)
+    override def apply(mrn: String): ActionBuilder[AuthenticatedRequest, AnyContent] =
+      buildDefault andThen authenticate andThen lock(mrn)
   }
 }

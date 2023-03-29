@@ -37,9 +37,9 @@ class LockActionProviderSpec extends SpecBase {
 
   class Harness(lock: AuthenticateAndLockActionProvider) {
 
-    def action(): Action[AnyContent] = lock(lrn) {
+    def action(): Action[AnyContent] = lock(mrn) {
       _ =>
-        Results.Ok(lrn)
+        Results.Ok(mrn)
     }
   }
 
@@ -84,7 +84,7 @@ class LockActionProviderSpec extends SpecBase {
         val result     = controller.action()(fakeRequest.withHeaders((HeaderNames.xSessionId, "sessionId")))
 
         status(result) shouldBe OK
-        contentAsString(result) shouldBe lrn
+        contentAsString(result) shouldBe mrn
       }
 
       "return locked when lock already exists" in {

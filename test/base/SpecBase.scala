@@ -35,13 +35,13 @@ import java.util.UUID
 
 trait SpecBase extends AnyWordSpec with Matchers with MockitoSugar with BeforeAndAfterEach with OptionValues with EitherValues with AppWithDefaultMockFixtures {
 
-  val lrn        = "lrn"
+  val mrn        = "mrn"
   val eoriNumber = "eori"
   val uuid       = "2e8ede47-dbfb-44ea-a1e3-6c57b1fe6fe2"
 
   implicit val hc: HeaderCarrier = HeaderCarrier()
 
-  val emptyMetadata: Metadata       = Metadata(lrn, eoriNumber)
+  val emptyMetadata: Metadata       = Metadata(mrn, eoriNumber)
   val emptyUserAnswers: UserAnswers = UserAnswers(emptyMetadata, Instant.now(), Instant.now(), UUID.randomUUID())
 
   val mockCacheRepository: CacheRepository      = mock[CacheRepository]

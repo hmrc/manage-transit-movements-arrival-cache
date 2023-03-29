@@ -41,10 +41,10 @@ import java.util.UUID
 trait ItSpecBase extends AnyWordSpec with Matchers with ScalaFutures with OptionValues with GuiceOneServerPerSuite {
   self: MongoSupport =>
 
-  val lrn        = "lrn"
+  val mrn        = "mrn"
   val eoriNumber = "eori"
 
-  def emptyMetadata: Metadata       = Metadata(lrn, eoriNumber)
+  def emptyMetadata: Metadata       = Metadata(mrn, eoriNumber)
   def emptyUserAnswers: UserAnswers = UserAnswers(emptyMetadata, Instant.now(), Instant.now(), UUID.randomUUID())
 
   val wsClient: WSClient = app.injector.instanceOf[WSClient]

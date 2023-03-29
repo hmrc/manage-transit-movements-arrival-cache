@@ -1,14 +1,14 @@
 # microservice specific routes
 
-GET        /user-answers                                        controllers.CacheController.getAll(lrn: Option[String] ?= None, limit: Option[Int] ?= None, skip: Option[Int] ?= None, sortBy: Option[String] ?= None)
-GET        /user-answers/:lrn                                   controllers.CacheController.get(lrn: String)
-POST       /user-answers/:lrn                                   controllers.CacheController.post(lrn: String)
+GET        /user-answers                                        controllers.CacheController.getAll(mrn: Option[String] ?= None, limit: Option[Int] ?= None, skip: Option[Int] ?= None, sortBy: Option[String] ?= None)
+GET        /user-answers/:mrn                                   controllers.CacheController.get(mrn: String)
+POST       /user-answers/:mrn                                   controllers.CacheController.post(mrn: String)
 PUT        /user-answers                                        controllers.CacheController.put()
-DELETE     /user-answers/:lrn                                   controllers.CacheController.delete(lrn: String)
+DELETE     /user-answers/:mrn                                   controllers.CacheController.delete(mrn: String)
 
 # Submission
 POST       /declaration/submit                                  controllers.SubmissionController.post()
 
 
-GET        /user-answers/:lrn/lock                              controllers.LockController.checkLock(lrn: String)
-DELETE     /user-answers/:lrn/lock                              controllers.LockController.deleteLock(lrn: String)
+GET        /user-answers/:mrn/lock                              controllers.LockController.checkLock(mrn: String)
+DELETE     /user-answers/:mrn/lock                              controllers.LockController.deleteLock(mrn: String)

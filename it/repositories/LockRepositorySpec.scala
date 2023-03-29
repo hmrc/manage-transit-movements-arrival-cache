@@ -32,7 +32,7 @@ class LockRepositorySpec extends LockRepositorySpecBase {
 
       "add new lock" in {
 
-        val lock1: Lock = Lock("session1", "eoriNumber", "lrn", now, now)
+        val lock1: Lock = Lock("session1", "eoriNumber", "mrn", now, now)
 
         val result = repository.lock(lock1).futureValue
 
@@ -41,8 +41,8 @@ class LockRepositorySpec extends LockRepositorySpecBase {
 
       "update lock when sessionId is the same as lock" in {
 
-        val lock1: Lock = Lock("session1", "eoriNumber", "lrn", now, now.minus(1, DAYS))
-        val lock2: Lock = Lock("session1", "eoriNumber", "lrn", now, now)
+        val lock1: Lock = Lock("session1", "eoriNumber", "mrn", now, now.minus(1, DAYS))
+        val lock2: Lock = Lock("session1", "eoriNumber", "mrn", now, now)
 
         insert(lock1).futureValue
 
@@ -56,8 +56,8 @@ class LockRepositorySpec extends LockRepositorySpecBase {
 
       "not add new lock if lock already exists and sessionId is different" in {
 
-        val lock1: Lock = Lock("session1", "eoriNumber", "lrn", now, now)
-        val lock2: Lock = Lock("session2", "eoriNumber", "lrn", now, now)
+        val lock1: Lock = Lock("session1", "eoriNumber", "mrn", now, now)
+        val lock2: Lock = Lock("session2", "eoriNumber", "mrn", now, now)
 
         insert(lock1).futureValue
 
@@ -77,20 +77,20 @@ class LockRepositorySpec extends LockRepositorySpecBase {
 
       "find and return existing lock" in {
 
-        val lock1: Lock = Lock("session1", "eoriNumber", "lrn", now, now)
+        val lock1: Lock = Lock("session1", "eoriNumber", "mrn", now, now)
 
         insert(lock1).futureValue
 
-        val result = repository.findLocks(lock1.eoriNumber, lock1.lrn).futureValue
+        val result = repository.findLocks(lock1.eoriNumber, lock1.mrn).futureValue
 
         result.value.sessionId shouldBe lock1.sessionId
         result.value.eoriNumber shouldBe lock1.eoriNumber
-        result.value.lrn shouldBe lock1.lrn
+        result.value.mrn shouldBe lock1.mrn
       }
 
       "return None for no lock" in {
 
-        val result = repository.findLocks("eoriNumber", "lrn").futureValue
+        val result = repository.findLocks("eoriNumber", "mrn").futureValue
 
         result shouldBe None
       }
@@ -103,11 +103,11 @@ class LockRepositorySpec extends LockRepositorySpecBase {
 
       "return true for successful unlock" in {
 
-        val lock1: Lock = Lock("session1", "eoriNumber", "lrn", now, now)
+        val lock1: Lock = Lock("session1", "eoriNumber", "mrn", now, now)
 
         insert(lock1).futureValue
 
-        val result = repository.unlock(lock1.eoriNumber, lock1.lrn, "session1").futureValue
+        val result = repository.unlock(lock1.eoriNumber, lock1.mrn, "session1").futureValue
 
         val numberOfDocs: Long = repository.collection.countDocuments().head().futureValue
 

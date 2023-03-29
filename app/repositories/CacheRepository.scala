@@ -44,9 +44,9 @@ class CacheRepository @Inject() (
       indexes = CacheRepository.indexes(appConfig)
     ) {
 
-  def get(lrn: String, eoriNumber: String): Future[Option[UserAnswers]] = {
+  def get(mrn: String, eoriNumber: String): Future[Option[UserAnswers]] = {
     val filter = Filters.and(
-      Filters.eq("lrn", lrn),
+      Filters.eq("mrn", mrn),
       Filters.eq("eoriNumber", eoriNumber)
     )
     val update  = Updates.set("lastUpdated", Instant.now(clock))
@@ -60,11 +60,11 @@ class CacheRepository @Inject() (
   def set(data: Metadata): Future[Boolean] = {
     val now = Instant.now(clock)
     val filter = Filters.and(
-      Filters.eq("lrn", data.lrn),
+      Filters.eq("mrn", data.mrn),
       Filters.eq("eoriNumber", data.eoriNumber)
     )
     val updates = Updates.combine(
-      Updates.setOnInsert("lrn", data.lrn),
+      Updates.setOnInsert("mrn", data.mrn),
       Updates.setOnInsert("eoriNumber", data.eoriNumber),
       Updates.set("data", Codecs.toBson(data.data)),
       Updates.set("tasks", Codecs.toBson(data.tasks)),
@@ -80,9 +80,9 @@ class CacheRepository @Inject() (
       .map(_.wasAcknowledged())
   }
 
-  def remove(lrn: String, eoriNumber: String): Future[Boolean] = {
+  def remove(mrn: String, eoriNumber: String): Future[Boolean] = {
     val filter = Filters.and(
-      Filters.eq("lrn", lrn),
+      Filters.eq("mrn", mrn),
       Filters.eq("eoriNumber", eoriNumber)
     )
 
@@ -94,7 +94,7 @@ class CacheRepository @Inject() (
 
   def getAll(
     eoriNumber: String,
-    lrn: Option[String] = None,
+    mrn: Option[String] = None,
     limit: Option[Int] = None,
     skip: Option[Int] = None,
     sortBy: Option[String] = None
@@ -103,10 +103,10 @@ class CacheRepository @Inject() (
     val skipIndex: Int   = skip.getOrElse(0)
     val returnLimit: Int = limit.getOrElse(appConfig.maxRowsReturned)
     val skipLimit: Int   = skipIndex * returnLimit
-    val lrnRegex         = lrn.map(_.replace(" ", "")).getOrElse("")
+    val lrnRegex         = mrn.map(_.replace(" ", "")).getOrElse("")
 
     val eoriFilter: Bson = mEq("eoriNumber", eoriNumber)
-    val lrnFilter: Bson  = regex("lrn", lrnRegex)
+    val lrnFilter: Bson  = regex("mrn", lrnRegex)
 
     val primaryFilter = Aggregates.filter(mAnd(eoriFilter, lrnFilter))
 
@@ -142,8 +142,8 @@ object CacheRepository {
     )
 
     val eoriNumberAndLrnCompoundIndex: IndexModel = IndexModel(
-      keys = compoundIndex(ascending("eoriNumber"), ascending("lrn")),
-      indexOptions = IndexOptions().name("eoriNumber-lrn-index")
+      keys = compoundIndex(ascending("eoriNumber"), ascending("mrn")),
+      indexOptions = IndexOptions().name("eoriNumber-mrn-index")
     )
 
     Seq(userAnswersCreatedAtIndex, eoriNumberAndLrnCompoundIndex)

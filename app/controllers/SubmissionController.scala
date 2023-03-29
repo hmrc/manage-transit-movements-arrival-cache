@@ -40,8 +40,8 @@ class SubmissionController @Inject() (
   def post(): Action[JsValue] = authenticate().async(parse.json) {
     implicit request =>
       request.body.validate[String] match {
-        case JsSuccess(lrn, _) =>
-          cacheRepository.get(lrn, request.eoriNumber).flatMap {
+        case JsSuccess(mrn, _) =>
+          cacheRepository.get(mrn, request.eoriNumber).flatMap {
             case Some(uA) =>
               apiConnector.submitDeclaration(uA).map {
                 case Right(response) => Ok(response.body)

@@ -34,7 +34,7 @@ class LockControllerSpec extends SpecBase {
     val lock = Lock(
       sessionId = "abc123",
       eoriNumber = "AB123",
-      lrn = "CD123",
+      mrn = "CD123",
       createdAt = Instant.now(),
       lastUpdated = Instant.now()
     )
@@ -43,7 +43,7 @@ class LockControllerSpec extends SpecBase {
       "when document is not locked" in {
         when(mockLockRepository.findLocks(any(), any())).thenReturn(Future.successful(None))
 
-        val request = FakeRequest(GET, routes.LockController.checkLock(lrn).url)
+        val request = FakeRequest(GET, routes.LockController.checkLock(mrn).url)
           .withHeaders((HeaderNames.xSessionId, "sessionId"))
 
         val result = route(app, request).value
@@ -54,7 +54,7 @@ class LockControllerSpec extends SpecBase {
       "when document is locked but header carrier session Id aligns to lock session Id" in {
         when(mockLockRepository.findLocks(any(), any())).thenReturn(Future.successful(Some(lock)))
 
-        val request = FakeRequest(GET, routes.LockController.checkLock(lrn).url)
+        val request = FakeRequest(GET, routes.LockController.checkLock(mrn).url)
           .withHeaders((HeaderNames.xSessionId, "abc123"))
 
         val result = route(app, request).value
@@ -68,7 +68,7 @@ class LockControllerSpec extends SpecBase {
       "when document is locked but header carrier session Id doesnt align to lock session Id" in {
         when(mockLockRepository.findLocks(any(), any())).thenReturn(Future.successful(Some(lock)))
 
-        val request = FakeRequest(GET, routes.LockController.checkLock(lrn).url)
+        val request = FakeRequest(GET, routes.LockController.checkLock(mrn).url)
           .withHeaders((HeaderNames.xSessionId, "cd123"))
 
         val result = route(app, request).value
@@ -82,7 +82,7 @@ class LockControllerSpec extends SpecBase {
       "when session id is not defined" in {
         when(mockLockRepository.findLocks(any(), any())).thenReturn(Future.successful(Some(lock)))
 
-        val request = FakeRequest(GET, routes.LockController.checkLock(lrn).url)
+        val request = FakeRequest(GET, routes.LockController.checkLock(mrn).url)
 
         val result = route(app, request).value
 
@@ -97,7 +97,7 @@ class LockControllerSpec extends SpecBase {
       "document is deleted" in {
         when(mockLockRepository.unlock(any(), any(), any())).thenReturn(Future.successful(true))
 
-        val request = FakeRequest(DELETE, routes.LockController.deleteLock(lrn).url)
+        val request = FakeRequest(DELETE, routes.LockController.deleteLock(mrn).url)
           .withHeaders((HeaderNames.xSessionId, "sessionId"))
 
         val result = route(app, request).value
@@ -111,7 +111,7 @@ class LockControllerSpec extends SpecBase {
       "when lock should exist but isnt found" in {
         when(mockLockRepository.unlock(any(), any(), any())).thenReturn(Future.successful(false))
 
-        val request = FakeRequest(DELETE, routes.LockController.deleteLock(lrn).url)
+        val request = FakeRequest(DELETE, routes.LockController.deleteLock(mrn).url)
           .withHeaders((HeaderNames.xSessionId, "sessionId"))
 
         val result = route(app, request).value
@@ -125,7 +125,7 @@ class LockControllerSpec extends SpecBase {
       "when sessionId is not defined" in {
         when(mockLockRepository.unlock(any(), any(), any())).thenReturn(Future.successful(false))
 
-        val request = FakeRequest(DELETE, routes.LockController.deleteLock(lrn).url)
+        val request = FakeRequest(DELETE, routes.LockController.deleteLock(mrn).url)
 
         val result = route(app, request).value
 

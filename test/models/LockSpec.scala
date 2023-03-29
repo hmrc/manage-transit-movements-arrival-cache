@@ -25,7 +25,7 @@ import java.time.Instant
 class LockSpec extends SpecBase {
 
   private val lock = Lock(
-    lrn = lrn,
+    mrn = mrn,
     eoriNumber = eoriNumber,
     createdAt = Instant.ofEpochMilli(1662393524188L),
     lastUpdated = Instant.ofEpochMilli(1662546803472L),
@@ -36,7 +36,7 @@ class LockSpec extends SpecBase {
 
     val json: JsValue = Json.parse(s"""
          |{
-         |    "lrn" : "$lrn",
+         |    "mrn" : "$mrn",
          |    "eoriNumber" : "$eoriNumber",
          |    "createdAt" : {
          |        "$$date" : {

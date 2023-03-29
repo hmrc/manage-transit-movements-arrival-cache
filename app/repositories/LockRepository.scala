@@ -38,9 +38,9 @@ class DefaultLockRepository @Inject() (mongoComponent: MongoComponent, appConfig
       indexes = LockRepository.indexes(appConfig)
     ) {
 
-  private def primaryFilter(eoriNumber: String, lrn: String): Bson = Filters.and(
+  private def primaryFilter(eoriNumber: String, mrn: String): Bson = Filters.and(
     Filters.eq("eoriNumber", eoriNumber),
-    Filters.eq("lrn", lrn)
+    Filters.eq("mrn", mrn)
   )
 
   private def insertNewLock(lock: Lock): Future[Boolean] =
@@ -52,26 +52,26 @@ class DefaultLockRepository @Inject() (mongoComponent: MongoComponent, appConfig
   private def updateLock(existingLock: Lock): Future[Boolean] = {
     val updatedLock = existingLock.copy(lastUpdated = Instant.now(clock))
     collection
-      .replaceOne(primaryFilter(existingLock.eoriNumber, existingLock.lrn), updatedLock)
+      .replaceOne(primaryFilter(existingLock.eoriNumber, existingLock.mrn), updatedLock)
       .head()
       .map(_.wasAcknowledged())
   }
 
   def lock(newLock: Lock): Future[Boolean] =
-    findLocks(newLock.eoriNumber, newLock.lrn).flatMap {
+    findLocks(newLock.eoriNumber, newLock.mrn).flatMap {
       case Some(existingLock) if existingLock.sessionId == newLock.sessionId => updateLock(existingLock)
       case None                                                              => insertNewLock(newLock)
       case _                                                                 => Future.successful(false)
     }
 
-  def findLocks(eoriNumber: String, lrn: String): Future[Option[Lock]] =
-    collection.find(primaryFilter(eoriNumber, lrn)).headOption()
+  def findLocks(eoriNumber: String, mrn: String): Future[Option[Lock]] =
+    collection.find(primaryFilter(eoriNumber, mrn)).headOption()
 
-  def unlock(eoriNumber: String, lrn: String, sessionId: String): Future[Boolean] = {
+  def unlock(eoriNumber: String, mrn: String, sessionId: String): Future[Boolean] = {
     val filters = Filters.and(
       Filters.eq("sessionId", sessionId),
       Filters.eq("eoriNumber", eoriNumber),
-      Filters.eq("lrn", lrn)
+      Filters.eq("mrn", mrn)
     )
 
     collection
@@ -95,8 +95,8 @@ object LockRepository {
     )
 
     val eoriNumberAndLrnCompoundIndex: IndexModel = IndexModel(
-      keys = compoundIndex(ascending("eoriNumber"), ascending("lrn")),
-      indexOptions = IndexOptions().name("eoriNumber-lrn-index")
+      keys = compoundIndex(ascending("eoriNumber"), ascending("mrn")),
+      indexOptions = IndexOptions().name("eoriNumber-mrn-index")
     )
 
     Seq(userAnswersCreatedAtIndex, userAnswersLastUpdatedIndex, eoriNumberAndLrnCompoundIndex)

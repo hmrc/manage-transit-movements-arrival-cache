@@ -47,7 +47,7 @@ class UserAnswersSummarySpec extends SpecBase {
           "totalMatchingMovements" -> 2,
           "userAnswers" -> Json.arr(
             Json.obj(
-              "lrn" -> "AB123",
+              "mrn" -> "AB123",
               "_links" -> Json.obj(
                 "self" -> Json.obj("href" -> controllers.routes.CacheController.get("AB123").url)
               ),
@@ -57,7 +57,7 @@ class UserAnswersSummarySpec extends SpecBase {
               "_id"           -> id1
             ),
             Json.obj(
-              "lrn" -> "CD123",
+              "mrn" -> "CD123",
               "_links" -> Json.obj(
                 "self" -> Json.obj("href" -> controllers.routes.CacheController.get("CD123").url)
               ),

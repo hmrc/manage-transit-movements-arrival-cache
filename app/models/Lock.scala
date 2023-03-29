@@ -24,7 +24,7 @@ import java.time.Instant
 final case class Lock(
   sessionId: String,
   eoriNumber: String,
-  lrn: String,
+  mrn: String,
   createdAt: Instant,
   lastUpdated: Instant
 )
@@ -37,7 +37,7 @@ object Lock {
     (
       (__ \ "sessionId").read[String] and
         (__ \ "eoriNumber").read[String] and
-        (__ \ "lrn").read[String] and
+        (__ \ "mrn").read[String] and
         (__ \ "createdAt").read(MongoJavatimeFormats.instantReads) and
         (__ \ "lastUpdated").read(MongoJavatimeFormats.instantReads)
     )(Lock.apply _)
@@ -46,7 +46,7 @@ object Lock {
     (
       (__ \ "sessionId").write[String] and
         (__ \ "eoriNumber").write[String] and
-        (__ \ "lrn").write[String] and
+        (__ \ "mrn").write[String] and
         (__ \ "createdAt").write(MongoJavatimeFormats.instantWrites) and
         (__ \ "lastUpdated").write(MongoJavatimeFormats.instantWrites)
     )(unlift(Lock.unapply))

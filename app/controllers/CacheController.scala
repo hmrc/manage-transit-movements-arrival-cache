@@ -39,14 +39,14 @@ class CacheController @Inject() (
     with Logging {
 
   // TODO replace with getAll when param's are added
-  def get(lrn: String): Action[AnyContent] = authenticate().async {
+  def get(mrn: String): Action[AnyContent] = authenticate().async {
     implicit request =>
       cacheRepository
-        .get(lrn, request.eoriNumber)
+        .get(mrn, request.eoriNumber)
         .map {
           case Some(userAnswers) => Ok(Json.toJson(userAnswers))
           case None =>
-            logger.warn(s"No document found for LRN '$lrn' and EORI '${request.eoriNumber}'")
+            logger.warn(s"No document found for LRN '$mrn' and EORI '${request.eoriNumber}'")
             NotFound
         }
         .recover {
@@ -56,7 +56,7 @@ class CacheController @Inject() (
         }
   }
 
-  def post(lrn: String): Action[JsValue] = authenticateAndLock(lrn).async(parse.json) {
+  def post(mrn: String): Action[JsValue] = authenticateAndLock(mrn).async(parse.json) {
     implicit request =>
       request.body.validate[Metadata] match {
         case JsSuccess(data, _) =>
@@ -75,8 +75,8 @@ class CacheController @Inject() (
   def put(): Action[JsValue] = authenticate().async(parse.json) {
     implicit request =>
       request.body.validate[String] match {
-        case JsSuccess(lrn, _) =>
-          set(Metadata(lrn, request.eoriNumber))
+        case JsSuccess(mrn, _) =>
+          set(Metadata(mrn, request.eoriNumber))
         case JsError(errors) =>
           logger.error(s"Failed to validate request body as String: $errors")
           Future.successful(BadRequest)
@@ -98,10 +98,10 @@ class CacheController @Inject() (
           InternalServerError
       }
 
-  def delete(lrn: String): Action[AnyContent] = authenticate().async {
+  def delete(mrn: String): Action[AnyContent] = authenticate().async {
     implicit request =>
       cacheRepository
-        .remove(lrn, request.eoriNumber)
+        .remove(mrn, request.eoriNumber)
         .map {
           _ => Ok
         }
@@ -112,11 +112,11 @@ class CacheController @Inject() (
         }
   }
 
-  def getAll(lrn: Option[String] = None, limit: Option[Int] = None, skip: Option[Int] = None, sortBy: Option[String] = None): Action[AnyContent] =
+  def getAll(mrn: Option[String] = None, limit: Option[Int] = None, skip: Option[Int] = None, sortBy: Option[String] = None): Action[AnyContent] =
     authenticate().async {
       implicit request =>
         cacheRepository
-          .getAll(request.eoriNumber, lrn, limit, skip, sortBy)
+          .getAll(request.eoriNumber, mrn, limit, skip, sortBy)
           .map(
             result => Ok(result.toHateoas())
           )

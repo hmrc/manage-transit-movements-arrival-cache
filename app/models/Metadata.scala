@@ -19,7 +19,7 @@ package models
 import play.api.libs.json.{Format, JsObject, Json}
 
 case class Metadata(
-  lrn: String,
+  mrn: String,
   eoriNumber: String,
   data: JsObject,
   tasks: Map[String, Status.Value]
@@ -27,7 +27,7 @@ case class Metadata(
 
 object Metadata {
 
-  def apply(lrn: String, eoriNumber: String): Metadata = Metadata(lrn, eoriNumber, Json.obj(), Map())
+  def apply(mrn: String, eoriNumber: String): Metadata = Metadata(mrn, eoriNumber, Json.obj(), Map())
 
   implicit val format: Format[Metadata] = Json.format[Metadata]
 }

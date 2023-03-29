@@ -54,7 +54,7 @@ object Sort {
   object Field {
 
     case object LRN extends Field {
-      override def toString: String = "lrn"
+      override def toString: String = "mrn"
     }
 
     case object CreatedAt extends Field {

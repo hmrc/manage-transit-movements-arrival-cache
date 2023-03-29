@@ -29,7 +29,7 @@ final case class UserAnswers(
   id: UUID
 ) {
 
-  val lrn: String        = metadata.lrn
+  val mrn: String        = metadata.mrn
   val eoriNumber: String = metadata.eoriNumber
 
   def get[A](path: JsPath)(implicit rds: Reads[A]): Option[A] =

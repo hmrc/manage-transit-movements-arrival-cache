@@ -35,9 +35,9 @@ case class UserAnswersSummary(eoriNumber: String, userAnswers: Seq[UserAnswers],
       "userAnswers" -> userAnswers.map {
         userAnswer =>
           Json.obj(
-            "lrn" -> userAnswer.lrn,
+            "mrn" -> userAnswer.mrn,
             "_links" -> Json.obj(
-              "self" -> Json.obj("href" -> controllers.routes.CacheController.get(userAnswer.lrn).url)
+              "self" -> Json.obj("href" -> controllers.routes.CacheController.get(userAnswer.mrn).url)
             ),
             "createdAt"     -> userAnswer.createdAt,
             "lastUpdated"   -> userAnswer.lastUpdated,

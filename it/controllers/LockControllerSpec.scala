@@ -21,9 +21,9 @@ import uk.gov.hmrc.http.HeaderNames
 
 class LockControllerSpec extends LockRepositorySpecBase {
 
-  "GET /user-answers/:lrn/lock" when {
+  "GET /user-answers/:mrn/lock" when {
 
-    val url = s"$baseUrl/manage-transit-movements-arrival-cache/user-answers/$lrn/lock"
+    val url = s"$baseUrl/manage-transit-movements-arrival-cache/user-answers/$mrn/lock"
 
     "respond with Ok status with sessionId" in {
       val response = wsClient
@@ -45,9 +45,9 @@ class LockControllerSpec extends LockRepositorySpecBase {
     }
   }
 
-  "DELETE /user-answers/:lrn/lock" when {
+  "DELETE /user-answers/:mrn/lock" when {
 
-    val url = s"$baseUrl/manage-transit-movements-arrival-cache/user-answers/$lrn/lock"
+    val url = s"$baseUrl/manage-transit-movements-arrival-cache/user-answers/$mrn/lock"
 
     "respond with Ok status with sessionId" in {
       val response = wsClient

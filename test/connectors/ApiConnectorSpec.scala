@@ -30,7 +30,7 @@ import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
 class ApiConnectorSpec extends AnyFreeSpec with AppWithDefaultMockFixtures with WireMockServerHandler with Matchers {
 
-  val lrn        = "lrn"
+  val mrn        = "mrn"
   val eoriNumber = "eori"
   val uuid       = "2e8ede47-dbfb-44ea-a1e3-6c57b1fe6fe2"
 
@@ -39,9 +39,74 @@ class ApiConnectorSpec extends AnyFreeSpec with AppWithDefaultMockFixtures with 
   val json: JsValue = Json.parse(s"""
                                     |{
                                     |  "_id" : "$uuid",
-                                    |  "lrn" : "$lrn",
+                                    |  "mrn" : "$mrn",
                                     |  "eoriNumber" : "$eoriNumber",
-                                    |  "data" : {},
+                                    |  "data" : {
+                                    |    "identification" : {
+                                    |      "destinationOffice" : {
+                                    |        "id" : "GB000142",
+                                    |        "name" : "Belfast EPU",
+                                    |        "phoneNumber" : "+44 (0)3000 523068"
+                                    |      },
+                                    |      "identificationNumber" : "GB123456789000",
+                                    |      "isSimplifiedProcedure" : "normal"
+                                    |    },
+                                    |    "locationOfGoods" : {
+                                    |      "typeOfLocation" : "authorisedPlace",
+                                    |      "qualifierOfIdentification" : "customsOffice",
+                                    |      "qualifierOfIdentificationDetails" : {
+                                    |        "customsOffice" : {
+                                    |          "id" : "GB000142",
+                                    |          "name" : "Belfast EPU",
+                                    |          "phoneNumber" : "+44 (0)3000 523068"
+                                    |        }
+                                    |      }
+                                    |    },
+                                    |    "incidentFlag" : true,
+                                    |    "incidents" : [
+                                    |      {
+                                    |        "incidentCountry" : {
+                                    |          "code" : "FR",
+                                    |          "description" : "France"
+                                    |        },
+                                    |        "incidentCode" : "partiallyOrFullyUnloaded",
+                                    |        "incidentText" : "foo",
+                                    |        "addEndorsement" : true,
+                                    |        "endorsement" : {
+                                    |          "date" : "2022-01-01",
+                                    |          "authority" : "bar",
+                                    |          "country" : {
+                                    |            "code" : "FR",
+                                    |            "description" : "France"
+                                    |          },
+                                    |          "location" : "foobar"
+                                    |        },
+                                    |        "qualifierOfIdentification" : "unlocode",
+                                    |        "unLocode" : {
+                                    |          "unLocodeExtendedCode" : "DEAAL",
+                                    |          "name" : "Aalen"
+                                    |        },
+                                    |        "equipments" : [
+                                    |          {
+                                    |            "containerIdentificationNumberYesNo" : true,
+                                    |            "containerIdentificationNumber" : "1",
+                                    |            "addSealsYesNo" : true,
+                                    |            "seals" : [
+                                    |              {
+                                    |                "sealIdentificationNumber" : "1"
+                                    |              }
+                                    |            ],
+                                    |            "addGoodsItemNumberYesNo" : true,
+                                    |            "itemNumbers" : [
+                                    |              {
+                                    |                "itemNumber" : "1"
+                                    |              }
+                                    |            ]
+                                    |          }
+                                    |        ]
+                                    |      }
+                                    |    ]
+                                    |  },
                                     |  "tasks" : {},
                                     |  "createdAt" : {
                                     |    "$$date" : {
@@ -92,7 +157,7 @@ class ApiConnectorSpec extends AnyFreeSpec with AppWithDefaultMockFixtures with 
         server.stubFor(post(urlEqualTo(uri)).willReturn(okJson(expected)))
 
         val res = await(connector.submitDeclaration(uA))
-        // TODO res.toString mustBe Right(HttpResponse(OK, expected)).toString
+        res.toString mustBe Right(HttpResponse(OK, expected)).toString
 
       }
 
@@ -101,7 +166,7 @@ class ApiConnectorSpec extends AnyFreeSpec with AppWithDefaultMockFixtures with 
         server.stubFor(post(urlEqualTo(uri)).willReturn(badRequest()))
 
         val res = await(connector.submitDeclaration(uA))
-        // TODO res mustBe Left(BadRequest("ApiConnector:submitDeclaration: bad request"))
+        res mustBe Left(BadRequest("ApiConnector:submitDeclaration: bad request"))
 
       }
 
@@ -110,7 +175,7 @@ class ApiConnectorSpec extends AnyFreeSpec with AppWithDefaultMockFixtures with 
         server.stubFor(post(urlEqualTo(uri)).willReturn(serverError()))
 
         val res = await(connector.submitDeclaration(uA))
-        // TODO res mustBe Left(InternalServerError("ApiConnector:submitDeclaration: something went wrong"))
+        res mustBe Left(InternalServerError("ApiConnector:submitDeclaration: something went wrong"))
 
       }
 

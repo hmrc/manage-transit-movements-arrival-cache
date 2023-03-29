@@ -34,12 +34,12 @@ class LockController @Inject() (
     extends BackendController(cc)
     with Logging {
 
-  def checkLock(lrn: String): Action[AnyContent] = authenticate().async {
+  def checkLock(mrn: String): Action[AnyContent] = authenticate().async {
     implicit request =>
       hc.sessionId
         .map {
           sessionId =>
-            lockRepository.findLocks(request.eoriNumber, lrn).map {
+            lockRepository.findLocks(request.eoriNumber, mrn).map {
               case Some(lock) if sessionId.value != lock.sessionId => Locked
               case _                                               => Ok
             }
@@ -47,12 +47,12 @@ class LockController @Inject() (
         .getOrElse(Future.successful(BadRequest))
   }
 
-  def deleteLock(lrn: String): Action[AnyContent] = authenticate().async {
+  def deleteLock(mrn: String): Action[AnyContent] = authenticate().async {
     implicit request =>
       hc.sessionId
         .map {
           sessionId =>
-            lockRepository.unlock(request.eoriNumber, lrn, sessionId.value).map {
+            lockRepository.unlock(request.eoriNumber, mrn, sessionId.value).map {
               case true  => Ok
               case false => InternalServerError
             }
