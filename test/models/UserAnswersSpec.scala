@@ -29,11 +29,13 @@ class UserAnswersSpec extends SpecBase {
       mrn = mrn,
       eoriNumber = eoriNumber,
       data = Json.obj(),
-      tasks = Map(
-        "task1" -> Status.Completed,
-        "task2" -> Status.InProgress,
-        "task3" -> Status.NotStarted,
-        "task4" -> Status.CannotStartYet
+      tasks = Some(
+        Map(
+          "task1" -> Status.Completed,
+          "task2" -> Status.InProgress,
+          "task3" -> Status.NotStarted,
+          "task4" -> Status.CannotStartYet
+        )
       )
     ),
     createdAt = Instant.ofEpochMilli(1662393524188L),

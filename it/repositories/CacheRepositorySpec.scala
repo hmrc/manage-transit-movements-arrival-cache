@@ -101,7 +101,7 @@ class CacheRepositorySpec extends CacheRepositorySpecBase {
 
       val metadata = userAnswers1.metadata.copy(
         data = Json.obj("foo" -> "bar"),
-        tasks = Map(".task" -> Status.InProgress)
+        tasks = Some(Map(".task" -> Status.InProgress))
       )
       val setResult = repository.set(metadata).futureValue
 

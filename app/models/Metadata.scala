@@ -22,12 +22,12 @@ case class Metadata(
   mrn: String,
   eoriNumber: String,
   data: JsObject,
-  tasks: Map[String, Status.Value]
+  tasks: Option[Map[String, Status.Value]] = Some(Map())
 )
 
 object Metadata {
 
-  def apply(mrn: String, eoriNumber: String): Metadata = Metadata(mrn, eoriNumber, Json.obj(), Map())
+  def apply(mrn: String, eoriNumber: String): Metadata = Metadata(mrn, eoriNumber, Json.obj())
 
   implicit val format: Format[Metadata] = Json.format[Metadata]
 }
