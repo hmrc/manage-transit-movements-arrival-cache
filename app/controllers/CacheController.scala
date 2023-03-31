@@ -46,7 +46,7 @@ class CacheController @Inject() (
         .map {
           case Some(userAnswers) => Ok(Json.toJson(userAnswers))
           case None =>
-            logger.warn(s"No document found for LRN '$mrn' and EORI '${request.eoriNumber}'")
+            logger.warn(s"No document found for MRN '$mrn' and EORI '${request.eoriNumber}'")
             NotFound
         }
         .recover {

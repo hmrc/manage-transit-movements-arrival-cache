@@ -53,7 +53,7 @@ object Sort {
 
   object Field {
 
-    case object LRN extends Field {
+    case object MRN extends Field {
       override def toString: String = "mrn"
     }
 
@@ -63,12 +63,12 @@ object Sort {
   }
 
   case object SortByLRNAsc extends Sort {
-    override val field: Field = LRN
+    override val field: Field = MRN
     override val order: Order = Ascending
   }
 
   case object SortByLRNDesc extends Sort {
-    override val field: Field = LRN
+    override val field: Field = MRN
     override val order: Order = Descending
   }
 
