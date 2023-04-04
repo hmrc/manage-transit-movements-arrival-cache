@@ -17,6 +17,8 @@
 package controllers.actions
 
 import base.SpecBase
+import models.EoriNumber
+import models.EoriNumber.prefixGBIfMissing
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito._
 import org.scalacheck.Gen
@@ -38,7 +40,7 @@ class AuthenticateActionProviderSpec extends SpecBase {
 
     def action(): Action[AnyContent] = authenticate() {
       result =>
-        Results.Ok(result.eoriNumber)
+        Results.Ok(result.eoriNumber.value)
     }
   }
 
@@ -90,7 +92,7 @@ class AuthenticateActionProviderSpec extends SpecBase {
         val result     = controller.action()(fakeRequest)
 
         status(result) shouldBe OK
-        contentAsString(result) shouldBe eoriNumber
+        contentAsString(result) shouldBe prefixGBIfMissing(eoriNumber)
       }
     }
 

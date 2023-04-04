@@ -39,7 +39,7 @@ class LockController @Inject() (
       hc.sessionId
         .map {
           sessionId =>
-            lockRepository.findLocks(request.eoriNumber, mrn).map {
+            lockRepository.findLocks(request.eoriNumber.value, mrn).map {
               case Some(lock) if sessionId.value != lock.sessionId => Locked
               case _                                               => Ok
             }
@@ -52,7 +52,7 @@ class LockController @Inject() (
       hc.sessionId
         .map {
           sessionId =>
-            lockRepository.unlock(request.eoriNumber, mrn, sessionId.value).map {
+            lockRepository.unlock(request.eoriNumber.value, mrn, sessionId.value).map {
               case true  => Ok
               case false => InternalServerError
             }

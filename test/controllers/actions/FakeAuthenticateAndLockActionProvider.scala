@@ -16,6 +16,7 @@
 
 package controllers.actions
 
+import models.EoriNumber
 import models.request.AuthenticatedRequest
 import play.api.mvc._
 import play.api.test.Helpers
@@ -26,7 +27,7 @@ class FakeAuthenticateAndLockActionProvider extends AuthenticateAndLockActionPro
 
   override def apply(mrn: String): ActionBuilder[AuthenticatedRequest, AnyContent] = {
     val defaultActionBuilder = DefaultActionBuilder(Helpers.stubBodyParser())
-    val authenticate         = new FakeAuthenticateAction("eori")
+    val authenticate         = new FakeAuthenticateAction(EoriNumber("eori"))
     val lock                 = new FakeLockAction()
 
     defaultActionBuilder andThen authenticate andThen lock

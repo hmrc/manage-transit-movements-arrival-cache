@@ -18,6 +18,8 @@ package controllers.actions
 
 import com.kenshoo.play.metrics.Metrics
 import config.AppConfig
+import models.EoriNumber
+import models.EoriNumber.prefixGBIfMissing
 import models.request.AuthenticatedRequest
 import play.api.Logging
 import play.api.mvc.Results.{Forbidden, Unauthorized}
@@ -46,7 +48,7 @@ class AuthenticateAction @Inject() (
         (for {
           enrolment  <- enrolments.getEnrolment(appConfig.enrolmentKey)
           identifier <- enrolment.getIdentifier(appConfig.enrolmentIdentifier)
-        } yield Future.successful(Right(AuthenticatedRequest(request, identifier.value)))).getOrElse {
+        } yield Future.successful(Right(AuthenticatedRequest(request, EoriNumber(prefixGBIfMissing(identifier.value)))))).getOrElse {
           Future.failed(InsufficientEnrolments(s"Unable to retrieve ${appConfig.enrolmentKey} enrolment"))
         }
     }

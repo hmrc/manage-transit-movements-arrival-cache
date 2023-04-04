@@ -14,9 +14,26 @@
  * limitations under the License.
  */
 
-package models.request
+package models
 
-import models.EoriNumber
-import play.api.mvc.{Request, WrappedRequest}
+import play.api.libs.json.{__, JsString, Reads, Writes}
 
-case class AuthenticatedRequest[A](request: Request[A], eoriNumber: EoriNumber) extends WrappedRequest[A](request)
+case class EoriNumber(value: String)
+
+object EoriNumber {
+
+  implicit def reads: Reads[EoriNumber] = __.read[String] map EoriNumber.apply
+
+  implicit def writes: Writes[EoriNumber] = Writes(
+    eori => JsString(eori.value)
+  )
+
+  private val eoriPrefix = "GB"
+  private val eoriRegex  = "[A-Z]{2}[^\n\r]{1,}"
+
+  def prefixGBIfMissing(eoriNumber: String): String =
+    if (!eoriNumber.matches(eoriRegex)) {
+      s"$eoriPrefix$eoriNumber"
+    } else eoriNumber
+
+}
