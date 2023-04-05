@@ -16,7 +16,6 @@
 
 package models.request
 
-import models.EoriNumber
 import play.api.mvc.{Request, WrappedRequest}
 
-case class AuthenticatedRequest[A](request: Request[A], eoriNumber: EoriNumber) extends WrappedRequest[A](request)
+case class AuthenticatedRequest[A](request: Request[A], eoriNumber: String) extends WrappedRequest[A](request)

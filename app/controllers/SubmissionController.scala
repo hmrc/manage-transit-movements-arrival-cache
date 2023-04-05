@@ -41,7 +41,7 @@ class SubmissionController @Inject() (
     implicit request =>
       request.body.validate[String] match {
         case JsSuccess(mrn, _) =>
-          cacheRepository.get(mrn, request.eoriNumber.value).flatMap {
+          cacheRepository.get(mrn, request.eoriNumber).flatMap {
             case Some(uA) =>
               apiConnector.submitDeclaration(uA).map {
                 case Right(response) => Ok(response.body)

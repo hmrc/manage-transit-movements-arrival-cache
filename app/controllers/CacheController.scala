@@ -42,7 +42,7 @@ class CacheController @Inject() (
   def get(mrn: String): Action[AnyContent] = authenticate().async {
     implicit request =>
       cacheRepository
-        .get(mrn, request.eoriNumber.value)
+        .get(mrn, request.eoriNumber)
         .map {
           case Some(userAnswers) => Ok(Json.toJson(userAnswers))
           case None =>
@@ -60,7 +60,7 @@ class CacheController @Inject() (
     implicit request =>
       request.body.validate[Metadata] match {
         case JsSuccess(data, _) =>
-          if (request.eoriNumber.value == data.eoriNumber) {
+          if (request.eoriNumber == data.eoriNumber) {
             set(data)
           } else {
             logger.error(s"Enrolment EORI (${request.eoriNumber}) does not match EORI in user answers (${data.eoriNumber})")
@@ -76,7 +76,7 @@ class CacheController @Inject() (
     implicit request =>
       request.body.validate[String] match {
         case JsSuccess(mrn, _) =>
-          set(Metadata(mrn, request.eoriNumber.value))
+          set(Metadata(mrn, request.eoriNumber))
         case JsError(errors) =>
           logger.error(s"Failed to validate request body as String: $errors")
           Future.successful(BadRequest)
@@ -101,7 +101,7 @@ class CacheController @Inject() (
   def delete(mrn: String): Action[AnyContent] = authenticate().async {
     implicit request =>
       cacheRepository
-        .remove(mrn, request.eoriNumber.value)
+        .remove(mrn, request.eoriNumber)
         .map {
           _ => Ok
         }
@@ -116,7 +116,7 @@ class CacheController @Inject() (
     authenticate().async {
       implicit request =>
         cacheRepository
-          .getAll(request.eoriNumber.value, mrn, limit, skip, sortBy)
+          .getAll(request.eoriNumber, mrn, limit, skip, sortBy)
           .map(
             result => Ok(result.toHateoas())
           )

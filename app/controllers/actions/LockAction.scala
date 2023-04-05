@@ -49,7 +49,7 @@ class LockAction(mrn: String, repository: DefaultLockRepository, clock: Clock)(i
 
           val lock: Lock = Lock(
             sessionId = sessionId.value,
-            eoriNumber = request.eoriNumber.value,
+            eoriNumber = request.eoriNumber,
             mrn = mrn,
             createdAt = now,
             lastUpdated = now

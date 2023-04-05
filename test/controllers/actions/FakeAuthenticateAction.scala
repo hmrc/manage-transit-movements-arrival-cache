@@ -16,14 +16,13 @@
 
 package controllers.actions
 
-import models.EoriNumber
 import models.request.AuthenticatedRequest
 import play.api.mvc._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
 
-class FakeAuthenticateAction(eoriNumber: EoriNumber) extends ActionRefiner[Request, AuthenticatedRequest] {
+class FakeAuthenticateAction(eoriNumber: String) extends ActionRefiner[Request, AuthenticatedRequest] {
 
   override protected def refine[A](request: Request[A]): Future[Either[Result, AuthenticatedRequest[A]]] =
     Future.successful(Right(AuthenticatedRequest(request, eoriNumber)))
