@@ -18,14 +18,15 @@ package api.submission
 
 import generated.TransitOperationType02
 import models.UserAnswers
-import org.joda.time.DateTime
-import play.api.libs.json.{__, Reads}
 import play.api.libs.functional.syntax._
+import play.api.libs.json.{__, Reads}
+
+import java.time.LocalDateTime
 
 object TransitOperation {
 
   def transform(uA: UserAnswers): TransitOperationType02 =
-    uA.metadata.data.as[TransitOperationType02](transitOperationType02.reads(uA.mrn.toString))
+    uA.metadata.data.as[TransitOperationType02](transitOperationType02.reads(uA.mrn))
 }
 
 object transitOperationType02 {
@@ -42,7 +43,7 @@ object transitOperationType02 {
     (isSimplified, isIncident) =>
       TransitOperationType02(
         MRN = mrn,
-        arrivalNotificationDateAndTime = DateTime.now().toString(),
+        arrivalNotificationDateAndTime = LocalDateTime.now(),
         simplifiedProcedure = isSimplified,
         incidentFlag = isIncident
       )
