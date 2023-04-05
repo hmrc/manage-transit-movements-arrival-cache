@@ -62,12 +62,12 @@ object Sort {
     }
   }
 
-  case object SortByLRNAsc extends Sort {
+  case object SortByMRNAsc extends Sort {
     override val field: Field = MRN
     override val order: Order = Ascending
   }
 
-  case object SortByLRNDesc extends Sort {
+  case object SortByMRNDesc extends Sort {
     override val field: Field = MRN
     override val order: Order = Descending
   }
@@ -83,8 +83,8 @@ object Sort {
   }
 
   def apply(sortParams: Option[String]): Sort = sortParams match {
-    case Some(SortByLRNAsc.convertParams)       => SortByLRNAsc
-    case Some(SortByLRNDesc.convertParams)      => SortByLRNDesc
+    case Some(SortByMRNAsc.convertParams)       => SortByMRNAsc
+    case Some(SortByMRNDesc.convertParams)      => SortByMRNDesc
     case Some(SortByCreatedAtAsc.convertParams) => SortByCreatedAtAsc
     case _                                      => SortByCreatedAtDesc
   }
@@ -93,8 +93,8 @@ object Sort {
   //
   //    override def bind(key: String, params: Map[String, Seq[String]]): Option[Either[String, Sort]] =
   //      Option(stringBinder.bind("sortBy", params) match {
-  //        case Some(Right(SortByLRNAsc.convertParams))        => Right(SortByLRNAsc)
-  //        case Some(Right(SortByLRNDesc.convertParams))       => Right(SortByLRNDesc)
+  //        case Some(Right(SortByMRNAsc.convertParams))        => Right(SortByMRNAsc)
+  //        case Some(Right(SortByMRNDesc.convertParams))       => Right(SortByMRNDesc)
   //        case Some(Right(SortByCreatedAtAsc.convertParams))  => Right(SortByCreatedAtAsc)
   //        case Some(Right(SortByCreatedAtDesc.convertParams)) => Right(SortByCreatedAtDesc)
   //        case _                                              => Left("Invalid sort parameters")

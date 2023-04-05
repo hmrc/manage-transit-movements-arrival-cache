@@ -103,12 +103,12 @@ class CacheRepository @Inject() (
     val skipIndex: Int   = skip.getOrElse(0)
     val returnLimit: Int = limit.getOrElse(appConfig.maxRowsReturned)
     val skipLimit: Int   = skipIndex * returnLimit
-    val lrnRegex         = mrn.map(_.replace(" ", "")).getOrElse("")
+    val mrnRegex         = mrn.map(_.replace(" ", "")).getOrElse("")
 
     val eoriFilter: Bson = mEq("eoriNumber", eoriNumber)
-    val lrnFilter: Bson  = regex("mrn", lrnRegex)
+    val mrnFilter: Bson  = regex("mrn", mrnRegex)
 
-    val primaryFilter = Aggregates.filter(mAnd(eoriFilter, lrnFilter))
+    val primaryFilter = Aggregates.filter(mAnd(eoriFilter, mrnFilter))
 
     val aggregates: Seq[Bson] = Seq(
       primaryFilter,
@@ -141,12 +141,12 @@ object CacheRepository {
       indexOptions = IndexOptions().name("user-answers-created-at-index").expireAfter(appConfig.mongoTtlInDays, TimeUnit.DAYS)
     )
 
-    val eoriNumberAndLrnCompoundIndex: IndexModel = IndexModel(
+    val eoriNumberAndMrnCompoundIndex: IndexModel = IndexModel(
       keys = compoundIndex(ascending("eoriNumber"), ascending("mrn")),
       indexOptions = IndexOptions().name("eoriNumber-mrn-index")
     )
 
-    Seq(userAnswersCreatedAtIndex, eoriNumberAndLrnCompoundIndex)
+    Seq(userAnswersCreatedAtIndex, eoriNumberAndMrnCompoundIndex)
   }
 
 }

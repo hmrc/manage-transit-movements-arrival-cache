@@ -47,7 +47,7 @@ class CacheControllerSpec extends SpecBase {
     }
 
     "return 404" when {
-      "document not found in mongo for given lrn and eori number" in {
+      "document not found in mongo for given mrn and eori number" in {
         when(mockCacheRepository.get(any(), any())).thenReturn(Future.successful(None))
 
         val request = FakeRequest(GET, routes.CacheController.get(mrn).url)

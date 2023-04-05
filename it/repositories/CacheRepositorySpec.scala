@@ -17,7 +17,7 @@
 package repositories
 
 import itbase.CacheRepositorySpecBase
-import models.Sort.{SortByCreatedAtAsc, SortByCreatedAtDesc, SortByLRNAsc, SortByLRNDesc}
+import models.Sort.{SortByCreatedAtAsc, SortByCreatedAtDesc, SortByMRNAsc, SortByMRNDesc}
 import models.{Metadata, Status, UserAnswers, UserAnswersSummary}
 import org.mongodb.scala.Document
 import org.mongodb.scala.bson.{BsonDocument, BsonString}
@@ -170,9 +170,9 @@ class CacheRepositorySpec extends CacheRepositorySpecBase {
       }
     }
 
-    "when given an lrn param" should {
+    "when given an mrn param" should {
 
-      "return UserAnswersSummary that match a full LRN" in {
+      "return UserAnswersSummary that match a full MRN" in {
 
         insert(userAnswers6).futureValue
 
@@ -189,7 +189,7 @@ class CacheRepositorySpec extends CacheRepositorySpecBase {
         }
       }
 
-      "return UserAnswersSummary that match a partial LRN" in {
+      "return UserAnswersSummary that match a partial MRN" in {
 
         insert(userAnswers6).futureValue
 
@@ -245,7 +245,7 @@ class CacheRepositorySpec extends CacheRepositorySpecBase {
 
       }
 
-      "return UserAnswersSummary to limit and to lrn param sorted by createdDate" in {
+      "return UserAnswersSummary to limit and to mrn param sorted by createdDate" in {
 
         val userAnswers1 = emptyUserAnswers.copy(metadata = Metadata("XI1111111111111", "AB123"), createdAt = Instant.now())
         val userAnswers2 = emptyUserAnswers.copy(metadata = Metadata("XI2222222222222", "AB123"), createdAt = Instant.now().minus(1, HOURS))
@@ -329,7 +329,7 @@ class CacheRepositorySpec extends CacheRepositorySpecBase {
         }
       }
 
-      "return UserAnswersSummary to limit, lrn and skip param sorted by createdDate" in {
+      "return UserAnswersSummary to limit, mrn and skip param sorted by createdDate" in {
 
         val userAnswers1 = emptyUserAnswers.copy(metadata = Metadata("XI1111111111111", "AB123"), createdAt = Instant.now())
         val userAnswers2 = emptyUserAnswers.copy(metadata = Metadata("XI2222222222222", "AB123"), createdAt = Instant.now().minus(1, HOURS))
@@ -367,7 +367,7 @@ class CacheRepositorySpec extends CacheRepositorySpecBase {
       val userAnswers5 = emptyUserAnswers.copy(metadata = Metadata("EE2222222222222", "AB123"), createdAt = Instant.now().minus(1, DAYS))
       val userAnswers6 = emptyUserAnswers.copy(metadata = Metadata("FF3333333333333", "AB123"), createdAt = Instant.now().minus(2, DAYS))
 
-      "return UserAnswersSummary, which is sorted by lrn in ascending order when sortBy is lrn.asc" in {
+      "return UserAnswersSummary, which is sorted by mrn in ascending order when sortBy is mrn.asc" in {
 
         insert(userAnswers6).futureValue
         insert(userAnswers4).futureValue
@@ -376,7 +376,7 @@ class CacheRepositorySpec extends CacheRepositorySpecBase {
         insert(userAnswers3).futureValue
         insert(userAnswers2).futureValue
 
-        val result = repository.getAll(userAnswers1.eoriNumber, sortBy = Some(SortByLRNAsc.convertParams)).futureValue
+        val result = repository.getAll(userAnswers1.eoriNumber, sortBy = Some(SortByMRNAsc.convertParams)).futureValue
 
         result match {
           case UserAnswersSummary(_, userAnswers, _, _, _) =>
@@ -389,7 +389,7 @@ class CacheRepositorySpec extends CacheRepositorySpecBase {
         }
 
       }
-      "return UserAnswersSummary, which is sorted by lrn in descending order when sortBy is lrn.desc" in {
+      "return UserAnswersSummary, which is sorted by mrn in descending order when sortBy is mrn.desc" in {
 
         insert(userAnswers6).futureValue
         insert(userAnswers4).futureValue
@@ -398,7 +398,7 @@ class CacheRepositorySpec extends CacheRepositorySpecBase {
         insert(userAnswers3).futureValue
         insert(userAnswers2).futureValue
 
-        val result = repository.getAll(userAnswers1.eoriNumber, sortBy = Some(SortByLRNDesc.convertParams)).futureValue
+        val result = repository.getAll(userAnswers1.eoriNumber, sortBy = Some(SortByMRNDesc.convertParams)).futureValue
 
         result match {
           case UserAnswersSummary(_, userAnswers, _, _, _) =>
@@ -494,8 +494,8 @@ class CacheRepositorySpec extends CacheRepositorySpecBase {
       createdAtIndex.get("key").get shouldBe BsonDocument("createdAt" -> 1)
       createdAtIndex.get("expireAfterSeconds").get.asNumber().intValue() shouldBe 2592000
 
-      val eoriLrnIndex = findIndex("eoriNumber-mrn-index")
-      eoriLrnIndex.get("key").get shouldBe BsonDocument("eoriNumber" -> 1, "mrn" -> 1)
+      val eoriMrnIndex = findIndex("eoriNumber-mrn-index")
+      eoriMrnIndex.get("key").get shouldBe BsonDocument("eoriNumber" -> 1, "mrn" -> 1)
     }
   }
 }

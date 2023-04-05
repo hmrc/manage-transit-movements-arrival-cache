@@ -236,10 +236,10 @@ class CacheControllerSpec extends CacheRepositorySpecBase {
 
         (response.json \ "userAnswers").as[Seq[JsObject]].length shouldBe 2
 
-        val lrnResults = response.json \ "userAnswers" \\ "mrn"
+        val mrnResults = response.json \ "userAnswers" \\ "mrn"
 
-        lrnResults.head.validate[String].get shouldBe "AB123"
-        lrnResults(1).validate[String].get shouldBe "CD123"
+        mrnResults.head.validate[String].get shouldBe "AB123"
+        mrnResults(1).validate[String].get shouldBe "CD123"
 
         val urlResults = response.json \ "userAnswers" \\ "_links"
 
