@@ -29,12 +29,11 @@ object Authorisations {
 
 object authorisationType01 {
 
-  def reads(index: Int): Reads[AuthorisationType01] = (
-    (__ \ "typeValue").read[String] and
-      (__ \ "referenceNumber").read[String]
-  ).apply {
-    (authType, reference) =>
-      AuthorisationType01(index.toString, authType, reference)
-  }
-
+  // Auth Type is always set to ACE - refer - CTCP-3227
+  def reads(index: Int): Reads[AuthorisationType01] =
+    (__ \ "referenceNumber")
+      .read[String]
+      .map(
+        reference => AuthorisationType01(index.toString, "ACE", reference)
+      )
 }
