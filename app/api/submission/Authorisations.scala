@@ -23,8 +23,7 @@ import play.api.libs.json.{__, Reads}
 
 object Authorisations {
 
-  def transform(uA: UserAnswers): Seq[AuthorisationType01] =
-    uA.metadata.data.as[Seq[AuthorisationType01]](authorisationType01.reads)
+  def transform(uA: UserAnswers): Seq[AuthorisationType01] = uA.metadata.data.as[Seq[AuthorisationType01]](authorisationType01.reads)
 }
 
 object authorisationType01 {
@@ -32,8 +31,9 @@ object authorisationType01 {
   // Auth Type is always set to ACE - refer - CTCP-3227
   def reads: Reads[Seq[AuthorisationType01]] =
     (authorisationsPath \ "referenceNumber")
-      .read[String]
-      .map(
-        reference => Seq(AuthorisationType01("1", "ACE", reference))
-      )
+      .readNullable[String]
+      .map {
+        case Some(referenceNumber) => Seq(AuthorisationType01("1", "ACE", referenceNumber))
+        case None                  => Nil
+      }
 }
