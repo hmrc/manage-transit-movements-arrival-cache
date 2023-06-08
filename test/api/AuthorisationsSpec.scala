@@ -44,16 +44,11 @@ class AuthorisationsSpec extends SpecBase {
              |      },
              |      "identificationNumber" : "GB123456789000",
              |      "isSimplifiedProcedure" : "normal",
-             |      "authorisations" : [
+             |      "authorisation" :
              |        {
              |          "typeValue" : "SSE",
              |          "referenceNumber" : "SSE1"
-             |        },
-             |        {
-             |          "typeValue" : "ACR",
-             |          "referenceNumber" : "ACR1"
              |        }
-             |      ]
              |    },
              |    "locationOfGoods" : {
              |      "typeOfLocation" : "authorisedPlace",
@@ -133,11 +128,6 @@ class AuthorisationsSpec extends SpecBase {
             sequenceNumber = "1",
             typeValue = "ACE",
             referenceNumber = "SSE1"
-          ),
-          AuthorisationType01(
-            sequenceNumber = "2",
-            typeValue = "ACE",
-            referenceNumber = "ACR1"
           )
         )
 
@@ -160,16 +150,11 @@ class AuthorisationsSpec extends SpecBase {
              |      },
              |      "identificationNumber" : "GB123456789000",
              |      "isSimplifiedProcedure" : "simple",
-             |      "authorisations" : [
+             |      "authorisation" :
              |        {
              |          "typeValue" : "SSE",
              |          "referenceNumber" : "SSE1"
-             |        },
-             |        {
-             |          "typeValue" : "ACR",
-             |          "referenceNumber" : "ACR1"
              |        }
-             |      ]
              |    },
              |    "locationOfGoods" : {
              |      "typeOfLocation" : "authorisedPlace",
@@ -249,11 +234,6 @@ class AuthorisationsSpec extends SpecBase {
             sequenceNumber = "1",
             typeValue = "ACE",
             referenceNumber = "SSE1"
-          ),
-          AuthorisationType01(
-            sequenceNumber = "2",
-            typeValue = "ACE",
-            referenceNumber = "ACR1"
           )
         )
 
