@@ -24,16 +24,16 @@ import play.api.libs.json.{__, Reads}
 object Authorisations {
 
   def transform(uA: UserAnswers): Seq[AuthorisationType01] =
-    uA.metadata.data.as[Seq[AuthorisationType01]](authorisationsPath.readArray[AuthorisationType01](authorisationType01.reads))
+    uA.metadata.data.as[Seq[AuthorisationType01]](authorisationType01.reads)
 }
 
 object authorisationType01 {
 
   // Auth Type is always set to ACE - refer - CTCP-3227
-  def reads(index: Int): Reads[AuthorisationType01] =
-    (__ \ "referenceNumber")
+  def reads: Reads[Seq[AuthorisationType01]] =
+    (authorisationsPath \ "referenceNumber")
       .read[String]
       .map(
-        reference => AuthorisationType01(index.toString, "ACE", reference)
+        reference => Seq(AuthorisationType01("1", "ACE", reference))
       )
 }
