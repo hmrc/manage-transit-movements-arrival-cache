@@ -16,30 +16,31 @@
 
 package api.submission
 
-import api.submission.transitOperationType02.convertIsSimplifiedProcedure
+import api.submission.transitOperationType02.{convertIsSimplifiedProcedure, isSimplifiedReader}
 import generated.{EndorsementType01, _}
 import models.UserAnswers
 import play.api.libs.functional.syntax._
-import play.api.libs.json.{Reads, __}
+import play.api.libs.json.{__, JsPath, Reads}
 
+import scala.language.implicitConversions
 
 object Consignment {
 
   def transform(uA: UserAnswers): ConsignmentType01 =
-    uA.metadata.data.as[ConsignmentType01](consignmentType01.reads)
+    uA.metadata.data.as[ConsignmentType01](consignmentType01.reads(uA.metadata.data.as(isSimplifiedReader)))
 
 }
 
 object consignmentType01 {
 
-  private val locationOfGoodsReads: Reads[LocationOfGoodsType01] =
-    (identificationPath \ "isSimplifiedProcedure").read[String].map(convertIsSimplifiedProcedure) match {
-      case true => locationOfGoodsType01.readsForSimplified
-      case false => locationOfGoodsType01.readsForNormal
+  private def chooseLocationOfGoodsReads(isSimplified: Boolean): Reads[LocationOfGoodsType01] = if (isSimplified) {
+    locationOfGoodsType01.readsForSimplified
+  } else {
+    locationOfGoodsType01.readsForNormal
   }
 
-  implicit val reads: Reads[ConsignmentType01] = (
-    (__ \ "locationOfGoods").read[LocationOfGoodsType01](locationOfGoodsReads) and
+  implicit def reads(isSimplified: Boolean): Reads[ConsignmentType01] = (
+    (__ \ "locationOfGoods").read[LocationOfGoodsType01](chooseLocationOfGoodsReads(isSimplified)) and
       (__ \ "incidents").readArray[IncidentType01](incidentType01.reads)
   )(ConsignmentType01.apply _)
 
@@ -67,19 +68,19 @@ object locationOfGoodsType01 {
   }
 
   implicit val readsForNormal: Reads[LocationOfGoodsType01] =
-      (
-        (__ \ "typeOfLocation").read[String].map(convertTypeOfLocation) and
-          (__ \ "qualifierOfIdentification").read[String].map(convertQualifierOfIdentification) and
-          (__ \ "qualifierOfIdentificationDetails" \ "authorisationNumber").readNullable[String] and
-          (__ \ "qualifierOfIdentificationDetails" \ "additionalIdentifier").readNullable[String] and
-          (__ \ "qualifierOfIdentificationDetails" \ "unlocode" \ "unLocodeExtendedCode").readNullable[String] and
-          (__ \ "qualifierOfIdentificationDetails" \ "customsOffice").readNullable[CustomsOfficeType01](customsOfficeType01.reads) and
-          (__ \ "qualifierOfIdentificationDetails" \ "coordinates").readNullable[GNSSType](gnssType.reads) and
-          (__ \ "qualifierOfIdentificationDetails" \ "identificationNumber").readNullable[EconomicOperatorType03](economicOperatorType03.reads) and
-          (__ \ "qualifierOfIdentificationDetails").read[Option[AddressType14]](addressType14.reads) and
-          (__ \ "qualifierOfIdentificationDetails" \ "postalCode").readNullable[PostcodeAddressType02](postcodeAddressType02.reads) and
-          (__ \ "contactPerson").readNullable[ContactPersonType06](contactPersonType06.reads)
-        ) (LocationOfGoodsType01.apply _)
+    (
+      (__ \ "typeOfLocation").read[String].map(convertTypeOfLocation) and
+        (__ \ "qualifierOfIdentification").read[String].map(convertQualifierOfIdentification) and
+        (__ \ "qualifierOfIdentificationDetails" \ "authorisationNumber").readNullable[String] and
+        (__ \ "qualifierOfIdentificationDetails" \ "additionalIdentifier").readNullable[String] and
+        (__ \ "qualifierOfIdentificationDetails" \ "unlocode" \ "unLocodeExtendedCode").readNullable[String] and
+        (__ \ "qualifierOfIdentificationDetails" \ "customsOffice").readNullable[CustomsOfficeType01](customsOfficeType01.reads) and
+        (__ \ "qualifierOfIdentificationDetails" \ "coordinates").readNullable[GNSSType](gnssType.reads) and
+        (__ \ "qualifierOfIdentificationDetails" \ "identificationNumber").readNullable[EconomicOperatorType03](economicOperatorType03.reads) and
+        (__ \ "qualifierOfIdentificationDetails").read[Option[AddressType14]](addressType14.reads) and
+        (__ \ "qualifierOfIdentificationDetails" \ "postalCode").readNullable[PostcodeAddressType02](postcodeAddressType02.reads) and
+        (__ \ "contactPerson").readNullable[ContactPersonType06](contactPersonType06.reads)
+    )(LocationOfGoodsType01.apply _)
 
   // If procedure type is simple then we automatically set typeOfLocation to B and qualifierOfIdentification to Y (CTCP-2666)
   implicit val readsForSimplified: Reads[LocationOfGoodsType01] =
@@ -93,9 +94,30 @@ object locationOfGoodsType01 {
         (__ \ "qualifierOfIdentificationDetails").read[Option[AddressType14]](addressType14.reads) and
         (__ \ "qualifierOfIdentificationDetails" \ "postalCode").readNullable[PostcodeAddressType02](postcodeAddressType02.reads) and
         (__ \ "contactPerson").readNullable[ContactPersonType06](contactPersonType06.reads)
-      ).apply {
-      (authorisationNumber, additionalIdentifier, unLocodeExtendedCode, customsOffice, coordinates, identificationNumber, addressType14, postalCode, contactPerson) =>
-        LocationOfGoodsType01("B", "Y", authorisationNumber, additionalIdentifier, unLocodeExtendedCode, customsOffice, coordinates, identificationNumber, addressType14, postalCode, contactPerson)
+    ).apply {
+      (authorisationNumber,
+       additionalIdentifier,
+       unLocodeExtendedCode,
+       customsOffice,
+       coordinates,
+       identificationNumber,
+       addressType14,
+       postalCode,
+       contactPerson
+      ) =>
+        LocationOfGoodsType01(
+          "B",
+          "Y",
+          authorisationNumber,
+          additionalIdentifier,
+          unLocodeExtendedCode,
+          customsOffice,
+          coordinates,
+          identificationNumber,
+          addressType14,
+          postalCode,
+          contactPerson
+        )
     }
 }
 
