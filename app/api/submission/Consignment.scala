@@ -16,13 +16,13 @@
 
 package api.submission
 
-import api.submission.transitOperationType02.{convertIsSimplifiedProcedure, isSimplifiedReader}
+import api.submission.transitOperationType02.isSimplifiedReader
 import generated.{EndorsementType01, _}
 import models.UserAnswers
 import play.api.libs.functional.syntax._
-import play.api.libs.json.{__, JsPath, Reads}
+import play.api.libs.json.{Reads, __}
 
-import scala.language.implicitConversions
+import scala.language.implicitConversions // TODO: Is this okay to use or is there a better way to do what I want
 
 object Consignment {
 
