@@ -31,7 +31,7 @@ object TransitOperation {
 
 object transitOperationType02 {
 
-  private lazy val convertIsSimplifiedProcedure: String => Boolean = {
+   lazy val convertIsSimplifiedProcedure: String => Boolean = {
     case "simplified" => true
     case _            => false
   }
