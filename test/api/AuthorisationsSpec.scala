@@ -149,7 +149,7 @@ class AuthorisationsSpec extends SpecBase {
              |        "phoneNumber" : "+44 (0)1394 303023 / 24 / 26"
              |      },
              |      "identificationNumber" : "GB123456789000",
-             |      "isSimplifiedProcedure" : "simple",
+             |      "isSimplifiedProcedure" : "simplified",
              |      "authorisation" :
              |        {
              |          "typeValue" : "SSE",

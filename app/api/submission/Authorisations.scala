@@ -16,10 +16,10 @@
 
 package api.submission
 
+import api.submission.transitOperationType02.isSimplifiedReader
 import generated.AuthorisationType01
 import models.UserAnswers
-import play.api.libs.functional.syntax._
-import play.api.libs.json.{__, Reads}
+import play.api.libs.json.Reads
 
 object Authorisations {
 
@@ -28,12 +28,26 @@ object Authorisations {
 
 object authorisationType01 {
 
+  private def convertAuthType(referenceNumber: String): Seq[AuthorisationType01] =
+    Seq(AuthorisationType01("1", "ACE", referenceNumber))
+
   // Auth Type is always set to ACE - refer - CTCP-3227
   def reads: Reads[Seq[AuthorisationType01]] =
-    (authorisationsPath \ "referenceNumber")
-      .readNullable[String]
-      .map {
-        case Some(referenceNumber) => Seq(AuthorisationType01("1", "ACE", referenceNumber))
-        case None                  => Nil
-      }
+    isSimplifiedReader flatMap {
+      case true =>
+        (authorisationsPath \ "referenceNumber")
+          .read[String]
+          .map(
+            referenceNumber => convertAuthType(referenceNumber)
+          )
+
+      case _ =>
+        (authorisationsPath \ "referenceNumber")
+          .readNullable[String]
+          .map {
+            case Some(referenceNumber) => convertAuthType(referenceNumber)
+            case None                  => Nil
+          }
+    }
+
 }
