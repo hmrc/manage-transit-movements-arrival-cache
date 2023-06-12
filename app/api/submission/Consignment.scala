@@ -30,16 +30,13 @@ object Consignment {
 
 object consignmentType01 {
 
-  implicit def reads: Reads[ConsignmentType01] = (
+  implicit val reads: Reads[ConsignmentType01] = (
     (__ \ "locationOfGoods").read[LocationOfGoodsType01](locationOfGoodsType01.reads) and
       (__ \ "incidents").readArray[IncidentType01](incidentType01.reads)
   )(ConsignmentType01.apply _)
 }
 
 object locationOfGoodsType01 {
-
-  val typeOfLocationDefault: String            = "authorisedPlace"
-  val qualifierOfIdentificationDefault: String = "authorisationNumber"
 
   private lazy val convertQualifierOfIdentification: String => String = {
     case "postalCode"          => "T"
@@ -63,8 +60,8 @@ object locationOfGoodsType01 {
   // If procedure type is simple then we automatically set typeOfLocation to B and qualifierOfIdentification to Y (CTCP-2666)
   implicit val reads: Reads[LocationOfGoodsType01] =
     (
-      (__ \ "typeOfLocation").readWithDefault[String](typeOfLocationDefault).map(convertTypeOfLocation) and
-        (__ \ "qualifierOfIdentification").readWithDefault[String](qualifierOfIdentificationDefault).map(convertQualifierOfIdentification) and
+      (__ \ "typeOfLocation").readWithDefault[String]("authorisedPlace").map(convertTypeOfLocation) and
+        (__ \ "qualifierOfIdentification").readWithDefault[String]("authorisationNumber").map(convertQualifierOfIdentification) and
         (__ \ "qualifierOfIdentificationDetails" \ "authorisationNumber").readNullable[String] and
         (__ \ "qualifierOfIdentificationDetails" \ "additionalIdentifier").readNullable[String] and
         (__ \ "qualifierOfIdentificationDetails" \ "unlocode" \ "unLocodeExtendedCode").readNullable[String] and
