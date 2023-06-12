@@ -16,7 +16,6 @@
 
 package api.submission
 
-import api.submission.transitOperationType02.isSimplifiedReader
 import generated.{EndorsementType01, _}
 import models.UserAnswers
 import play.api.libs.functional.syntax._
@@ -32,15 +31,15 @@ object Consignment {
 object consignmentType01 {
 
   implicit def reads: Reads[ConsignmentType01] = (
-    isSimplifiedReader.flatMap {
-      isSimplified =>
-        (__ \ "locationOfGoods").read[LocationOfGoodsType01](locationOfGoodsType01.chooseLocationOfGoodsReads(isSimplified))
-    } and
+    (__ \ "locationOfGoods").read[LocationOfGoodsType01](locationOfGoodsType01.reads) and
       (__ \ "incidents").readArray[IncidentType01](incidentType01.reads)
   )(ConsignmentType01.apply _)
 }
 
 object locationOfGoodsType01 {
+
+  val typeOfLocationDefault: String            = "authorisedPlace"
+  val qualifierOfIdentificationDefault: String = "authorisationNumber"
 
   private lazy val convertQualifierOfIdentification: String => String = {
     case "postalCode"          => "T"
@@ -61,17 +60,11 @@ object locationOfGoodsType01 {
     case _                    => throw new Exception("Invalid type of location value")
   }
 
-  def chooseLocationOfGoodsReads(isSimplified: Boolean): Reads[LocationOfGoodsType01] =
-    if (isSimplified) {
-      locationOfGoodsType01.readsForSimplified
-    } else {
-      locationOfGoodsType01.readsForNormal
-    }
-
-  val readsForNormal: Reads[LocationOfGoodsType01] =
+  // If procedure type is simple then we automatically set typeOfLocation to B and qualifierOfIdentification to Y (CTCP-2666)
+  implicit val reads: Reads[LocationOfGoodsType01] =
     (
-      (__ \ "typeOfLocation").read[String].map(convertTypeOfLocation) and
-        (__ \ "qualifierOfIdentification").read[String].map(convertQualifierOfIdentification) and
+      (__ \ "typeOfLocation").readWithDefault[String](typeOfLocationDefault).map(convertTypeOfLocation) and
+        (__ \ "qualifierOfIdentification").readWithDefault[String](qualifierOfIdentificationDefault).map(convertQualifierOfIdentification) and
         (__ \ "qualifierOfIdentificationDetails" \ "authorisationNumber").readNullable[String] and
         (__ \ "qualifierOfIdentificationDetails" \ "additionalIdentifier").readNullable[String] and
         (__ \ "qualifierOfIdentificationDetails" \ "unlocode" \ "unLocodeExtendedCode").readNullable[String] and
@@ -82,44 +75,6 @@ object locationOfGoodsType01 {
         (__ \ "qualifierOfIdentificationDetails" \ "postalCode").readNullable[PostcodeAddressType02](postcodeAddressType02.reads) and
         (__ \ "contactPerson").readNullable[ContactPersonType06](contactPersonType06.reads)
     )(LocationOfGoodsType01.apply _)
-
-  // If procedure type is simple then we automatically set typeOfLocation to B and qualifierOfIdentification to Y (CTCP-2666)
-  val readsForSimplified: Reads[LocationOfGoodsType01] =
-    (
-      (__ \ "qualifierOfIdentificationDetails" \ "authorisationNumber").readNullable[String] and
-        (__ \ "qualifierOfIdentificationDetails" \ "additionalIdentifier").readNullable[String] and
-        (__ \ "qualifierOfIdentificationDetails" \ "unlocode" \ "unLocodeExtendedCode").readNullable[String] and
-        (__ \ "qualifierOfIdentificationDetails" \ "customsOffice").readNullable[CustomsOfficeType01](customsOfficeType01.reads) and
-        (__ \ "qualifierOfIdentificationDetails" \ "coordinates").readNullable[GNSSType](gnssType.reads) and
-        (__ \ "qualifierOfIdentificationDetails" \ "identificationNumber").readNullable[EconomicOperatorType03](economicOperatorType03.reads) and
-        (__ \ "qualifierOfIdentificationDetails").read[Option[AddressType14]](addressType14.reads) and
-        (__ \ "qualifierOfIdentificationDetails" \ "postalCode").readNullable[PostcodeAddressType02](postcodeAddressType02.reads) and
-        (__ \ "contactPerson").readNullable[ContactPersonType06](contactPersonType06.reads)
-    ).apply {
-      (authorisationNumber,
-       additionalIdentifier,
-       unLocodeExtendedCode,
-       customsOffice,
-       coordinates,
-       identificationNumber,
-       addressType14,
-       postalCode,
-       contactPerson
-      ) =>
-        LocationOfGoodsType01(
-          "B",
-          "Y",
-          authorisationNumber,
-          additionalIdentifier,
-          unLocodeExtendedCode,
-          customsOffice,
-          coordinates,
-          identificationNumber,
-          addressType14,
-          postalCode,
-          contactPerson
-        )
-    }
 }
 
 object economicOperatorType03 {
