@@ -20,30 +20,24 @@ import api.submission.transitOperationType02.isSimplifiedReader
 import generated.{EndorsementType01, _}
 import models.UserAnswers
 import play.api.libs.functional.syntax._
-import play.api.libs.json.{Reads, __}
-
-import scala.language.implicitConversions // TODO: Is this okay to use or is there a better way to do what I want
+import play.api.libs.json.{__, Reads}
 
 object Consignment {
 
   def transform(uA: UserAnswers): ConsignmentType01 =
-    uA.metadata.data.as[ConsignmentType01](consignmentType01.reads(uA.metadata.data.as(isSimplifiedReader)))
+    uA.metadata.data.as[ConsignmentType01](consignmentType01.reads)
 
 }
 
 object consignmentType01 {
 
-  private def chooseLocationOfGoodsReads(isSimplified: Boolean): Reads[LocationOfGoodsType01] = if (isSimplified) {
-    locationOfGoodsType01.readsForSimplified
-  } else {
-    locationOfGoodsType01.readsForNormal
-  }
-
-  implicit def reads(isSimplified: Boolean): Reads[ConsignmentType01] = (
-    (__ \ "locationOfGoods").read[LocationOfGoodsType01](chooseLocationOfGoodsReads(isSimplified)) and
+  implicit def reads: Reads[ConsignmentType01] = (
+    isSimplifiedReader.flatMap {
+      isSimplified =>
+        (__ \ "locationOfGoods").read[LocationOfGoodsType01](locationOfGoodsType01.chooseLocationOfGoodsReads(isSimplified))
+    } and
       (__ \ "incidents").readArray[IncidentType01](incidentType01.reads)
   )(ConsignmentType01.apply _)
-
 }
 
 object locationOfGoodsType01 {
@@ -67,7 +61,14 @@ object locationOfGoodsType01 {
     case _                    => throw new Exception("Invalid type of location value")
   }
 
-  implicit val readsForNormal: Reads[LocationOfGoodsType01] =
+  def chooseLocationOfGoodsReads(isSimplified: Boolean): Reads[LocationOfGoodsType01] =
+    if (isSimplified) {
+      locationOfGoodsType01.readsForSimplified
+    } else {
+      locationOfGoodsType01.readsForNormal
+    }
+
+  val readsForNormal: Reads[LocationOfGoodsType01] =
     (
       (__ \ "typeOfLocation").read[String].map(convertTypeOfLocation) and
         (__ \ "qualifierOfIdentification").read[String].map(convertQualifierOfIdentification) and
@@ -83,7 +84,7 @@ object locationOfGoodsType01 {
     )(LocationOfGoodsType01.apply _)
 
   // If procedure type is simple then we automatically set typeOfLocation to B and qualifierOfIdentification to Y (CTCP-2666)
-  implicit val readsForSimplified: Reads[LocationOfGoodsType01] =
+  val readsForSimplified: Reads[LocationOfGoodsType01] =
     (
       (__ \ "qualifierOfIdentificationDetails" \ "authorisationNumber").readNullable[String] and
         (__ \ "qualifierOfIdentificationDetails" \ "additionalIdentifier").readNullable[String] and
