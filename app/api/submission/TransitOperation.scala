@@ -31,12 +31,7 @@ object TransitOperation {
 
 object transitOperationType02 {
 
-  lazy val convertIsSimplifiedProcedure: String => Boolean = {
-    case "simplified" => true
-    case _            => false
-  }
-
-  val isSimplifiedReader: Reads[Boolean] = (identificationPath \ "isSimplifiedProcedure").read[String].map(convertIsSimplifiedProcedure)
+  val isSimplifiedReader: Reads[Boolean] = (identificationPath \ "isSimplifiedProcedure").read[String].map(_.equals("simplified"))
 
   def reads(mrn: String): Reads[TransitOperationType02] = (
     isSimplifiedReader and
