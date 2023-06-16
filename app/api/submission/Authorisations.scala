@@ -16,7 +16,6 @@
 
 package api.submission
 
-import api.submission.transitOperationType02.isSimplifiedReader
 import generated.AuthorisationType01
 import models.UserAnswers
 import play.api.libs.json.Reads
