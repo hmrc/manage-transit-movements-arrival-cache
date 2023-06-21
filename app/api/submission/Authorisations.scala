@@ -18,23 +18,21 @@ package api.submission
 
 import generated.AuthorisationType01
 import models.UserAnswers
-import play.api.libs.functional.syntax._
-import play.api.libs.json.{__, Reads}
+import play.api.libs.json.Reads
 
 object Authorisations {
 
-  def transform(uA: UserAnswers): Seq[AuthorisationType01] =
-    uA.metadata.data.as[Seq[AuthorisationType01]](authorisationsPath.readArray[AuthorisationType01](authorisationType01.reads))
+  def transform(uA: UserAnswers): Seq[AuthorisationType01] = uA.metadata.data.as[Seq[AuthorisationType01]](authorisationType01.reads)
 }
 
 object authorisationType01 {
 
-  def reads(index: Int): Reads[AuthorisationType01] = (
-    (__ \ "typeValue").read[String] and
-      (__ \ "referenceNumber").read[String]
-  ).apply {
-    (authType, reference) =>
-      AuthorisationType01(index.toString, authType, reference)
-  }
-
+  // Auth Type is always set to ACE - refer - CTCP-3227
+  def reads: Reads[Seq[AuthorisationType01]] =
+    (authorisationsPath \ "referenceNumber")
+      .readNullable[String]
+      .map {
+        case Some(referenceNumber) => Seq(AuthorisationType01("1", "ACE", referenceNumber))
+        case None                  => Nil
+      }
 }
