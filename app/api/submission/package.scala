@@ -28,7 +28,6 @@ import scala.language.implicitConversions
 package object submission {
 
   lazy val identificationPath: JsPath = __ \ "identification"
-  lazy val authorisationsPath: JsPath = __ \ "identification" \ "authorisation"
 
   implicit class RichJsPath(path: JsPath) {
 

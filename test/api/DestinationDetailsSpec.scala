@@ -40,16 +40,7 @@ class DestinationDetailsSpec extends SpecBase {
          |      },
          |      "identificationNumber" : "GB123456789000",
          |      "isSimplifiedProcedure" : "normal",
-         |      "authorisations" : [
-         |        {
-         |          "typeValue" : "SSE",
-         |          "referenceNumber" : "SSE1"
-         |        },
-         |        {
-         |          "typeValue" : "ACR",
-         |          "referenceNumber" : "ACR1"
-         |        }
-         |      ]
+         |      "authorisationReferenceNumber" : "SSE1"
          |    },
          |    "locationOfGoods" : {
          |      "typeOfLocation" : "authorisedPlace",

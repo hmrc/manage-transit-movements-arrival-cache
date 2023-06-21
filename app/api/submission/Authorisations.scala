@@ -29,10 +29,8 @@ object authorisationType01 {
 
   // Auth Type is always set to ACE - refer - CTCP-3227
   def reads: Reads[Seq[AuthorisationType01]] =
-    (authorisationsPath \ "referenceNumber")
-      .readNullable[String]
-      .map {
-        case Some(referenceNumber) => Seq(AuthorisationType01("1", "ACE", referenceNumber))
-        case None                  => Nil
-      }
+    (identificationPath \ "authorisationReferenceNumber").readNullable[String].map {
+      case Some(referenceNumber) => Seq(AuthorisationType01("1", "ACE", referenceNumber))
+      case None                  => Nil
+    }
 }
