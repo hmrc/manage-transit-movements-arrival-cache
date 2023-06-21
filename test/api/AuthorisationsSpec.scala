@@ -44,11 +44,7 @@ class AuthorisationsSpec extends SpecBase {
              |      },
              |      "identificationNumber" : "GB123456789000",
              |      "isSimplifiedProcedure" : "normal",
-             |      "authorisation" :
-             |        {
-             |          "typeValue" : "SSE",
-             |          "referenceNumber" : "SSE1"
-             |        }
+             |      "authorisationReferenceNumber" : "SSE1"
              |    },
              |    "locationOfGoods" : {
              |      "typeOfLocation" : "authorisedPlace",
@@ -150,11 +146,7 @@ class AuthorisationsSpec extends SpecBase {
              |      },
              |      "identificationNumber" : "GB123456789000",
              |      "isSimplifiedProcedure" : "simplified",
-             |      "authorisation" :
-             |        {
-             |          "typeValue" : "SSE",
-             |          "referenceNumber" : "SSE1"
-             |        }
+             |      "authorisationReferenceNumber" : "SSE1"
              |    },
              |    "locationOfGoods" : {
              |      "typeOfLocation" : "authorisedPlace",
