@@ -17,6 +17,8 @@
 package api.submission
 
 import generated.{CORRELATION_IDENTIFIERSequence, MESSAGE_1Sequence, MESSAGE_FROM_TRADERSequence, MessageType007}
+import models.UserAnswers
+import play.api.libs.json.JsSuccess
 
 import java.time.LocalDateTime
 import scala.xml.NamespaceBinding
@@ -25,15 +27,19 @@ object Header {
 
   val scope: NamespaceBinding = scalaxb.toScope(Some("ncts") -> "http://ncts.dgtaxud.ec")
 
-  def message: MESSAGE_FROM_TRADERSequence =
-    MESSAGE_FROM_TRADERSequence(
-      messageSender = Some("NCTS"),
-      messagE_1Sequence2 = MESSAGE_1Sequence(
-        messageRecipient = "NCTS",
-        preparationDateAndTime = LocalDateTime.now(),
-        messageIdentification = "CC007C" // TODO - check this with API team? What should this be set to?
-      )
-    )
+  def message(uA: UserAnswers): MESSAGE_FROM_TRADERSequence =
+    uA.metadata.data.validate((identificationPath \ "destinationOffice" \ "id").read[String].map(_.take(2))) match {
+      case JsSuccess(officeOfDestinationCountryCode, _) =>
+        MESSAGE_FROM_TRADERSequence(
+          messageSender = Some("NCTS"),
+          messagE_1Sequence2 = MESSAGE_1Sequence(
+            messageRecipient = s"NTA.$officeOfDestinationCountryCode",
+            preparationDateAndTime = LocalDateTime.now(),
+            messageIdentification = "CC007C" // TODO - check this with API team? What should this be set to?
+          )
+        )
+      case _ => throw new Exception("Json did not contain office of destination ID")
+    }
 
   def messageType: MessageType007 = MessageType007.fromString("CC007C", scope)
 

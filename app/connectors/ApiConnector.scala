@@ -40,7 +40,7 @@ class ApiConnector @Inject() (httpClient: HttpClient, appConfig: AppConfig)(impl
   )
 
   def createPayload(userAnswers: UserAnswers): CC007CType = {
-    val message: MESSAGE_FROM_TRADERSequence = Header.message
+    val message: MESSAGE_FROM_TRADERSequence = Header.message(userAnswers)
     val messageType: MessageType007          = Header.messageType
     val correlationIdentifier                = Header.correlationIdentifier
     val transitOperation                     = TransitOperation.transform(userAnswers)
