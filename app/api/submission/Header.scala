@@ -38,7 +38,7 @@ object Header {
             messageIdentification = "CC007C" // TODO - check this with API team? What should this be set to?
           )
         )
-      case _ => throw new Exception("Json did not contain office of departure ID")
+      case _ => throw new Exception("Json did not contain office of destination ID")
     }
 
   def messageType: MessageType007 = MessageType007.fromString("CC007C", scope)
