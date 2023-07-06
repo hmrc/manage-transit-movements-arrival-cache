@@ -29,11 +29,11 @@ object Header {
 
   def message(uA: UserAnswers): MESSAGE_FROM_TRADERSequence =
     uA.metadata.data.validate((identificationPath \ "destinationOffice" \ "id").read[String].map(_.take(2))) match {
-      case JsSuccess(officeOfDepartureCountryCode, _) =>
+      case JsSuccess(officeOfDestinationCountryCode, _) =>
         MESSAGE_FROM_TRADERSequence(
           messageSender = Some("NCTS"),
           messagE_1Sequence2 = MESSAGE_1Sequence(
-            messageRecipient = s"NTA.$officeOfDepartureCountryCode",
+            messageRecipient = s"NTA.$officeOfDestinationCountryCode",
             preparationDateAndTime = LocalDateTime.now(),
             messageIdentification = "CC007C" // TODO - check this with API team? What should this be set to?
           )
