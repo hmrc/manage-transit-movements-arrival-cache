@@ -51,7 +51,7 @@ class CacheController @Inject() (
         }
         .recover {
           case e =>
-            logger.error("Failed to read user answers from mongo", e)
+            logger.warn("Failed to read user answers from mongo", e)
             InternalServerError
         }
   }
@@ -63,11 +63,11 @@ class CacheController @Inject() (
           if (request.eoriNumber == data.eoriNumber) {
             set(data)
           } else {
-            logger.error(s"Enrolment EORI (${request.eoriNumber}) does not match EORI in user answers (${data.eoriNumber})")
+            logger.warn(s"Enrolment EORI (${request.eoriNumber}) does not match EORI in user answers (${data.eoriNumber})")
             Future.successful(Forbidden)
           }
         case JsError(errors) =>
-          logger.error(s"Failed to validate request body as UserAnswers: $errors")
+          logger.warn(s"Failed to validate request body as UserAnswers: $errors")
           Future.successful(BadRequest)
       }
   }
@@ -78,7 +78,7 @@ class CacheController @Inject() (
         case JsSuccess(mrn, _) =>
           set(Metadata(mrn, request.eoriNumber))
         case JsError(errors) =>
-          logger.error(s"Failed to validate request body as String: $errors")
+          logger.warn(s"Failed to validate request body as String: $errors")
           Future.successful(BadRequest)
       }
   }
@@ -89,12 +89,12 @@ class CacheController @Inject() (
       .map {
         case true => Ok
         case false =>
-          logger.error("Write was not acknowledged")
+          logger.warn("Write was not acknowledged")
           InternalServerError
       }
       .recover {
         case e =>
-          logger.error("Failed to write user answers to mongo", e)
+          logger.warn("Failed to write user answers to mongo", e)
           InternalServerError
       }
 
@@ -107,7 +107,7 @@ class CacheController @Inject() (
         }
         .recover {
           case e =>
-            logger.error("Failed to delete draft", e)
+            logger.warn("Failed to delete draft", e)
             InternalServerError
         }
   }
@@ -122,7 +122,7 @@ class CacheController @Inject() (
           )
           .recover {
             case e =>
-              logger.error("Failed to read user answers summary from mongo", e)
+              logger.warn("Failed to read user answers summary from mongo", e)
               InternalServerError
           }
     }
