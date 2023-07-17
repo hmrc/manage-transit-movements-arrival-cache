@@ -51,7 +51,7 @@ class CacheController @Inject() (
         }
         .recover {
           case e =>
-            logger.warn("Failed to read user answers from mongo", e)
+            logger.error("Failed to read user answers from mongo", e)
             InternalServerError
         }
   }
@@ -89,12 +89,12 @@ class CacheController @Inject() (
       .map {
         case true => Ok
         case false =>
-          logger.warn("Write was not acknowledged")
+          logger.error("Write was not acknowledged")
           InternalServerError
       }
       .recover {
         case e =>
-          logger.warn("Failed to write user answers to mongo", e)
+          logger.error("Failed to write user answers to mongo", e)
           InternalServerError
       }
 
@@ -107,7 +107,7 @@ class CacheController @Inject() (
         }
         .recover {
           case e =>
-            logger.warn("Failed to delete draft", e)
+            logger.error("Failed to delete draft", e)
             InternalServerError
         }
   }
@@ -122,7 +122,7 @@ class CacheController @Inject() (
           )
           .recover {
             case e =>
-              logger.warn("Failed to read user answers summary from mongo", e)
+              logger.error("Failed to read user answers summary from mongo", e)
               InternalServerError
           }
     }
