@@ -76,7 +76,7 @@ class ApiConnector @Inject() (httpClient: HttpClient, appConfig: AppConfig)(impl
       }
       .recover {
         case httpEx: BadRequestException =>
-          logger.warn(s"ApiConnector:submitDeclaration: bad request: ${httpEx.responseCode}-${httpEx.getMessage}")
+          logger.info(s"ApiConnector:submitDeclaration: bad request: ${httpEx.responseCode}-${httpEx.getMessage}")
           Left(BadRequest("ApiConnector:submitDeclaration: bad request"))
         case e: Exception =>
           logger.error(s"ApiConnector:submitDeclaration: something went wrong: ${e.getMessage}")
