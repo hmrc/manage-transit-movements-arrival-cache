@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-package api
+package api.submission
 
-import api.submission.TransitOperation
 import base.SpecBase
 import generated._
 import models.UserAnswers
