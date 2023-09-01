@@ -16,10 +16,9 @@
 
 package connectors
 
-import api.submission.Header.scope
 import api.submission._
 import config.AppConfig
-import generated.{CC007CType, MESSAGE_FROM_TRADERSequence, MessageType007, PhaseIDtype}
+import generated.{CC007CType, MESSAGESequence, PhaseIDtype}
 import models.UserAnswers
 import play.api.Logging
 import play.api.http.HeaderNames
@@ -31,6 +30,7 @@ import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier, HttpClient, HttpErr
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
+import scala.xml.NamespaceBinding
 
 class ApiConnector @Inject() (httpClient: HttpClient, appConfig: AppConfig)(implicit ec: ExecutionContext) extends HttpErrorFunctions with Logging {
 
@@ -39,25 +39,23 @@ class ApiConnector @Inject() (httpClient: HttpClient, appConfig: AppConfig)(impl
     HeaderNames.CONTENT_TYPE -> "application/xml"
   )
 
-  def createPayload(userAnswers: UserAnswers): CC007CType = {
-    val message: MESSAGE_FROM_TRADERSequence = Header.message(userAnswers)
-    val messageType: MessageType007          = Header.messageType
-    val correlationIdentifier                = Header.correlationIdentifier
-    val transitOperation                     = TransitOperation.transform(userAnswers)
-    val authorisations                       = Authorisations.transform(userAnswers)
-    val customsOfficeOfDestination           = DestinationDetails.customsOfficeOfDestination(userAnswers)
-    val traderAtDestination                  = DestinationDetails.traderAtDestination(userAnswers)
-    val consignment                          = Consignment.transform(userAnswers)
+  private val scope: NamespaceBinding = scalaxb.toScope(Some("ncts") -> "http://ncts.dgtaxud.ec")
+
+  private def createPayload(userAnswers: UserAnswers): CC007CType = {
+    val message: MESSAGESequence   = Header.message(userAnswers)
+    val transitOperation           = TransitOperation.transform(userAnswers)
+    val authorisations             = Authorisations.transform(userAnswers)
+    val customsOfficeOfDestination = DestinationDetails.customsOfficeOfDestination(userAnswers)
+    val traderAtDestination        = DestinationDetails.traderAtDestination(userAnswers)
+    val consignment                = Consignment.transform(userAnswers)
 
     CC007CType(
-      message,
-      messageType,
-      correlationIdentifier,
-      transitOperation,
-      authorisations,
-      customsOfficeOfDestination,
-      traderAtDestination,
-      consignment,
+      messageSequence1 = message,
+      TransitOperation = transitOperation,
+      Authorisation = authorisations,
+      CustomsOfficeOfDestinationActual = customsOfficeOfDestination,
+      TraderAtDestination = traderAtDestination,
+      Consignment = consignment,
       attributes = Map("@PhaseID" -> DataRecord(PhaseIDtype.fromString("NCTS5.0", scope)))
     )
   }
