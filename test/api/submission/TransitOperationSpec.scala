@@ -75,10 +75,7 @@ class TransitOperationSpec extends SpecBase {
              |          "location" : "foobar"
              |        },
              |        "qualifierOfIdentification" : "unlocode",
-             |        "unLocode" : {
-             |          "unLocodeExtendedCode" : "ADCAN",
-             |          "name" : "Canillo"
-             |        },
+             |        "unLocode" : "ADCAN",
              |        "equipments" : [
              |          {
              |            "containerIdentificationNumberYesNo" : true,
