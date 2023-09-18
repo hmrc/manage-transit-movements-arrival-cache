@@ -64,7 +64,7 @@ object locationOfGoodsType01 {
         (__ \ "qualifierOfIdentification").readWithDefault[String]("authorisationNumber").map(convertQualifierOfIdentification) and
         (__ \ "qualifierOfIdentificationDetails" \ "authorisationNumber").readNullable[String] and
         (__ \ "qualifierOfIdentificationDetails" \ "additionalIdentifier").readNullable[String] and
-        (__ \ "qualifierOfIdentificationDetails" \ "unlocode" \ "unLocodeExtendedCode").readNullable[String] and
+        (__ \ "qualifierOfIdentificationDetails" \ "unlocode").readNullable[String] and
         (__ \ "qualifierOfIdentificationDetails" \ "customsOffice").readNullable[CustomsOfficeType01](customsOfficeType01.reads) and
         (__ \ "qualifierOfIdentificationDetails" \ "coordinates").readNullable[GNSSType](gnssType.reads) and
         (__ \ "qualifierOfIdentificationDetails" \ "identificationNumber").readNullable[EconomicOperatorType03](economicOperatorType03.reads) and
@@ -195,7 +195,7 @@ object locationType01 {
 
   def reads: Reads[LocationType01] = (
     (__ \ "qualifierOfIdentification").read[String].map(convertQualifierOfIdentification) and
-      (__ \ "unLocode" \ "unLocodeExtendedCode").readNullable[String] and
+      (__ \ "unLocode").readNullable[String] and
       (__ \ "incidentCountry" \ "code").read[String] and
       (__ \ "coordinates").readNullable[GNSSType](gnssType.reads) and
       (__ \ "address").readNullable[AddressType01](addressType01.reads)

@@ -82,10 +82,7 @@ class ApiConnectorSpec extends AnyFreeSpec with AppWithDefaultMockFixtures with 
                                     |          "location" : "foobar"
                                     |        },
                                     |        "qualifierOfIdentification" : "unlocode",
-                                    |        "unLocode" : {
-                                    |          "unLocodeExtendedCode" : "DEAAL",
-                                    |          "name" : "Aalen"
-                                    |        },
+                                    |        "unLocode" : "DEAAL",
                                     |        "equipments" : [
                                     |          {
                                     |            "containerIdentificationNumberYesNo" : true,

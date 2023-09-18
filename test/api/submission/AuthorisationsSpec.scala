@@ -76,10 +76,7 @@ class AuthorisationsSpec extends SpecBase {
              |          "location" : "foobar"
              |        },
              |        "qualifierOfIdentification" : "unlocode",
-             |        "unLocode" : {
-             |          "unLocodeExtendedCode" : "ADCAN",
-             |          "name" : "Canillo"
-             |        },
+             |        "unLocode" : "ADCAN",
              |        "equipments" : [
              |          {
              |            "containerIdentificationNumberYesNo" : true,
@@ -178,10 +175,7 @@ class AuthorisationsSpec extends SpecBase {
              |          "location" : "foobar"
              |        },
              |        "qualifierOfIdentification" : "unlocode",
-             |        "unLocode" : {
-             |          "unLocodeExtendedCode" : "ADCAN",
-             |          "name" : "Canillo"
-             |        },
+             |        "unLocode" : "ADCAN",
              |        "equipments" : [
              |          {
              |            "containerIdentificationNumberYesNo" : true,
@@ -279,10 +273,7 @@ class AuthorisationsSpec extends SpecBase {
              |          "location" : "foobar"
              |        },
              |        "qualifierOfIdentification" : "unlocode",
-             |        "unLocode" : {
-             |          "unLocodeExtendedCode" : "ADCAN",
-             |          "name" : "Canillo"
-             |        },
+             |        "unLocode" : "ADCAN",
              |        "equipments" : [
              |          {
              |            "containerIdentificationNumberYesNo" : true,

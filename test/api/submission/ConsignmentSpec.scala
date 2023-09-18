@@ -76,10 +76,7 @@ class ConsignmentSpec extends SpecBase {
                    |          "location" : "foobar"
                    |        },
                    |        "qualifierOfIdentification" : "unlocode",
-                   |        "unLocode" : {
-                   |          "unLocodeExtendedCode" : "ADCAN",
-                   |          "name" : "Canillo"
-                   |        },
+                   |        "unLocode" : "ADCAN",
                    |        "equipments" : [
                    |          {
                    |            "containerIdentificationNumberYesNo" : true,
@@ -254,10 +251,7 @@ class ConsignmentSpec extends SpecBase {
                  |          "location" : "foobar"
                  |        },
                  |        "qualifierOfIdentification" : "unlocode",
-                 |        "unLocode" : {
-                 |          "unLocodeExtendedCode" : "ADCAN",
-                 |          "name" : "Canillo"
-                 |        },
+                 |        "unLocode" : "ADCAN",
                  |        "equipments" : [
                  |          {
                  |            "containerIdentificationNumberYesNo" : true,
@@ -412,10 +406,7 @@ class ConsignmentSpec extends SpecBase {
                  |          "location" : "foobar"
                  |        },
                  |        "qualifierOfIdentification" : "unlocode",
-                 |        "unLocode" : {
-                 |          "unLocodeExtendedCode" : "ADCAN",
-                 |          "name" : "Canillo"
-                 |        },
+                 |        "unLocode" : "ADCAN",
                  |        "equipments" : [
                  |          {
                  |            "containerIdentificationNumberYesNo" : true,
@@ -587,10 +578,7 @@ class ConsignmentSpec extends SpecBase {
                  |          "location" : "foobar"
                  |        },
                  |        "qualifierOfIdentification" : "unlocode",
-                 |        "unLocode" : {
-                 |          "unLocodeExtendedCode" : "ADCAN",
-                 |          "name" : "Canillo"
-                 |        },
+                 |        "unLocode" : "ADCAN",
                  |        "equipments" : [
                  |          {
                  |            "containerIdentificationNumberYesNo" : true,
@@ -763,10 +751,7 @@ class ConsignmentSpec extends SpecBase {
                  |          "location" : "foobar"
                  |        },
                  |        "qualifierOfIdentification" : "unlocode",
-                 |        "unLocode" : {
-                 |          "unLocodeExtendedCode" : "ADCAN",
-                 |          "name" : "Canillo"
-                 |        },
+                 |        "unLocode" : "ADCAN",
                  |        "equipments" : [
                  |          {
                  |            "containerIdentificationNumberYesNo" : true,
@@ -918,10 +903,7 @@ class ConsignmentSpec extends SpecBase {
                  |      "typeOfLocation" : "authorisedPlace",
                  |      "qualifierOfIdentification" : "unlocode",
                  |      "qualifierOfIdentificationDetails" : {
-                 |        "unlocode": {
-                 |          "unLocodeExtendedCode": "DEAAL",
-                 |          "name": "Alean"
-                 |        }
+                 |        "unlocode": "DEAAL"
                  |      }
                  |    },
                  |    "incidentFlag" : true,
@@ -944,10 +926,7 @@ class ConsignmentSpec extends SpecBase {
                  |          "location" : "foobar"
                  |        },
                  |        "qualifierOfIdentification" : "unlocode",
-                 |        "unLocode" : {
-                 |          "unLocodeExtendedCode" : "ADCAN",
-                 |          "name" : "Canillo"
-                 |        },
+                 |        "unLocode" : "ADCAN",
                  |        "equipments" : [
                  |          {
                  |            "containerIdentificationNumberYesNo" : true,
@@ -1126,10 +1105,7 @@ class ConsignmentSpec extends SpecBase {
                  |          "location" : "foobar"
                  |        },
                  |        "qualifierOfIdentification" : "unlocode",
-                 |        "unLocode" : {
-                 |          "unLocodeExtendedCode" : "ADCAN",
-                 |          "name" : "Canillo"
-                 |        },
+                 |        "unLocode" : "ADCAN",
                  |        "equipments" : [
                  |          {
                  |            "containerIdentificationNumberYesNo" : true,
@@ -1314,10 +1290,7 @@ class ConsignmentSpec extends SpecBase {
                  |          "location" : "foobar"
                  |        },
                  |        "qualifierOfIdentification" : "unlocode",
-                 |        "unLocode" : {
-                 |          "unLocodeExtendedCode" : "ADCAN",
-                 |          "name" : "Canillo"
-                 |        },
+                 |        "unLocode" : "ADCAN",
                  |        "equipments" : [
                  |          {
                  |            "containerIdentificationNumberYesNo" : true,
@@ -1501,10 +1474,7 @@ class ConsignmentSpec extends SpecBase {
                  |          "location" : "foobar"
                  |        },
                  |        "qualifierOfIdentification" : "unlocode",
-                 |        "unLocode" : {
-                 |          "unLocodeExtendedCode" : "ADCAN",
-                 |          "name" : "Canillo"
-                 |        },
+                 |        "unLocode" : "ADCAN",
                  |        "equipments" : [
                  |          {
                  |            "containerIdentificationNumberYesNo" : true,
@@ -1688,10 +1658,7 @@ class ConsignmentSpec extends SpecBase {
                  |          "location" : "foobar"
                  |        },
                  |        "qualifierOfIdentification" : "unlocode",
-                 |        "unLocode" : {
-                 |          "unLocodeExtendedCode" : "ADCAN",
-                 |          "name" : "Canillo"
-                 |        },
+                 |        "unLocode" : "ADCAN",
                  |        "equipments" : [
                  |          {
                  |            "containerIdentificationNumberYesNo" : true,
