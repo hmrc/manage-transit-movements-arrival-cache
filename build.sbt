@@ -3,7 +3,6 @@ import uk.gov.hmrc.DefaultBuildSettings.integrationTestSettings
 
 val appName = "manage-transit-movements-arrival-cache"
 
-
 lazy val microservice = Project(appName, file("."))
   .enablePlugins(play.sbt.PlayScala, SbtDistributablesPlugin, ScalaxbPlugin)
   .disablePlugins(JUnitXmlReportPlugin) //Required to prevent https://github.com/scalatest/scalatest/issues/1427
@@ -24,8 +23,16 @@ lazy val microservice = Project(appName, file("."))
     Compile / scalaxb / scalaxbDispatchVersion := "1.1.3",
     Compile / scalaxb / scalaxbPackageName := "generated"
   )
+  .settings(inConfig(Test)(testSettings): _*)
   .configs(IntegrationTest extend Test)
   .settings(integrationTestSettings(): _*)
   .settings(inConfig(IntegrationTest)(org.scalafmt.sbt.ScalafmtPlugin.scalafmtConfigSettings): _*)
   .settings(resolvers += Resolver.jcenterRepo)
   .settings(CodeCoverageSettings.settings: _*)
+
+lazy val testSettings: Seq[Def.Setting[_]] = Seq(
+  fork := true,
+  javaOptions ++= Seq(
+    "-Dconfig.resource=test.application.conf"
+  )
+)

@@ -32,7 +32,7 @@ class HeaderSpec extends SpecBase {
           |  "_id" : "$uuid",
           |  "mrn" : "$mrn",
           |  "eoriNumber" : "$eoriNumber",
-          |  "isSubmitted" : false,
+          |  "isSubmitted" : "notSubmitted",
           |  "data" : {
           |    "identification" : {
           |      "destinationOffice" : {

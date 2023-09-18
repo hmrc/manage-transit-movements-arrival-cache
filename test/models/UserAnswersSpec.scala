@@ -29,6 +29,7 @@ class UserAnswersSpec extends SpecBase {
       mrn = mrn,
       eoriNumber = eoriNumber,
       data = Json.obj(),
+      isSubmitted = SubmissionState.NotSubmitted,
       tasks = Some(
         Map(
           "task1" -> Status.Completed,
@@ -60,7 +61,8 @@ class UserAnswersSpec extends SpecBase {
           |        "task4" : "cannot-start-yet"
           |    },
           |    "createdAt" : "2022-09-05T15:58:44.188Z",
-          |    "lastUpdated" : "2022-09-07T10:33:23.472Z"
+          |    "lastUpdated" : "2022-09-07T10:33:23.472Z",
+          |    "isSubmitted" : "notSubmitted"
           |}
           |""".stripMargin)
 
@@ -88,6 +90,7 @@ class UserAnswersSpec extends SpecBase {
           |    "mrn" : "$mrn",
           |    "eoriNumber" : "$eoriNumber",
           |    "data" : {},
+          |    "isSubmitted" : "notSubmitted",
           |    "tasks" : {
           |        "task1" : "completed",
           |        "task2" : "in-progress",

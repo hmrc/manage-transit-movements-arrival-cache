@@ -16,20 +16,17 @@
 
 package models
 
-import play.api.libs.json.{Format, JsObject, Json}
+import play.api.libs.json.{Format, Json}
 
-case class Metadata(
-  mrn: String,
-  eoriNumber: String,
-  data: JsObject,
-  isSubmitted: SubmissionState.Value,
-  tasks: Option[Map[String, Status.Value]] = Some(Map())
-)
+sealed trait SubmissionState
 
-object Metadata {
+object SubmissionState extends Enumeration {
 
-  def apply(mrn: String, eoriNumber: String): Metadata =
-    new Metadata(mrn, eoriNumber, Json.obj(), SubmissionState.NotSubmitted)
+  type SubmissionState = Value
 
-  implicit val format: Format[Metadata] = Json.format[Metadata]
+  val NotSubmitted: SubmissionState           = Value("notSubmitted")
+  val Submitted: SubmissionState              = Value("submitted")
+  val RejectedPendingChanges: SubmissionState = Value("rejectedPendingChanges")
+
+  implicit val format: Format[SubmissionState] = Json.formatEnum(this)
 }

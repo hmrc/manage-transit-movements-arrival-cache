@@ -41,6 +41,7 @@ class ApiConnectorSpec extends AnyFreeSpec with AppWithDefaultMockFixtures with 
                                     |  "_id" : "$uuid",
                                     |  "mrn" : "$mrn",
                                     |  "eoriNumber" : "$eoriNumber",
+                                    |  "isSubmitted" : "notSubmitted",
                                     |  "data" : {
                                     |    "identification" : {
                                     |      "destinationOffice" : {

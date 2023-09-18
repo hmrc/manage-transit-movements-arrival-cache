@@ -18,6 +18,7 @@ package controllers
 
 import connectors.ApiConnector
 import controllers.actions.AuthenticateActionProvider
+import models.SubmissionState
 import play.api.Logging
 import play.api.libs.json.{JsError, JsSuccess, JsValue}
 import play.api.mvc.{Action, ControllerComponents}
@@ -44,8 +45,13 @@ class SubmissionController @Inject() (
           cacheRepository.get(mrn, request.eoriNumber).flatMap {
             case Some(uA) =>
               apiConnector.submitDeclaration(uA).map {
-                case Right(response) => Ok(response.body)
-                case Left(error)     => error
+                case Right(response) =>
+                  cacheRepository.set(uA.metadata.copy(isSubmitted = SubmissionState.Submitted)).map {
+                    _ => Ok(response.body)
+                  }
+                  Ok(response.body)
+                case Left(error) =>
+                  error
               }
             case None => Future.successful(InternalServerError)
           }

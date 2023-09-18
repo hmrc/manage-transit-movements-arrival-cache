@@ -34,6 +34,7 @@ class TransitOperationSpec extends SpecBase {
              |  "_id" : "c8fdf8a7-1c77-4d25-991d-2a0881e05062",
              |  "mrn" : "$mrn",
              |  "eoriNumber" : "GB1234567",
+             |  "isSubmitted" : "notSubmitted",
              |  "data" : {
              |    "identification" : {
              |      "destinationOffice" : {

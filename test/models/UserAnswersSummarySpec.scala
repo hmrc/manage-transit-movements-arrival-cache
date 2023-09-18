@@ -27,7 +27,7 @@ class UserAnswersSummarySpec extends SpecBase {
 
   "toHateoas" must {
 
-    "turn an UserAnswersSummary to hateos jjobject" in {
+    "turn an UserAnswersSummary to hateos jsobject" in {
 
       val now = Instant.now(clock)
       val id1 = UUID.randomUUID()
@@ -54,7 +54,8 @@ class UserAnswersSummarySpec extends SpecBase {
               "createdAt"     -> now,
               "lastUpdated"   -> now,
               "expiresInDays" -> 30,
-              "_id"           -> id1
+              "_id"           -> id1,
+              "isSubmitted"   -> "notSubmitted"
             ),
             Json.obj(
               "mrn" -> "CD123",
@@ -64,7 +65,8 @@ class UserAnswersSummarySpec extends SpecBase {
               "createdAt"     -> now.minus(1, DAYS),
               "lastUpdated"   -> now.minus(1, DAYS),
               "expiresInDays" -> 29,
-              "_id"           -> id2
+              "_id"           -> id2,
+              "isSubmitted"   -> "notSubmitted"
             )
           )
         )
