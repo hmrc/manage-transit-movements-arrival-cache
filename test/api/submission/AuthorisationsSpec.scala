@@ -118,7 +118,7 @@ class AuthorisationsSpec extends SpecBase {
         val expected = Seq(
           AuthorisationType01(
             sequenceNumber = "1",
-            typeValue = "ACE",
+            typeValue = "C522",
             referenceNumber = "SSE1"
           )
         )
@@ -217,7 +217,7 @@ class AuthorisationsSpec extends SpecBase {
         val expected = Seq(
           AuthorisationType01(
             sequenceNumber = "1",
-            typeValue = "ACE",
+            typeValue = "C522",
             referenceNumber = "SSE1"
           )
         )
