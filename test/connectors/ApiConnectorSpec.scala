@@ -52,8 +52,14 @@ class ApiConnectorSpec extends AnyFreeSpec with AppWithDefaultMockFixtures with 
                                     |      "isSimplifiedProcedure" : "normal"
                                     |    },
                                     |    "locationOfGoods" : {
-                                    |      "typeOfLocation" : "authorisedPlace",
-                                    |      "qualifierOfIdentification" : "customsOffice",
+                                    |      "typeOfLocation" : {
+                                    |        "type": "B",
+                                    |        "description": "Authorised place"
+                                    |      },
+                                    |      "qualifierOfIdentification" : {
+                                    |        "qualifier": "V",
+                                    |        "description": "Customs office identifier"
+                                    |      },
                                     |      "qualifierOfIdentificationDetails" : {
                                     |        "customsOffice" : {
                                     |          "id" : "GB000142",
@@ -69,7 +75,10 @@ class ApiConnectorSpec extends AnyFreeSpec with AppWithDefaultMockFixtures with 
                                     |          "code" : "FR",
                                     |          "description" : "France"
                                     |        },
-                                    |        "incidentCode" : "partiallyOrFullyUnloaded",
+                                    |        "incidentCode" : {
+                                    |          "code": "4",
+                                    |          "description": "Imminent danger necessitates immediate partial or total unloading of the sealed means of transport."
+                                    |        },
                                     |        "incidentText" : "foo",
                                     |        "addEndorsement" : true,
                                     |        "endorsement" : {
@@ -81,7 +90,10 @@ class ApiConnectorSpec extends AnyFreeSpec with AppWithDefaultMockFixtures with 
                                     |          },
                                     |          "location" : "foobar"
                                     |        },
-                                    |        "qualifierOfIdentification" : "unlocode",
+                                    |        "qualifierOfIdentification" : {
+                                    |          "qualifier": "U",
+                                    |          "description": "UN/LOCODE"
+                                    |        },
                                     |        "unLocode" : "DEAAL",
                                     |        "equipments" : [
                                     |          {

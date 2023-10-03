@@ -38,30 +38,11 @@ object consignmentType01 {
 
 object locationOfGoodsType01 {
 
-  private lazy val convertQualifierOfIdentification: String => String = {
-    case "postalCode"          => "T"
-    case "unlocode"            => "U"
-    case "customsOffice"       => "V"
-    case "coordinates"         => "W"
-    case "eoriNumber"          => "X"
-    case "authorisationNumber" => "Y"
-    case "address"             => "Z"
-    case _                     => throw new Exception("Invalid qualifier of identification value")
-  }
-
-  private lazy val convertTypeOfLocation: String => String = {
-    case "designatedLocation" => "A"
-    case "authorisedPlace"    => "B"
-    case "approvedPlace"      => "C"
-    case "other"              => "D"
-    case _                    => throw new Exception("Invalid type of location value")
-  }
-
   // If procedure type is simple then we automatically set typeOfLocation to B and qualifierOfIdentification to Y (CTCP-2666)
   implicit val reads: Reads[LocationOfGoodsType01] =
     (
-      (__ \ "typeOfLocation").readWithDefault[String]("authorisedPlace").map(convertTypeOfLocation) and
-        (__ \ "qualifierOfIdentification").readWithDefault[String]("authorisationNumber").map(convertQualifierOfIdentification) and
+      (__ \ "typeOfLocation" \ "type").readWithDefault[String]("B") and
+        (__ \ "qualifierOfIdentification" \ "qualifier").readWithDefault[String]("Y") and
         (__ \ "qualifierOfIdentificationDetails" \ "authorisationNumber").readNullable[String] and
         (__ \ "qualifierOfIdentificationDetails" \ "additionalIdentifier").readNullable[String] and
         (__ \ "qualifierOfIdentificationDetails" \ "unlocode").readNullable[String] and
@@ -151,19 +132,9 @@ object contactPersonType06 {
 
 object incidentType01 {
 
-  private lazy val convertIncidentCode: String => String = {
-    case "deviatedFromItinerary"         => "1"
-    case "sealsBrokenOrTampered"         => "2"
-    case "transferredToAnotherTransport" => "3"
-    case "partiallyOrFullyUnloaded"      => "4"
-    case "carrierUnableToComply"         => "5"
-    case "unexpectedlyChanged"           => "6"
-    case _                               => throw new Exception("Invalid incident code")
-  }
-
   def reads(index: Int): Reads[IncidentType01] = (
     (index.toString: Reads[String]) and
-      (__ \ "incidentCode").read[String].map(convertIncidentCode) and
+      (__ \ "incidentCode" \ "code").read[String] and
       (__ \ "incidentText").read[String] and
       (__ \ "endorsement").readNullable[EndorsementType01](endorsementType01.reads) and
       __.read[LocationType01](locationType01.reads) and
@@ -186,15 +157,8 @@ object endorsementType01 {
 
 object locationType01 {
 
-  private lazy val convertQualifierOfIdentification: String => String = {
-    case "unlocode"    => "U"
-    case "coordinates" => "W"
-    case "address"     => "Z"
-    case _             => throw new Exception("Invalid qualifier of identification value")
-  }
-
   def reads: Reads[LocationType01] = (
-    (__ \ "qualifierOfIdentification").read[String].map(convertQualifierOfIdentification) and
+    (__ \ "qualifierOfIdentification" \ "qualifier").read[String] and
       (__ \ "unLocode").readNullable[String] and
       (__ \ "incidentCountry" \ "code").read[String] and
       (__ \ "coordinates").readNullable[GNSSType](gnssType.reads) and
@@ -260,23 +224,8 @@ object transhipmentType01 {
 
 object transportMeansType01 {
 
-  lazy val convertTypeOfIdentification: String => String = {
-    case "imoShipIdNumber"        => "10"
-    case "seaGoingVessel"         => "11"
-    case "wagonNumber"            => "20"
-    case "trainNumber"            => "21"
-    case "regNumberRoadVehicle"   => "30"
-    case "regNumberRoadTrailer"   => "31"
-    case "iataFlightNumber"       => "40"
-    case "regNumberAircraft"      => "41"
-    case "europeanVesselIdNumber" => "80"
-    case "inlandWaterwaysVehicle" => "81"
-    case "unknown"                => "99"
-    case _                        => throw new Exception("Invalid type of identification value")
-  }
-
   def reads: Reads[TransportMeansType01] = (
-    (__ \ "identification").read[String].map(convertTypeOfIdentification) and
+    (__ \ "identification" \ "type").read[String] and
       (__ \ "identificationNumber").read[String] and
       (__ \ "transportNationality" \ "code").read[String]
   )(TransportMeansType01.apply _)

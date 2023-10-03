@@ -31,7 +31,11 @@ object TransitOperation {
 
 object transitOperationType02 {
 
-  val isSimplifiedReader: Reads[Boolean] = (identificationPath \ "isSimplifiedProcedure").read[String].map(_.equals("simplified"))
+  val isSimplifiedReader: Reads[Boolean] = (identificationPath \ "isSimplifiedProcedure").read[String].map {
+    case "simplified" => true
+    case "normal"     => false
+    case x            => throw new Exception(s"Invalid procedure type value: $x")
+  }
 
   def reads(mrn: String): Reads[TransitOperationType02] = (
     isSimplifiedReader and

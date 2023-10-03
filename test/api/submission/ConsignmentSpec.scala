@@ -27,184 +27,11 @@ class ConsignmentSpec extends SpecBase {
 
     "transform is called" when {
 
-      "locationOfGoods qualifierOfIdentification" when {
-
-        "isSimplified is true" should {
-          "automatically set type of location to B " +
-            "and qualifierOfIdentification to Y" when {
-              "when converting to an API format" in {
-                val json: JsValue = Json.parse(s"""
-                   |{
-                   |  "_id" : "c8fdf8a7-1c77-4d25-991d-2a0881e05062",
-                   |  "mrn" : "$mrn",
-                   |  "eoriNumber" : "GB1234567",
-                   |  "data" : {
-                   |    "identification" : {
-                   |      "destinationOffice" : {
-                   |        "id" : "GB000051",
-                   |        "name" : "Felixstowe",
-                   |        "phoneNumber" : "+44 (0)1394 303023 / 24 / 26"
-                   |      },
-                   |      "identificationNumber" : "GB123456789000",
-                   |      "isSimplifiedProcedure" : "simplified",
-                   |      "authorisationReferenceNumber" : "SSE1"
-                   |    },
-                   |    "locationOfGoods" : {
-                   |      "qualifierOfIdentificationDetails" : {
-                   |        "authorisationNumber" : "GB123456789000",
-                   |        "addAdditionalIdentifier" : true,
-                   |        "additionalIdentifier" : "0000"
-                   |      }
-                   |    },
-                   |    "incidentFlag" : true,
-                   |    "incidents" : [
-                   |      {
-                   |        "incidentCountry" : {
-                   |          "code" : "GB",
-                   |          "description" : "United Kingdom"
-                   |        },
-                   |        "incidentCode" : "partiallyOrFullyUnloaded",
-                   |        "incidentText" : "foo",
-                   |        "addEndorsement" : true,
-                   |        "endorsement" : {
-                   |          "date" : "2023-01-01",
-                   |          "authority" : "bar",
-                   |          "country" : {
-                   |            "code" : "GB",
-                   |            "description" : "United Kingdom"
-                   |          },
-                   |          "location" : "foobar"
-                   |        },
-                   |        "qualifierOfIdentification" : "unlocode",
-                   |        "unLocode" : "ADCAN",
-                   |        "equipments" : [
-                   |          {
-                   |            "containerIdentificationNumberYesNo" : true,
-                   |            "containerIdentificationNumber" : "1",
-                   |            "addSealsYesNo" : true,
-                   |            "seals" : [
-                   |              {
-                   |                "sealIdentificationNumber" : "1"
-                   |              }
-                   |            ],
-                   |            "addGoodsItemNumberYesNo" : true,
-                   |            "itemNumbers" : [
-                   |              {
-                   |                "itemNumber" : "1"
-                   |              }
-                   |            ]
-                   |          }
-                   |        ],
-                   |        "transportMeans" : {
-                   |          "identification" : "seaGoingVessel",
-                   |          "identificationNumber" : "foo",
-                   |          "transportNationality" : {
-                   |            "code" : "FR",
-                   |            "desc" : "France"
-                   |          }
-                   |        }
-                   |      }
-                   |    ]
-                   |  },
-                   |  "lastUpdated" : {
-                   |    "$$date" : {
-                   |      "$$numberLong" : "1662546803472"
-                   |    }
-                   |  },
-                   |  "createdAt" : {
-                   |    "$$date" : {
-                   |      "$$numberLong" : "1662546803472"
-                   |    }
-                   |  }
-                   |}
-                   |""".stripMargin)
-
-                val uA: UserAnswers = json.as[UserAnswers](UserAnswers.mongoFormat)
-
-                val converted = Consignment.transform(uA)
-
-                val expected = ConsignmentType01(
-                  LocationOfGoods = LocationOfGoodsType01(
-                    typeOfLocation = "B",
-                    qualifierOfIdentification = "Y",
-                    authorisationNumber = Some("GB123456789000"),
-                    additionalIdentifier = Some("0000"),
-                    UNLocode = None,
-                    CustomsOffice = None,
-                    GNSS = None,
-                    EconomicOperator = None,
-                    Address = None,
-                    PostcodeAddress = None,
-                    ContactPerson = None
-                  ),
-                  Incident = Seq(
-                    IncidentType01(
-                      sequenceNumber = "1",
-                      code = "4",
-                      text = "foo",
-                      Endorsement = Some(
-                        EndorsementType01(
-                          date = converted.Incident
-                            .flatMap(
-                              x =>
-                                x.Endorsement.map(
-                                  y => y.date
-                                )
-                            )
-                            .head,
-                          authority = "bar",
-                          place = "foobar",
-                          country = "GB"
-                        )
-                      ),
-                      Location = LocationType01(
-                        qualifierOfIdentification = "U",
-                        UNLocode = Some("ADCAN"),
-                        country = "GB",
-                        GNSS = None,
-                        Address = None
-                      ),
-                      TransportEquipment = Seq(
-                        TransportEquipmentType01(
-                          sequenceNumber = "1",
-                          containerIdentificationNumber = Some("1"),
-                          numberOfSeals = Some(BigInt(1)),
-                          Seal = Seq(
-                            SealType05(sequenceNumber = "1", identifier = "1")
-                          ),
-                          GoodsReference = Seq(
-                            GoodsReferenceType01(
-                              sequenceNumber = "1",
-                              declarationGoodsItemNumber = BigInt(1)
-                            )
-                          )
-                        )
-                      ),
-                      Transhipment = Some(
-                        TranshipmentType01(
-                          containerIndicator = Number0,
-                          TransportMeans = TransportMeansType01(
-                            typeOfIdentification = "11",
-                            identificationNumber = "foo",
-                            nationality = "FR"
-                          )
-                        )
-                      )
-                    )
-                  )
-                )
-
-                converted shouldBe expected
-
-              }
-            }
-        }
-
-        "customs office" should {
-
-          "convert to API format" in {
-
-            val json: JsValue = Json.parse(s"""
+      "isSimplified is true" should {
+        "automatically set type of location to B " +
+          "and qualifierOfIdentification to Y" when {
+            "when converting to an API format" in {
+              val json: JsValue = Json.parse(s"""
                  |{
                  |  "_id" : "c8fdf8a7-1c77-4d25-991d-2a0881e05062",
                  |  "mrn" : "$mrn",
@@ -217,341 +44,10 @@ class ConsignmentSpec extends SpecBase {
                  |        "phoneNumber" : "+44 (0)1394 303023 / 24 / 26"
                  |      },
                  |      "identificationNumber" : "GB123456789000",
-                 |      "isSimplifiedProcedure" : "normal",
+                 |      "isSimplifiedProcedure" : "simplified",
                  |      "authorisationReferenceNumber" : "SSE1"
                  |    },
                  |    "locationOfGoods" : {
-                 |      "typeOfLocation" : "authorisedPlace",
-                 |      "qualifierOfIdentification" : "customsOffice",
-                 |      "qualifierOfIdentificationDetails" : {
-                 |        "customsOffice" : {
-                 |          "id" : "GB000142",
-                 |          "name" : "Belfast EPU",
-                 |          "phoneNumber" : "+44 (0)3000 523068"
-                 |        }
-                 |      }
-                 |    },
-                 |    "incidentFlag" : true,
-                 |    "incidents" : [
-                 |      {
-                 |        "incidentCountry" : {
-                 |          "code" : "GB",
-                 |          "description" : "United Kingdom"
-                 |        },
-                 |        "incidentCode" : "partiallyOrFullyUnloaded",
-                 |        "incidentText" : "foo",
-                 |        "addEndorsement" : true,
-                 |        "endorsement" : {
-                 |          "date" : "2023-01-01",
-                 |          "authority" : "bar",
-                 |          "country" : {
-                 |            "code" : "GB",
-                 |            "description" : "United Kingdom"
-                 |          },
-                 |          "location" : "foobar"
-                 |        },
-                 |        "qualifierOfIdentification" : "unlocode",
-                 |        "unLocode" : "ADCAN",
-                 |        "equipments" : [
-                 |          {
-                 |            "containerIdentificationNumberYesNo" : true,
-                 |            "containerIdentificationNumber" : "1",
-                 |            "addSealsYesNo" : true,
-                 |            "seals" : [
-                 |              {
-                 |                "sealIdentificationNumber" : "1"
-                 |              }
-                 |            ],
-                 |            "addGoodsItemNumberYesNo" : true,
-                 |            "itemNumbers" : [
-                 |              {
-                 |                "itemNumber" : "1"
-                 |              }
-                 |            ]
-                 |          }
-                 |        ]
-                 |      }
-                 |    ]
-                 |  },
-                 |  "lastUpdated" : {
-                 |    "$$date" : {
-                 |      "$$numberLong" : "1662546803472"
-                 |    }
-                 |  },
-                 |  "createdAt" : {
-                 |    "$$date" : {
-                 |      "$$numberLong" : "1662546803472"
-                 |    }
-                 |  }
-                 |}
-                 |""".stripMargin)
-
-            val uA: UserAnswers = json.as[UserAnswers](UserAnswers.mongoFormat)
-
-            val converted = Consignment.transform(uA)
-
-            val expected = ConsignmentType01(
-              LocationOfGoods = LocationOfGoodsType01(
-                typeOfLocation = "B",
-                qualifierOfIdentification = "V",
-                authorisationNumber = None,
-                additionalIdentifier = None,
-                UNLocode = None,
-                CustomsOffice = Some(CustomsOfficeType01("GB000142")),
-                GNSS = None,
-                EconomicOperator = None,
-                Address = None,
-                PostcodeAddress = None,
-                ContactPerson = None
-              ),
-              Incident = Seq(
-                IncidentType01(
-                  sequenceNumber = "1",
-                  code = "4",
-                  text = "foo",
-                  Endorsement = Some(
-                    EndorsementType01(
-                      date = converted.Incident
-                        .flatMap(
-                          x =>
-                            x.Endorsement.map(
-                              y => y.date
-                            )
-                        )
-                        .head,
-                      authority = "bar",
-                      place = "foobar",
-                      country = "GB"
-                    )
-                  ),
-                  Location = LocationType01(
-                    qualifierOfIdentification = "U",
-                    UNLocode = Some("ADCAN"),
-                    country = "GB",
-                    GNSS = None,
-                    Address = None
-                  ),
-                  TransportEquipment = Seq(
-                    TransportEquipmentType01(
-                      sequenceNumber = "1",
-                      containerIdentificationNumber = Some("1"),
-                      numberOfSeals = Some(BigInt(1)),
-                      Seal = Seq(
-                        SealType05(sequenceNumber = "1", identifier = "1")
-                      ),
-                      GoodsReference = Seq(
-                        GoodsReferenceType01(
-                          sequenceNumber = "1",
-                          declarationGoodsItemNumber = BigInt(1)
-                        )
-                      )
-                    )
-                  ),
-                  Transhipment = None
-                )
-              )
-            )
-
-            converted shouldBe expected
-
-          }
-        }
-
-        "for eori number" should {
-
-          "convert to API format" in {
-
-            val json: JsValue = Json.parse(s"""
-                 |{
-                 |  "_id" : "c8fdf8a7-1c77-4d25-991d-2a0881e05062",
-                 |  "mrn" : "$mrn",
-                 |  "eoriNumber" : "GB1234567",
-                 |  "data" : {
-                 |    "identification" : {
-                 |      "destinationOffice" : {
-                 |        "id" : "GB000051",
-                 |        "name" : "Felixstowe",
-                 |        "phoneNumber" : "+44 (0)1394 303023 / 24 / 26"
-                 |      },
-                 |      "identificationNumber" : "GB123456789000",
-                 |      "isSimplifiedProcedure" : "normal",
-                 |      "authorisationReferenceNumber" : "SSE1"
-                 |    },
-                 |    "locationOfGoods" : {
-                 |      "typeOfLocation" : "authorisedPlace",
-                 |      "qualifierOfIdentification" : "eoriNumber",
-                 |      "qualifierOfIdentificationDetails" : {
-                 |        "identificationNumber" : "GB123456789000",
-                 |        "addAdditionalIdentifier" : true,
-                 |        "additionalIdentifier" : "0000"
-                 |      }
-                 |    },
-                 |    "incidentFlag" : true,
-                 |    "incidents" : [
-                 |      {
-                 |        "incidentCountry" : {
-                 |          "code" : "GB",
-                 |          "description" : "United Kingdom"
-                 |        },
-                 |        "incidentCode" : "partiallyOrFullyUnloaded",
-                 |        "incidentText" : "foo",
-                 |        "addEndorsement" : true,
-                 |        "endorsement" : {
-                 |          "date" : "2023-01-01",
-                 |          "authority" : "bar",
-                 |          "country" : {
-                 |            "code" : "GB",
-                 |            "description" : "United Kingdom"
-                 |          },
-                 |          "location" : "foobar"
-                 |        },
-                 |        "qualifierOfIdentification" : "unlocode",
-                 |        "unLocode" : "ADCAN",
-                 |        "equipments" : [
-                 |          {
-                 |            "containerIdentificationNumberYesNo" : true,
-                 |            "containerIdentificationNumber" : "1",
-                 |            "addSealsYesNo" : true,
-                 |            "seals" : [
-                 |              {
-                 |                "sealIdentificationNumber" : "1"
-                 |              }
-                 |            ],
-                 |            "addGoodsItemNumberYesNo" : true,
-                 |            "itemNumbers" : [
-                 |              {
-                 |                "itemNumber" : "1"
-                 |              }
-                 |            ]
-                 |          }
-                 |        ],
-                 |        "transportMeans" : {
-                 |          "identification" : "seaGoingVessel",
-                 |          "identificationNumber" : "foo",
-                 |          "transportNationality" : {
-                 |            "code" : "FR",
-                 |            "desc" : "France"
-                 |          }
-                 |        }
-                 |      }
-                 |    ]
-                 |  },
-                 |  "lastUpdated" : {
-                 |    "$$date" : {
-                 |      "$$numberLong" : "1662546803472"
-                 |    }
-                 |  },
-                 |  "createdAt" : {
-                 |    "$$date" : {
-                 |      "$$numberLong" : "1662546803472"
-                 |    }
-                 |  }
-                 |}
-                 |""".stripMargin)
-
-            val uA: UserAnswers = json.as[UserAnswers](UserAnswers.mongoFormat)
-
-            val converted = Consignment.transform(uA)
-
-            val expected = ConsignmentType01(
-              LocationOfGoods = LocationOfGoodsType01(
-                typeOfLocation = "B",
-                qualifierOfIdentification = "X",
-                authorisationNumber = None,
-                additionalIdentifier = Some("0000"),
-                UNLocode = None,
-                CustomsOffice = None,
-                GNSS = None,
-                EconomicOperator = Some(EconomicOperatorType03("GB123456789000")),
-                Address = None,
-                PostcodeAddress = None,
-                ContactPerson = None
-              ),
-              Incident = Seq(
-                IncidentType01(
-                  sequenceNumber = "1",
-                  code = "4",
-                  text = "foo",
-                  Endorsement = Some(
-                    EndorsementType01(
-                      date = converted.Incident
-                        .flatMap(
-                          x =>
-                            x.Endorsement.map(
-                              y => y.date
-                            )
-                        )
-                        .head,
-                      authority = "bar",
-                      place = "foobar",
-                      country = "GB"
-                    )
-                  ),
-                  Location = LocationType01(
-                    qualifierOfIdentification = "U",
-                    UNLocode = Some("ADCAN"),
-                    country = "GB",
-                    GNSS = None,
-                    Address = None
-                  ),
-                  TransportEquipment = Seq(
-                    TransportEquipmentType01(
-                      sequenceNumber = "1",
-                      containerIdentificationNumber = Some("1"),
-                      numberOfSeals = Some(BigInt(1)),
-                      Seal = Seq(
-                        SealType05(sequenceNumber = "1", identifier = "1")
-                      ),
-                      GoodsReference = Seq(
-                        GoodsReferenceType01(
-                          sequenceNumber = "1",
-                          declarationGoodsItemNumber = BigInt(1)
-                        )
-                      )
-                    )
-                  ),
-                  Transhipment = Some(
-                    TranshipmentType01(
-                      containerIndicator = Number0,
-                      TransportMeans = TransportMeansType01(
-                        typeOfIdentification = "11",
-                        identificationNumber = "foo",
-                        nationality = "FR"
-                      )
-                    )
-                  )
-                )
-              )
-            )
-
-            converted shouldBe expected
-
-          }
-        }
-
-        "for authorisation number" should {
-
-          "convert to API format" in {
-
-            val json: JsValue = Json.parse(s"""
-                 |{
-                 |  "_id" : "c8fdf8a7-1c77-4d25-991d-2a0881e05062",
-                 |  "mrn" : "$mrn",
-                 |  "eoriNumber" : "GB1234567",
-                 |  "data" : {
-                 |    "identification" : {
-                 |      "destinationOffice" : {
-                 |        "id" : "GB000051",
-                 |        "name" : "Felixstowe",
-                 |        "phoneNumber" : "+44 (0)1394 303023 / 24 / 26"
-                 |      },
-                 |      "identificationNumber" : "GB123456789000",
-                 |      "isSimplifiedProcedure" : "normal",
-                 |      "authorisationReferenceNumber" : "SSE1"
-                 |    },
-                 |    "locationOfGoods" : {
-                 |      "typeOfLocation" : "authorisedPlace",
-                 |      "qualifierOfIdentification" : "authorisationNumber",
                  |      "qualifierOfIdentificationDetails" : {
                  |        "authorisationNumber" : "GB123456789000",
                  |        "addAdditionalIdentifier" : true,
@@ -565,7 +61,10 @@ class ConsignmentSpec extends SpecBase {
                  |          "code" : "GB",
                  |          "description" : "United Kingdom"
                  |        },
-                 |        "incidentCode" : "partiallyOrFullyUnloaded",
+                 |        "incidentCode" : {
+                 |          "code": "4",
+                 |          "description": "Imminent danger necessitates immediate partial or total unloading of the sealed means of transport."
+                 |        },
                  |        "incidentText" : "foo",
                  |        "addEndorsement" : true,
                  |        "endorsement" : {
@@ -577,7 +76,10 @@ class ConsignmentSpec extends SpecBase {
                  |          },
                  |          "location" : "foobar"
                  |        },
-                 |        "qualifierOfIdentification" : "unlocode",
+                 |        "qualifierOfIdentification" : {
+                 |          "qualifier": "U",
+                 |          "description": "UN/LOCODE"
+                 |        },
                  |        "unLocode" : "ADCAN",
                  |        "equipments" : [
                  |          {
@@ -598,7 +100,10 @@ class ConsignmentSpec extends SpecBase {
                  |          }
                  |        ],
                  |        "transportMeans" : {
-                 |          "identification" : "seaGoingVessel",
+                 |          "identification" : {
+                 |            "type": "11",
+                 |            "description": "Name of the sea-going vessel"
+                 |          },
                  |          "identificationNumber" : "foo",
                  |          "transportNationality" : {
                  |            "code" : "FR",
@@ -621,1479 +126,252 @@ class ConsignmentSpec extends SpecBase {
                  |}
                  |""".stripMargin)
 
-            val uA: UserAnswers = json.as[UserAnswers](UserAnswers.mongoFormat)
+              val uA: UserAnswers = json.as[UserAnswers](UserAnswers.mongoFormat)
 
-            val converted = Consignment.transform(uA)
+              val converted = Consignment.transform(uA)
 
-            val expected = ConsignmentType01(
-              LocationOfGoods = LocationOfGoodsType01(
-                typeOfLocation = "B",
-                qualifierOfIdentification = "Y",
-                authorisationNumber = Some("GB123456789000"),
-                additionalIdentifier = Some("0000"),
-                UNLocode = None,
-                CustomsOffice = None,
-                GNSS = None,
-                EconomicOperator = None,
-                Address = None,
-                PostcodeAddress = None,
-                ContactPerson = None
-              ),
-              Incident = Seq(
-                IncidentType01(
-                  sequenceNumber = "1",
-                  code = "4",
-                  text = "foo",
-                  Endorsement = Some(
-                    EndorsementType01(
-                      date = converted.Incident
-                        .flatMap(
-                          x =>
-                            x.Endorsement.map(
-                              y => y.date
-                            )
-                        )
-                        .head,
-                      authority = "bar",
-                      place = "foobar",
-                      country = "GB"
-                    )
-                  ),
-                  Location = LocationType01(
-                    qualifierOfIdentification = "U",
-                    UNLocode = Some("ADCAN"),
-                    country = "GB",
-                    GNSS = None,
-                    Address = None
-                  ),
-                  TransportEquipment = Seq(
-                    TransportEquipmentType01(
-                      sequenceNumber = "1",
-                      containerIdentificationNumber = Some("1"),
-                      numberOfSeals = Some(BigInt(1)),
-                      Seal = Seq(
-                        SealType05(sequenceNumber = "1", identifier = "1")
-                      ),
-                      GoodsReference = Seq(
-                        GoodsReferenceType01(
-                          sequenceNumber = "1",
-                          declarationGoodsItemNumber = BigInt(1)
-                        )
-                      )
-                    )
-                  ),
-                  Transhipment = Some(
-                    TranshipmentType01(
-                      containerIndicator = Number0,
-                      TransportMeans = TransportMeansType01(
-                        typeOfIdentification = "11",
-                        identificationNumber = "foo",
-                        nationality = "FR"
-                      )
-                    )
-                  )
-                )
-              )
-            )
-
-            converted shouldBe expected
-
-          }
-        }
-
-        "for coordinates number" should {
-
-          "convert to API format" in {
-
-            val json: JsValue = Json.parse(s"""
-                 |{
-                 |  "_id" : "c8fdf8a7-1c77-4d25-991d-2a0881e05062",
-                 |  "mrn" : "$mrn",
-                 |  "eoriNumber" : "GB1234567",
-                 |  "data" : {
-                 |    "identification" : {
-                 |      "destinationOffice" : {
-                 |        "id" : "GB000051",
-                 |        "name" : "Felixstowe",
-                 |        "phoneNumber" : "+44 (0)1394 303023 / 24 / 26"
-                 |      },
-                 |      "identificationNumber" : "GB123456789000",
-                 |      "isSimplifiedProcedure" : "normal",
-                 |      "authorisationReferenceNumber" : "SSE1"
-                 |    },
-                 |    "locationOfGoods" : {
-                 |      "typeOfLocation" : "authorisedPlace",
-                 |      "qualifierOfIdentification" : "coordinates",
-                 |      "qualifierOfIdentificationDetails" : {
-                 |        "coordinates": {
-                 |          "latitude": "50.96622",
-                 |          "longitude": "1.86201"
-                 |        }
-                 |      }
-                 |    },
-                 |    "incidentFlag" : true,
-                 |    "incidents" : [
-                 |      {
-                 |        "incidentCountry" : {
-                 |          "code" : "GB",
-                 |          "description" : "United Kingdom"
-                 |        },
-                 |        "incidentCode" : "partiallyOrFullyUnloaded",
-                 |        "incidentText" : "foo",
-                 |        "addEndorsement" : true,
-                 |        "endorsement" : {
-                 |          "date" : "2023-01-01",
-                 |          "authority" : "bar",
-                 |          "country" : {
-                 |            "code" : "GB",
-                 |            "description" : "United Kingdom"
-                 |          },
-                 |          "location" : "foobar"
-                 |        },
-                 |        "qualifierOfIdentification" : "unlocode",
-                 |        "unLocode" : "ADCAN",
-                 |        "equipments" : [
-                 |          {
-                 |            "containerIdentificationNumberYesNo" : true,
-                 |            "containerIdentificationNumber" : "1",
-                 |            "addSealsYesNo" : true,
-                 |            "seals" : [
-                 |              {
-                 |                "sealIdentificationNumber" : "1"
-                 |              }
-                 |            ],
-                 |            "addGoodsItemNumberYesNo" : true,
-                 |            "itemNumbers" : [
-                 |              {
-                 |                "itemNumber" : "1"
-                 |              }
-                 |            ]
-                 |          }
-                 |        ],
-                 |        "transportMeans" : {
-                 |          "identification" : "seaGoingVessel",
-                 |          "identificationNumber" : "foo",
-                 |          "transportNationality" : {
-                 |            "code" : "FR",
-                 |            "desc" : "France"
-                 |          }
-                 |        }
-                 |      }
-                 |    ]
-                 |  },
-                 |  "lastUpdated" : {
-                 |    "$$date" : {
-                 |      "$$numberLong" : "1662546803472"
-                 |    }
-                 |  },
-                 |  "createdAt" : {
-                 |    "$$date" : {
-                 |      "$$numberLong" : "1662546803472"
-                 |    }
-                 |  }
-                 |}
-                 |""".stripMargin)
-
-            val uA: UserAnswers = json.as[UserAnswers](UserAnswers.mongoFormat)
-
-            val converted = Consignment.transform(uA)
-
-            val expected = ConsignmentType01(
-              LocationOfGoods = LocationOfGoodsType01(
-                typeOfLocation = "B",
-                qualifierOfIdentification = "W",
-                authorisationNumber = None,
-                additionalIdentifier = None,
-                UNLocode = None,
-                CustomsOffice = None,
-                GNSS = Some(
-                  GNSSType(
-                    latitude = "50.96622",
-                    longitude = "1.86201"
-                  )
+              val expected = ConsignmentType01(
+                LocationOfGoods = LocationOfGoodsType01(
+                  typeOfLocation = "B",
+                  qualifierOfIdentification = "Y",
+                  authorisationNumber = Some("GB123456789000"),
+                  additionalIdentifier = Some("0000"),
+                  UNLocode = None,
+                  CustomsOffice = None,
+                  GNSS = None,
+                  EconomicOperator = None,
+                  Address = None,
+                  PostcodeAddress = None,
+                  ContactPerson = None
                 ),
-                EconomicOperator = None,
-                Address = None,
-                PostcodeAddress = None,
-                ContactPerson = None
-              ),
-              Incident = Seq(
-                IncidentType01(
-                  sequenceNumber = "1",
-                  code = "4",
-                  text = "foo",
-                  Endorsement = Some(
-                    EndorsementType01(
-                      date = converted.Incident
-                        .flatMap(
-                          x =>
-                            x.Endorsement.map(
-                              y => y.date
-                            )
-                        )
-                        .head,
-                      authority = "bar",
-                      place = "foobar",
-                      country = "GB"
-                    )
-                  ),
-                  Location = LocationType01(
-                    qualifierOfIdentification = "U",
-                    UNLocode = Some("ADCAN"),
-                    country = "GB",
-                    GNSS = None,
-                    Address = None
-                  ),
-                  TransportEquipment = Seq(
-                    TransportEquipmentType01(
-                      sequenceNumber = "1",
-                      containerIdentificationNumber = Some("1"),
-                      numberOfSeals = Some(BigInt(1)),
-                      Seal = Seq(
-                        SealType05(sequenceNumber = "1", identifier = "1")
-                      ),
-                      GoodsReference = Seq(
-                        GoodsReferenceType01(
-                          sequenceNumber = "1",
-                          declarationGoodsItemNumber = BigInt(1)
-                        )
-                      )
-                    )
-                  ),
-                  Transhipment = Some(
-                    TranshipmentType01(
-                      containerIndicator = Number0,
-                      TransportMeans = TransportMeansType01(
-                        typeOfIdentification = "11",
-                        identificationNumber = "foo",
-                        nationality = "FR"
-                      )
-                    )
-                  )
-                )
-              )
-            )
-
-            converted shouldBe expected
-
-          }
-        }
-
-        "for unlocode number" should {
-
-          "convert to API format" in {
-
-            val json: JsValue = Json.parse(s"""
-                 |{
-                 |  "_id" : "c8fdf8a7-1c77-4d25-991d-2a0881e05062",
-                 |  "mrn" : "$mrn",
-                 |  "eoriNumber" : "GB1234567",
-                 |  "data" : {
-                 |    "identification" : {
-                 |      "destinationOffice" : {
-                 |        "id" : "GB000051",
-                 |        "name" : "Felixstowe",
-                 |        "phoneNumber" : "+44 (0)1394 303023 / 24 / 26"
-                 |      },
-                 |      "identificationNumber" : "GB123456789000",
-                 |      "isSimplifiedProcedure" : "normal",
-                 |      "authorisationReferenceNumber" : "SSE1"
-                 |    },
-                 |    "locationOfGoods" : {
-                 |      "typeOfLocation" : "authorisedPlace",
-                 |      "qualifierOfIdentification" : "unlocode",
-                 |      "qualifierOfIdentificationDetails" : {
-                 |        "unlocode": "DEAAL"
-                 |      }
-                 |    },
-                 |    "incidentFlag" : true,
-                 |    "incidents" : [
-                 |      {
-                 |        "incidentCountry" : {
-                 |          "code" : "GB",
-                 |          "description" : "United Kingdom"
-                 |        },
-                 |        "incidentCode" : "partiallyOrFullyUnloaded",
-                 |        "incidentText" : "foo",
-                 |        "addEndorsement" : true,
-                 |        "endorsement" : {
-                 |          "date" : "2023-01-01",
-                 |          "authority" : "bar",
-                 |          "country" : {
-                 |            "code" : "GB",
-                 |            "description" : "United Kingdom"
-                 |          },
-                 |          "location" : "foobar"
-                 |        },
-                 |        "qualifierOfIdentification" : "unlocode",
-                 |        "unLocode" : "ADCAN",
-                 |        "equipments" : [
-                 |          {
-                 |            "containerIdentificationNumberYesNo" : true,
-                 |            "containerIdentificationNumber" : "1",
-                 |            "addSealsYesNo" : true,
-                 |            "seals" : [
-                 |              {
-                 |                "sealIdentificationNumber" : "1"
-                 |              }
-                 |            ],
-                 |            "addGoodsItemNumberYesNo" : true,
-                 |            "itemNumbers" : [
-                 |              {
-                 |                "itemNumber" : "1"
-                 |              }
-                 |            ]
-                 |          }
-                 |        ],
-                 |        "transportMeans" : {
-                 |          "identification" : "seaGoingVessel",
-                 |          "identificationNumber" : "foo",
-                 |          "transportNationality" : {
-                 |            "code" : "FR",
-                 |            "desc" : "France"
-                 |          }
-                 |        }
-                 |      }
-                 |    ]
-                 |  },
-                 |  "lastUpdated" : {
-                 |    "$$date" : {
-                 |      "$$numberLong" : "1662546803472"
-                 |    }
-                 |  },
-                 |  "createdAt" : {
-                 |    "$$date" : {
-                 |      "$$numberLong" : "1662546803472"
-                 |    }
-                 |  }
-                 |}
-                 |""".stripMargin)
-
-            val uA: UserAnswers = json.as[UserAnswers](UserAnswers.mongoFormat)
-
-            val converted = Consignment.transform(uA)
-
-            val expected = ConsignmentType01(
-              LocationOfGoods = LocationOfGoodsType01(
-                typeOfLocation = "B",
-                qualifierOfIdentification = "U",
-                authorisationNumber = None,
-                additionalIdentifier = None,
-                UNLocode = Some("DEAAL"),
-                CustomsOffice = None,
-                GNSS = None,
-                EconomicOperator = None,
-                Address = None,
-                PostcodeAddress = None,
-                ContactPerson = None
-              ),
-              Incident = Seq(
-                IncidentType01(
-                  sequenceNumber = "1",
-                  code = "4",
-                  text = "foo",
-                  Endorsement = Some(
-                    EndorsementType01(
-                      date = converted.Incident
-                        .flatMap(
-                          x =>
-                            x.Endorsement.map(
-                              y => y.date
-                            )
-                        )
-                        .head,
-                      authority = "bar",
-                      place = "foobar",
-                      country = "GB"
-                    )
-                  ),
-                  Location = LocationType01(
-                    qualifierOfIdentification = "U",
-                    UNLocode = Some("ADCAN"),
-                    country = "GB",
-                    GNSS = None,
-                    Address = None
-                  ),
-                  TransportEquipment = Seq(
-                    TransportEquipmentType01(
-                      sequenceNumber = "1",
-                      containerIdentificationNumber = Some("1"),
-                      numberOfSeals = Some(BigInt(1)),
-                      Seal = Seq(
-                        SealType05(sequenceNumber = "1", identifier = "1")
-                      ),
-                      GoodsReference = Seq(
-                        GoodsReferenceType01(
-                          sequenceNumber = "1",
-                          declarationGoodsItemNumber = BigInt(1)
-                        )
-                      )
-                    )
-                  ),
-                  Transhipment = Some(
-                    TranshipmentType01(
-                      containerIndicator = Number0,
-                      TransportMeans = TransportMeansType01(
-                        typeOfIdentification = "11",
-                        identificationNumber = "foo",
-                        nationality = "FR"
-                      )
-                    )
-                  )
-                )
-              )
-            )
-
-            converted shouldBe expected
-
-          }
-        }
-
-        "for address" should {
-
-          "convert to API format" in {
-
-            val json: JsValue = Json.parse(s"""
-                 |{
-                 |  "_id" : "c8fdf8a7-1c77-4d25-991d-2a0881e05062",
-                 |  "mrn" : "$mrn",
-                 |  "eoriNumber" : "GB1234567",
-                 |  "data" : {
-                 |    "identification" : {
-                 |      "destinationOffice" : {
-                 |        "id" : "GB000051",
-                 |        "name" : "Felixstowe",
-                 |        "phoneNumber" : "+44 (0)1394 303023 / 24 / 26"
-                 |      },
-                 |      "identificationNumber" : "GB123456789000",
-                 |      "isSimplifiedProcedure" : "normal",
-                 |      "authorisationReferenceNumber" : "SSE1"
-                 |    },
-                 |    "locationOfGoods" : {
-                 |      "typeOfLocation" : "authorisedPlace",
-                 |      "qualifierOfIdentification" : "address",
-                 |      "qualifierOfIdentificationDetails" : {
-                 |        "country": {
-                 |          "code": "FR",
-                 |          "description": "France"
-                 |        }
-                 |        ,
-                 |        "address": {
-                 |          "numberAndStreet": "28 Poker Avenue",
-                 |          "city": "Foo",
-                 |          "postalCode": "NEXX XXX"
-                 |        }
-                 |      }
-                 |    },
-                 |    "incidentFlag" : true,
-                 |    "incidents" : [
-                 |      {
-                 |        "incidentCountry" : {
-                 |          "code" : "GB",
-                 |          "description" : "United Kingdom"
-                 |        },
-                 |        "incidentCode" : "partiallyOrFullyUnloaded",
-                 |        "incidentText" : "foo",
-                 |        "addEndorsement" : true,
-                 |        "endorsement" : {
-                 |          "date" : "2023-01-01",
-                 |          "authority" : "bar",
-                 |          "country" : {
-                 |            "code" : "GB",
-                 |            "description" : "United Kingdom"
-                 |          },
-                 |          "location" : "foobar"
-                 |        },
-                 |        "qualifierOfIdentification" : "unlocode",
-                 |        "unLocode" : "ADCAN",
-                 |        "equipments" : [
-                 |          {
-                 |            "containerIdentificationNumberYesNo" : true,
-                 |            "containerIdentificationNumber" : "1",
-                 |            "addSealsYesNo" : true,
-                 |            "seals" : [
-                 |              {
-                 |                "sealIdentificationNumber" : "1"
-                 |              }
-                 |            ],
-                 |            "addGoodsItemNumberYesNo" : true,
-                 |            "itemNumbers" : [
-                 |              {
-                 |                "itemNumber" : "1"
-                 |              }
-                 |            ]
-                 |          }
-                 |        ],
-                 |        "transportMeans" : {
-                 |          "identification" : "seaGoingVessel",
-                 |          "identificationNumber" : "foo",
-                 |          "transportNationality" : {
-                 |            "code" : "FR",
-                 |            "desc" : "France"
-                 |          }
-                 |        }
-                 |      }
-                 |    ]
-                 |  },
-                 |  "lastUpdated" : {
-                 |    "$$date" : {
-                 |      "$$numberLong" : "1662546803472"
-                 |    }
-                 |  },
-                 |  "createdAt" : {
-                 |    "$$date" : {
-                 |      "$$numberLong" : "1662546803472"
-                 |    }
-                 |  }
-                 |}
-                 |""".stripMargin)
-
-            val uA: UserAnswers = json.as[UserAnswers](UserAnswers.mongoFormat)
-
-            val converted = Consignment.transform(uA)
-
-            val expected = ConsignmentType01(
-              LocationOfGoods = LocationOfGoodsType01(
-                typeOfLocation = "B",
-                qualifierOfIdentification = "Z",
-                authorisationNumber = None,
-                additionalIdentifier = None,
-                UNLocode = None,
-                CustomsOffice = None,
-                GNSS = None,
-                EconomicOperator = None,
-                Address = Some(
-                  AddressType14(
-                    streetAndNumber = "28 Poker Avenue",
-                    postcode = Some("NEXX XXX"),
-                    city = "Foo",
-                    country = "FR"
-                  )
-                ),
-                PostcodeAddress = None,
-                ContactPerson = None
-              ),
-              Incident = Seq(
-                IncidentType01(
-                  sequenceNumber = "1",
-                  code = "4",
-                  text = "foo",
-                  Endorsement = Some(
-                    EndorsementType01(
-                      date = converted.Incident
-                        .flatMap(
-                          x =>
-                            x.Endorsement.map(
-                              y => y.date
-                            )
-                        )
-                        .head,
-                      authority = "bar",
-                      place = "foobar",
-                      country = "GB"
-                    )
-                  ),
-                  Location = LocationType01(
-                    qualifierOfIdentification = "U",
-                    UNLocode = Some("ADCAN"),
-                    country = "GB",
-                    GNSS = None,
-                    Address = None
-                  ),
-                  TransportEquipment = Seq(
-                    TransportEquipmentType01(
-                      sequenceNumber = "1",
-                      containerIdentificationNumber = Some("1"),
-                      numberOfSeals = Some(BigInt(1)),
-                      Seal = Seq(
-                        SealType05(sequenceNumber = "1", identifier = "1")
-                      ),
-                      GoodsReference = Seq(
-                        GoodsReferenceType01(
-                          sequenceNumber = "1",
-                          declarationGoodsItemNumber = BigInt(1)
-                        )
-                      )
-                    )
-                  ),
-                  Transhipment = Some(
-                    TranshipmentType01(
-                      containerIndicator = Number0,
-                      TransportMeans = TransportMeansType01(
-                        typeOfIdentification = "11",
-                        identificationNumber = "foo",
-                        nationality = "FR"
-                      )
-                    )
-                  )
-                )
-              )
-            )
-
-            converted shouldBe expected
-
-          }
-        }
-
-        "for address (no postcode)" should {
-
-          "convert to API format" in {
-
-            val json: JsValue = Json.parse(s"""
-                 |{
-                 |  "_id" : "c8fdf8a7-1c77-4d25-991d-2a0881e05062",
-                 |  "mrn" : "$mrn",
-                 |  "eoriNumber" : "GB1234567",
-                 |  "data" : {
-                 |    "identification" : {
-                 |      "destinationOffice" : {
-                 |        "id" : "GB000051",
-                 |        "name" : "Felixstowe",
-                 |        "phoneNumber" : "+44 (0)1394 303023 / 24 / 26"
-                 |      },
-                 |      "identificationNumber" : "GB123456789000",
-                 |      "isSimplifiedProcedure" : "normal",
-                 |      "authorisationReferenceNumber" : "SSE1"
-                 |    },
-                 |    "locationOfGoods" : {
-                 |      "typeOfLocation" : "authorisedPlace",
-                 |      "qualifierOfIdentification" : "address",
-                 |      "qualifierOfIdentificationDetails" : {
-                 |        "country": {
-                 |          "code": "FR",
-                 |          "description": "France"
-                 |        }
-                 |        ,
-                 |        "address": {
-                 |          "numberAndStreet": "28 Poker Avenue",
-                 |          "city": "Foo"
-                 |        }
-                 |      }
-                 |    },
-                 |    "incidentFlag" : true,
-                 |    "incidents" : [
-                 |      {
-                 |        "incidentCountry" : {
-                 |          "code" : "GB",
-                 |          "description" : "United Kingdom"
-                 |        },
-                 |        "incidentCode" : "partiallyOrFullyUnloaded",
-                 |        "incidentText" : "foo",
-                 |        "addEndorsement" : true,
-                 |        "endorsement" : {
-                 |          "date" : "2023-01-01",
-                 |          "authority" : "bar",
-                 |          "country" : {
-                 |            "code" : "GB",
-                 |            "description" : "United Kingdom"
-                 |          },
-                 |          "location" : "foobar"
-                 |        },
-                 |        "qualifierOfIdentification" : "unlocode",
-                 |        "unLocode" : "ADCAN",
-                 |        "equipments" : [
-                 |          {
-                 |            "containerIdentificationNumberYesNo" : true,
-                 |            "containerIdentificationNumber" : "1",
-                 |            "addSealsYesNo" : true,
-                 |            "seals" : [
-                 |              {
-                 |                "sealIdentificationNumber" : "1"
-                 |              }
-                 |            ],
-                 |            "addGoodsItemNumberYesNo" : true,
-                 |            "itemNumbers" : [
-                 |              {
-                 |                "itemNumber" : "1"
-                 |              }
-                 |            ]
-                 |          }
-                 |        ],
-                 |        "transportMeans" : {
-                 |          "identification" : "seaGoingVessel",
-                 |          "identificationNumber" : "foo",
-                 |          "transportNationality" : {
-                 |            "code" : "FR",
-                 |            "desc" : "France"
-                 |          }
-                 |        }
-                 |      }
-                 |    ]
-                 |  },
-                 |  "lastUpdated" : {
-                 |    "$$date" : {
-                 |      "$$numberLong" : "1662546803472"
-                 |    }
-                 |  },
-                 |  "createdAt" : {
-                 |    "$$date" : {
-                 |      "$$numberLong" : "1662546803472"
-                 |    }
-                 |  }
-                 |}
-                 |""".stripMargin)
-
-            val uA: UserAnswers = json.as[UserAnswers](UserAnswers.mongoFormat)
-
-            val converted = Consignment.transform(uA)
-
-            val expected = ConsignmentType01(
-              LocationOfGoods = LocationOfGoodsType01(
-                typeOfLocation = "B",
-                qualifierOfIdentification = "Z",
-                authorisationNumber = None,
-                additionalIdentifier = None,
-                UNLocode = None,
-                CustomsOffice = None,
-                GNSS = None,
-                EconomicOperator = None,
-                Address = Some(
-                  AddressType14(
-                    streetAndNumber = "28 Poker Avenue",
-                    postcode = None,
-                    city = "Foo",
-                    country = "FR"
-                  )
-                ),
-                PostcodeAddress = None,
-                ContactPerson = None
-              ),
-              Incident = Seq(
-                IncidentType01(
-                  sequenceNumber = "1",
-                  code = "4",
-                  text = "foo",
-                  Endorsement = Some(
-                    EndorsementType01(
-                      date = converted.Incident
-                        .flatMap(
-                          x =>
-                            x.Endorsement.map(
-                              y => y.date
-                            )
-                        )
-                        .head,
-                      authority = "bar",
-                      place = "foobar",
-                      country = "GB"
-                    )
-                  ),
-                  Location = LocationType01(
-                    qualifierOfIdentification = "U",
-                    UNLocode = Some("ADCAN"),
-                    country = "GB",
-                    GNSS = None,
-                    Address = None
-                  ),
-                  TransportEquipment = Seq(
-                    TransportEquipmentType01(
-                      sequenceNumber = "1",
-                      containerIdentificationNumber = Some("1"),
-                      numberOfSeals = Some(BigInt(1)),
-                      Seal = Seq(
-                        SealType05(sequenceNumber = "1", identifier = "1")
-                      ),
-                      GoodsReference = Seq(
-                        GoodsReferenceType01(
-                          sequenceNumber = "1",
-                          declarationGoodsItemNumber = BigInt(1)
-                        )
-                      )
-                    )
-                  ),
-                  Transhipment = Some(
-                    TranshipmentType01(
-                      containerIndicator = Number0,
-                      TransportMeans = TransportMeansType01(
-                        typeOfIdentification = "11",
-                        identificationNumber = "foo",
-                        nationality = "FR"
-                      )
-                    )
-                  )
-                )
-              )
-            )
-
-            converted shouldBe expected
-
-          }
-        }
-
-        "for postcode" should {
-
-          "convert to API format" in {
-
-            val json: JsValue = Json.parse(s"""
-                 |{
-                 |  "_id" : "c8fdf8a7-1c77-4d25-991d-2a0881e05062",
-                 |  "mrn" : "$mrn",
-                 |  "eoriNumber" : "GB1234567",
-                 |  "data" : {
-                 |    "identification" : {
-                 |      "destinationOffice" : {
-                 |        "id" : "GB000051",
-                 |        "name" : "Felixstowe",
-                 |        "phoneNumber" : "+44 (0)1394 303023 / 24 / 26"
-                 |      },
-                 |      "identificationNumber" : "GB123456789000",
-                 |      "isSimplifiedProcedure" : "normal",
-                 |      "authorisationReferenceNumber" : "SSE1"
-                 |    },
-                 |    "locationOfGoods" : {
-                 |      "typeOfLocation" : "authorisedPlace",
-                 |      "qualifierOfIdentification" : "postalCode",
-                 |      "qualifierOfIdentificationDetails" : {
-                 |        "postalCode": {
-                 |          "streetNumber": "28",
-                 |          "postalCode": "NXX XXX",
-                 |          "country": {
-                 |            "code": "FR",
-                 |            "description": "France"
-                 |          }
-                 |        }
-                 |      }
-                 |    },
-                 |    "incidentFlag" : true,
-                 |    "incidents" : [
-                 |      {
-                 |        "incidentCountry" : {
-                 |          "code" : "GB",
-                 |          "description" : "United Kingdom"
-                 |        },
-                 |        "incidentCode" : "partiallyOrFullyUnloaded",
-                 |        "incidentText" : "foo",
-                 |        "addEndorsement" : true,
-                 |        "endorsement" : {
-                 |          "date" : "2023-01-01",
-                 |          "authority" : "bar",
-                 |          "country" : {
-                 |            "code" : "GB",
-                 |            "description" : "United Kingdom"
-                 |          },
-                 |          "location" : "foobar"
-                 |        },
-                 |        "qualifierOfIdentification" : "unlocode",
-                 |        "unLocode" : "ADCAN",
-                 |        "equipments" : [
-                 |          {
-                 |            "containerIdentificationNumberYesNo" : true,
-                 |            "containerIdentificationNumber" : "1",
-                 |            "addSealsYesNo" : true,
-                 |            "seals" : [
-                 |              {
-                 |                "sealIdentificationNumber" : "1"
-                 |              }
-                 |            ],
-                 |            "addGoodsItemNumberYesNo" : true,
-                 |            "itemNumbers" : [
-                 |              {
-                 |                "itemNumber" : "1"
-                 |              }
-                 |            ]
-                 |          }
-                 |        ],
-                 |        "transportMeans" : {
-                 |          "identification" : "seaGoingVessel",
-                 |          "identificationNumber" : "foo",
-                 |          "transportNationality" : {
-                 |            "code" : "FR",
-                 |            "desc" : "France"
-                 |          }
-                 |        }
-                 |      }
-                 |    ]
-                 |  },
-                 |  "lastUpdated" : {
-                 |    "$$date" : {
-                 |      "$$numberLong" : "1662546803472"
-                 |    }
-                 |  },
-                 |  "createdAt" : {
-                 |    "$$date" : {
-                 |      "$$numberLong" : "1662546803472"
-                 |    }
-                 |  }
-                 |}
-                 |""".stripMargin)
-
-            val uA: UserAnswers = json.as[UserAnswers](UserAnswers.mongoFormat)
-
-            val converted = Consignment.transform(uA)
-
-            val expected = ConsignmentType01(
-              LocationOfGoods = LocationOfGoodsType01(
-                typeOfLocation = "B",
-                qualifierOfIdentification = "T",
-                authorisationNumber = None,
-                additionalIdentifier = None,
-                UNLocode = None,
-                CustomsOffice = None,
-                GNSS = None,
-                EconomicOperator = None,
-                Address = None,
-                PostcodeAddress = Some(
-                  PostcodeAddressType02(
-                    houseNumber = Some("28"),
-                    postcode = "NXX XXX",
-                    country = "FR"
-                  )
-                ),
-                ContactPerson = None
-              ),
-              Incident = Seq(
-                IncidentType01(
-                  sequenceNumber = "1",
-                  code = "4",
-                  text = "foo",
-                  Endorsement = Some(
-                    EndorsementType01(
-                      date = converted.Incident
-                        .flatMap(
-                          x =>
-                            x.Endorsement.map(
-                              y => y.date
-                            )
-                        )
-                        .head,
-                      authority = "bar",
-                      place = "foobar",
-                      country = "GB"
-                    )
-                  ),
-                  Location = LocationType01(
-                    qualifierOfIdentification = "U",
-                    UNLocode = Some("ADCAN"),
-                    country = "GB",
-                    GNSS = None,
-                    Address = None
-                  ),
-                  TransportEquipment = Seq(
-                    TransportEquipmentType01(
-                      sequenceNumber = "1",
-                      containerIdentificationNumber = Some("1"),
-                      numberOfSeals = Some(BigInt(1)),
-                      Seal = Seq(
-                        SealType05(sequenceNumber = "1", identifier = "1")
-                      ),
-                      GoodsReference = Seq(
-                        GoodsReferenceType01(
-                          sequenceNumber = "1",
-                          declarationGoodsItemNumber = BigInt(1)
-                        )
-                      )
-                    )
-                  ),
-                  Transhipment = Some(
-                    TranshipmentType01(
-                      containerIndicator = Number0,
-                      TransportMeans = TransportMeansType01(
-                        typeOfIdentification = "11",
-                        identificationNumber = "foo",
-                        nationality = "FR"
-                      )
-                    )
-                  )
-                )
-              )
-            )
-
-            converted shouldBe expected
-
-          }
-        }
-
-      }
-
-      "Incident qualifierOfIdentification" when {
-
-        "unlocode" should {
-
-          "convert to API format" in {
-
-            val json: JsValue = Json.parse(s"""
-                 |{
-                 |  "_id" : "c8fdf8a7-1c77-4d25-991d-2a0881e05062",
-                 |  "mrn" : "$mrn",
-                 |  "eoriNumber" : "GB1234567",
-                 |  "data" : {
-                 |    "identification" : {
-                 |      "destinationOffice" : {
-                 |        "id" : "GB000051",
-                 |        "name" : "Felixstowe",
-                 |        "phoneNumber" : "+44 (0)1394 303023 / 24 / 26"
-                 |      },
-                 |      "identificationNumber" : "GB123456789000",
-                 |      "isSimplifiedProcedure" : "normal",
-                 |      "authorisationReferenceNumber" : "SSE1"
-                 |    },
-                 |    "locationOfGoods" : {
-                 |      "typeOfLocation" : "authorisedPlace",
-                 |      "qualifierOfIdentification" : "customsOffice",
-                 |      "qualifierOfIdentificationDetails" : {
-                 |        "customsOffice" : {
-                 |          "id" : "GB000142",
-                 |          "name" : "Belfast EPU",
-                 |          "phoneNumber" : "+44 (0)3000 523068"
-                 |        }
-                 |      }
-                 |    },
-                 |    "incidentFlag" : true,
-                 |    "incidents" : [
-                 |      {
-                 |        "incidentCountry" : {
-                 |          "code" : "GB",
-                 |          "description" : "United Kingdom"
-                 |        },
-                 |        "incidentCode" : "partiallyOrFullyUnloaded",
-                 |        "incidentText" : "foo",
-                 |        "addEndorsement" : true,
-                 |        "endorsement" : {
-                 |          "date" : "2023-01-01",
-                 |          "authority" : "bar",
-                 |          "country" : {
-                 |            "code" : "GB",
-                 |            "description" : "United Kingdom"
-                 |          },
-                 |          "location" : "foobar"
-                 |        },
-                 |        "qualifierOfIdentification" : "unlocode",
-                 |        "unLocode" : "ADCAN",
-                 |        "equipments" : [
-                 |          {
-                 |            "containerIdentificationNumberYesNo" : true,
-                 |            "containerIdentificationNumber" : "1",
-                 |            "addSealsYesNo" : true,
-                 |            "seals" : [
-                 |              {
-                 |                "sealIdentificationNumber" : "1"
-                 |              }
-                 |            ],
-                 |            "addGoodsItemNumberYesNo" : true,
-                 |            "itemNumbers" : [
-                 |              {
-                 |                "itemNumber" : "1"
-                 |              }
-                 |            ]
-                 |          }
-                 |        ]
-                 |      }
-                 |    ]
-                 |  },
-                 |  "lastUpdated" : {
-                 |    "$$date" : {
-                 |      "$$numberLong" : "1662546803472"
-                 |    }
-                 |  },
-                 |  "createdAt" : {
-                 |    "$$date" : {
-                 |      "$$numberLong" : "1662546803472"
-                 |    }
-                 |  }
-                 |}
-                 |""".stripMargin)
-
-            val uA: UserAnswers = json.as[UserAnswers](UserAnswers.mongoFormat)
-
-            val converted = Consignment.transform(uA)
-
-            val expected = ConsignmentType01(
-              LocationOfGoods = LocationOfGoodsType01(
-                typeOfLocation = "B",
-                qualifierOfIdentification = "V",
-                authorisationNumber = None,
-                additionalIdentifier = None,
-                UNLocode = None,
-                CustomsOffice = Some(CustomsOfficeType01("GB000142")),
-                GNSS = None,
-                EconomicOperator = None,
-                Address = None,
-                PostcodeAddress = None,
-                ContactPerson = None
-              ),
-              Incident = Seq(
-                IncidentType01(
-                  sequenceNumber = "1",
-                  code = "4",
-                  text = "foo",
-                  Endorsement = Some(
-                    EndorsementType01(
-                      date = converted.Incident
-                        .flatMap(
-                          x =>
-                            x.Endorsement.map(
-                              y => y.date
-                            )
-                        )
-                        .head,
-                      authority = "bar",
-                      place = "foobar",
-                      country = "GB"
-                    )
-                  ),
-                  Location = LocationType01(
-                    qualifierOfIdentification = "U",
-                    UNLocode = Some("ADCAN"),
-                    country = "GB",
-                    GNSS = None,
-                    Address = None
-                  ),
-                  TransportEquipment = Seq(
-                    TransportEquipmentType01(
-                      sequenceNumber = "1",
-                      containerIdentificationNumber = Some("1"),
-                      numberOfSeals = Some(BigInt(1)),
-                      Seal = Seq(
-                        SealType05(sequenceNumber = "1", identifier = "1")
-                      ),
-                      GoodsReference = Seq(
-                        GoodsReferenceType01(
-                          sequenceNumber = "1",
-                          declarationGoodsItemNumber = BigInt(1)
-                        )
-                      )
-                    )
-                  ),
-                  Transhipment = None
-                )
-              )
-            )
-
-            converted shouldBe expected
-
-          }
-        }
-
-        "for coordinates" should {
-
-          "convert to API format" in {
-
-            val json: JsValue = Json.parse(s"""
-                 |{
-                 |  "_id" : "c8fdf8a7-1c77-4d25-991d-2a0881e05062",
-                 |  "mrn" : "$mrn",
-                 |  "eoriNumber" : "GB1234567",
-                 |  "data" : {
-                 |    "identification" : {
-                 |      "destinationOffice" : {
-                 |        "id" : "GB000051",
-                 |        "name" : "Felixstowe",
-                 |        "phoneNumber" : "+44 (0)1394 303023 / 24 / 26"
-                 |      },
-                 |      "identificationNumber" : "GB123456789000",
-                 |      "isSimplifiedProcedure" : "normal",
-                 |      "authorisationReferenceNumber" : "SSE1"
-                 |    },
-                 |    "locationOfGoods" : {
-                 |      "typeOfLocation" : "authorisedPlace",
-                 |      "qualifierOfIdentification" : "customsOffice",
-                 |      "qualifierOfIdentificationDetails" : {
-                 |        "customsOffice" : {
-                 |          "id" : "GB000142",
-                 |          "name" : "Belfast EPU",
-                 |          "phoneNumber" : "+44 (0)3000 523068"
-                 |        }
-                 |      }
-                 |    },
-                 |    "incidentFlag" : true,
-                 |    "incidents" : [
-                 |      {
-                 |        "incidentCountry" : {
-                 |          "code" : "GB",
-                 |          "description" : "United Kingdom"
-                 |        },
-                 |        "incidentCode" : "partiallyOrFullyUnloaded",
-                 |        "incidentText" : "foo",
-                 |        "addEndorsement" : true,
-                 |        "endorsement" : {
-                 |          "date" : "2023-01-01",
-                 |          "authority" : "bar",
-                 |          "country" : {
-                 |            "code" : "GB",
-                 |            "description" : "United Kingdom"
-                 |          },
-                 |          "location" : "foobar"
-                 |        },
-                 |        "qualifierOfIdentification" : "coordinates",
-                 |        "coordinates" : {
-                 |          "latitude" : "12345",
-                 |          "longitude" : "54321"
-                 |        },
-                 |        "equipments" : [
-                 |          {
-                 |            "containerIdentificationNumberYesNo" : true,
-                 |            "containerIdentificationNumber" : "1",
-                 |            "addSealsYesNo" : true,
-                 |            "seals" : [
-                 |              {
-                 |                "sealIdentificationNumber" : "1"
-                 |              }
-                 |            ],
-                 |            "addGoodsItemNumberYesNo" : true,
-                 |            "itemNumbers" : [
-                 |              {
-                 |                "itemNumber" : "1"
-                 |              }
-                 |            ]
-                 |          }
-                 |        ]
-                 |      }
-                 |    ]
-                 |  },
-                 |  "lastUpdated" : {
-                 |    "$$date" : {
-                 |      "$$numberLong" : "1662546803472"
-                 |    }
-                 |  },
-                 |  "createdAt" : {
-                 |    "$$date" : {
-                 |      "$$numberLong" : "1662546803472"
-                 |    }
-                 |  }
-                 |}
-                 |""".stripMargin)
-
-            val uA: UserAnswers = json.as[UserAnswers](UserAnswers.mongoFormat)
-
-            val converted = Consignment.transform(uA)
-
-            val expected = ConsignmentType01(
-              LocationOfGoods = LocationOfGoodsType01(
-                typeOfLocation = "B",
-                qualifierOfIdentification = "V",
-                authorisationNumber = None,
-                additionalIdentifier = None,
-                UNLocode = None,
-                CustomsOffice = Some(CustomsOfficeType01("GB000142")),
-                GNSS = None,
-                EconomicOperator = None,
-                Address = None,
-                PostcodeAddress = None,
-                ContactPerson = None
-              ),
-              Incident = Seq(
-                IncidentType01(
-                  sequenceNumber = "1",
-                  code = "4",
-                  text = "foo",
-                  Endorsement = Some(
-                    EndorsementType01(
-                      date = converted.Incident
-                        .flatMap(
-                          x =>
-                            x.Endorsement.map(
-                              y => y.date
-                            )
-                        )
-                        .head,
-                      authority = "bar",
-                      place = "foobar",
-                      country = "GB"
-                    )
-                  ),
-                  Location = LocationType01(
-                    qualifierOfIdentification = "W",
-                    UNLocode = None,
-                    country = "GB",
-                    GNSS = Some(
-                      GNSSType(
-                        latitude = "12345",
-                        longitude = "54321"
+                Incident = Seq(
+                  IncidentType01(
+                    sequenceNumber = "1",
+                    code = "4",
+                    text = "foo",
+                    Endorsement = Some(
+                      EndorsementType01(
+                        date = converted.Incident
+                          .flatMap(
+                            x =>
+                              x.Endorsement.map(
+                                y => y.date
+                              )
+                          )
+                          .head,
+                        authority = "bar",
+                        place = "foobar",
+                        country = "GB"
                       )
                     ),
-                    Address = None
-                  ),
-                  TransportEquipment = Seq(
-                    TransportEquipmentType01(
-                      sequenceNumber = "1",
-                      containerIdentificationNumber = Some("1"),
-                      numberOfSeals = Some(BigInt(1)),
-                      Seal = Seq(
-                        SealType05(sequenceNumber = "1", identifier = "1")
-                      ),
-                      GoodsReference = Seq(
-                        GoodsReferenceType01(
-                          sequenceNumber = "1",
-                          declarationGoodsItemNumber = BigInt(1)
+                    Location = LocationType01(
+                      qualifierOfIdentification = "U",
+                      UNLocode = Some("ADCAN"),
+                      country = "GB",
+                      GNSS = None,
+                      Address = None
+                    ),
+                    TransportEquipment = Seq(
+                      TransportEquipmentType01(
+                        sequenceNumber = "1",
+                        containerIdentificationNumber = Some("1"),
+                        numberOfSeals = Some(BigInt(1)),
+                        Seal = Seq(
+                          SealType05(sequenceNumber = "1", identifier = "1")
+                        ),
+                        GoodsReference = Seq(
+                          GoodsReferenceType01(
+                            sequenceNumber = "1",
+                            declarationGoodsItemNumber = BigInt(1)
+                          )
+                        )
+                      )
+                    ),
+                    Transhipment = Some(
+                      TranshipmentType01(
+                        containerIndicator = Number0,
+                        TransportMeans = TransportMeansType01(
+                          typeOfIdentification = "11",
+                          identificationNumber = "foo",
+                          nationality = "FR"
                         )
                       )
                     )
-                  ),
-                  Transhipment = None
+                  )
                 )
               )
-            )
 
-            converted shouldBe expected
+              converted shouldBe expected
 
+            }
           }
-        }
+      }
 
-        "for address" should {
+      "isSimplified is false" should {
+        "convert to API format" in {
 
-          "convert to API format" in {
+          val json: JsValue = Json.parse(s"""
+               |{
+               |  "_id" : "c8fdf8a7-1c77-4d25-991d-2a0881e05062",
+               |  "mrn" : "$mrn",
+               |  "eoriNumber" : "GB1234567",
+               |  "data" : {
+               |    "identification" : {
+               |      "destinationOffice" : {
+               |        "id" : "GB000051",
+               |        "name" : "Felixstowe",
+               |        "phoneNumber" : "+44 (0)1394 303023 / 24 / 26"
+               |      },
+               |      "identificationNumber" : "GB123456789000",
+               |      "isSimplifiedProcedure" : "normal",
+               |      "authorisationReferenceNumber" : "SSE1"
+               |    },
+               |    "locationOfGoods" : {
+               |      "typeOfLocation" : {
+               |        "type": "B",
+               |        "description": "Authorised place"
+               |      },
+               |      "qualifierOfIdentification" : {
+               |        "qualifier": "V",
+               |        "description": "Customs office identifier"
+               |      },
+               |      "qualifierOfIdentificationDetails" : {
+               |        "customsOffice" : {
+               |          "id" : "GB000142",
+               |          "name" : "Belfast EPU",
+               |          "phoneNumber" : "+44 (0)3000 523068"
+               |        }
+               |      }
+               |    },
+               |    "incidentFlag" : true,
+               |    "incidents" : [
+               |      {
+               |        "incidentCountry" : {
+               |          "code" : "GB",
+               |          "description" : "United Kingdom"
+               |        },
+               |        "incidentCode" : {
+               |          "code": "4",
+               |          "description": "Imminent danger necessitates immediate partial or total unloading of the sealed means of transport."
+               |        },
+               |        "incidentText" : "foo",
+               |        "addEndorsement" : true,
+               |        "endorsement" : {
+               |          "date" : "2023-01-01",
+               |          "authority" : "bar",
+               |          "country" : {
+               |            "code" : "GB",
+               |            "description" : "United Kingdom"
+               |          },
+               |          "location" : "foobar"
+               |        },
+               |        "qualifierOfIdentification" : {
+               |          "qualifier": "U",
+               |          "description": "UN/LOCODE"
+               |        },
+               |        "unLocode" : "ADCAN",
+               |        "equipments" : [
+               |          {
+               |            "containerIdentificationNumberYesNo" : true,
+               |            "containerIdentificationNumber" : "1",
+               |            "addSealsYesNo" : true,
+               |            "seals" : [
+               |              {
+               |                "sealIdentificationNumber" : "1"
+               |              }
+               |            ],
+               |            "addGoodsItemNumberYesNo" : true,
+               |            "itemNumbers" : [
+               |              {
+               |                "itemNumber" : "1"
+               |              }
+               |            ]
+               |          }
+               |        ]
+               |      }
+               |    ]
+               |  },
+               |  "lastUpdated" : {
+               |    "$$date" : {
+               |      "$$numberLong" : "1662546803472"
+               |    }
+               |  },
+               |  "createdAt" : {
+               |    "$$date" : {
+               |      "$$numberLong" : "1662546803472"
+               |    }
+               |  }
+               |}
+               |""".stripMargin)
 
-            val json: JsValue = Json.parse(s"""
-                 |{
-                 |  "_id" : "c8fdf8a7-1c77-4d25-991d-2a0881e05062",
-                 |  "mrn" : "$mrn",
-                 |  "eoriNumber" : "GB1234567",
-                 |  "data" : {
-                 |    "identification" : {
-                 |      "destinationOffice" : {
-                 |        "id" : "GB000051",
-                 |        "name" : "Felixstowe",
-                 |        "phoneNumber" : "+44 (0)1394 303023 / 24 / 26"
-                 |      },
-                 |      "identificationNumber" : "GB123456789000",
-                 |      "isSimplifiedProcedure" : "normal",
-                 |      "authorisationReferenceNumber" : "SSE1"
-                 |    },
-                 |    "locationOfGoods" : {
-                 |      "typeOfLocation" : "authorisedPlace",
-                 |      "qualifierOfIdentification" : "customsOffice",
-                 |      "qualifierOfIdentificationDetails" : {
-                 |        "customsOffice" : {
-                 |          "id" : "GB000142",
-                 |          "name" : "Belfast EPU",
-                 |          "phoneNumber" : "+44 (0)3000 523068"
-                 |        }
-                 |      }
-                 |    },
-                 |    "incidentFlag" : true,
-                 |    "incidents" : [
-                 |      {
-                 |        "incidentCountry" : {
-                 |          "code" : "GB",
-                 |          "description" : "United Kingdom"
-                 |        },
-                 |        "incidentCode" : "partiallyOrFullyUnloaded",
-                 |        "incidentText" : "foo",
-                 |        "addEndorsement" : true,
-                 |        "endorsement" : {
-                 |          "date" : "2023-01-01",
-                 |          "authority" : "bar",
-                 |          "country" : {
-                 |            "code" : "GB",
-                 |            "description" : "United Kingdom"
-                 |          },
-                 |          "location" : "foobar"
-                 |        },
-                 |        "qualifierOfIdentification" : "address",
-                 |        "address" : {
-                 |          "numberAndStreet" : "24 Poker Avenue",
-                 |          "city" : "Foo",
-                 |          "postalCode" : "NEX XXX"
-                 |        },
-                 |        "equipments" : [
-                 |          {
-                 |            "containerIdentificationNumberYesNo" : true,
-                 |            "containerIdentificationNumber" : "1",
-                 |            "addSealsYesNo" : true,
-                 |            "seals" : [
-                 |              {
-                 |                "sealIdentificationNumber" : "1"
-                 |              }
-                 |            ],
-                 |            "addGoodsItemNumberYesNo" : true,
-                 |            "itemNumbers" : [
-                 |              {
-                 |                "itemNumber" : "1"
-                 |              }
-                 |            ]
-                 |          }
-                 |        ]
-                 |      }
-                 |    ]
-                 |  },
-                 |  "lastUpdated" : {
-                 |    "$$date" : {
-                 |      "$$numberLong" : "1662546803472"
-                 |    }
-                 |  },
-                 |  "createdAt" : {
-                 |    "$$date" : {
-                 |      "$$numberLong" : "1662546803472"
-                 |    }
-                 |  }
-                 |}
-                 |""".stripMargin)
+          val uA: UserAnswers = json.as[UserAnswers](UserAnswers.mongoFormat)
 
-            val uA: UserAnswers = json.as[UserAnswers](UserAnswers.mongoFormat)
+          val converted = Consignment.transform(uA)
 
-            val converted = Consignment.transform(uA)
-
-            val expected = ConsignmentType01(
-              LocationOfGoods = LocationOfGoodsType01(
-                typeOfLocation = "B",
-                qualifierOfIdentification = "V",
-                authorisationNumber = None,
-                additionalIdentifier = None,
-                UNLocode = None,
-                CustomsOffice = Some(CustomsOfficeType01("GB000142")),
-                GNSS = None,
-                EconomicOperator = None,
-                Address = None,
-                PostcodeAddress = None,
-                ContactPerson = None
-              ),
-              Incident = Seq(
-                IncidentType01(
-                  sequenceNumber = "1",
-                  code = "4",
-                  text = "foo",
-                  Endorsement = Some(
-                    EndorsementType01(
-                      date = converted.Incident
-                        .flatMap(
-                          x =>
-                            x.Endorsement.map(
-                              y => y.date
-                            )
-                        )
-                        .head,
-                      authority = "bar",
-                      place = "foobar",
-                      country = "GB"
-                    )
-                  ),
-                  Location = LocationType01(
-                    qualifierOfIdentification = "Z",
-                    UNLocode = None,
-                    country = "GB",
-                    GNSS = None,
-                    Address = Some(
-                      AddressType01(
-                        streetAndNumber = "24 Poker Avenue",
-                        postcode = Some("NEX XXX"),
-                        city = "Foo"
+          val expected = ConsignmentType01(
+            LocationOfGoods = LocationOfGoodsType01(
+              typeOfLocation = "B",
+              qualifierOfIdentification = "V",
+              authorisationNumber = None,
+              additionalIdentifier = None,
+              UNLocode = None,
+              CustomsOffice = Some(CustomsOfficeType01("GB000142")),
+              GNSS = None,
+              EconomicOperator = None,
+              Address = None,
+              PostcodeAddress = None,
+              ContactPerson = None
+            ),
+            Incident = Seq(
+              IncidentType01(
+                sequenceNumber = "1",
+                code = "4",
+                text = "foo",
+                Endorsement = Some(
+                  EndorsementType01(
+                    date = converted.Incident
+                      .flatMap(
+                        x =>
+                          x.Endorsement.map(
+                            y => y.date
+                          )
+                      )
+                      .head,
+                    authority = "bar",
+                    place = "foobar",
+                    country = "GB"
+                  )
+                ),
+                Location = LocationType01(
+                  qualifierOfIdentification = "U",
+                  UNLocode = Some("ADCAN"),
+                  country = "GB",
+                  GNSS = None,
+                  Address = None
+                ),
+                TransportEquipment = Seq(
+                  TransportEquipmentType01(
+                    sequenceNumber = "1",
+                    containerIdentificationNumber = Some("1"),
+                    numberOfSeals = Some(BigInt(1)),
+                    Seal = Seq(
+                      SealType05(sequenceNumber = "1", identifier = "1")
+                    ),
+                    GoodsReference = Seq(
+                      GoodsReferenceType01(
+                        sequenceNumber = "1",
+                        declarationGoodsItemNumber = BigInt(1)
                       )
                     )
-                  ),
-                  TransportEquipment = Seq(
-                    TransportEquipmentType01(
-                      sequenceNumber = "1",
-                      containerIdentificationNumber = Some("1"),
-                      numberOfSeals = Some(BigInt(1)),
-                      Seal = Seq(
-                        SealType05(sequenceNumber = "1", identifier = "1")
-                      ),
-                      GoodsReference = Seq(
-                        GoodsReferenceType01(
-                          sequenceNumber = "1",
-                          declarationGoodsItemNumber = BigInt(1)
-                        )
-                      )
-                    )
-                  ),
-                  Transhipment = None
-                )
+                  )
+                ),
+                Transhipment = None
               )
             )
+          )
 
-            converted shouldBe expected
+          converted shouldBe expected
 
-          }
         }
       }
     }
