@@ -22,11 +22,13 @@ import generated.{CC007CType, MESSAGESequence, PhaseIDtype}
 import models.UserAnswers
 import play.api.Logging
 import play.api.http.HeaderNames
+import play.api.http.Status._
 import play.api.mvc.Result
 import play.api.mvc.Results.{BadRequest, InternalServerError}
 import scalaxb.DataRecord
 import scalaxb.`package`.toXML
-import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier, HttpClient, HttpErrorFunctions, HttpResponse}
+import uk.gov.hmrc.http.HttpReads.Implicits._
+import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpErrorFunctions, HttpResponse}
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
@@ -69,16 +71,17 @@ class ApiConnector @Inject() (httpClient: HttpClient, appConfig: AppConfig)(impl
       .POSTString[HttpResponse](declarationUrl, payload, requestHeaders)
       .map {
         response =>
-          logger.debug(s"ApiConnector:submitDeclaration: success: ${response.status}-${response.body}")
-          Right(response)
-      }
-      .recover {
-        case httpEx: BadRequestException =>
-          logger.info(s"ApiConnector:submitDeclaration: bad request: ${httpEx.responseCode}-${httpEx.getMessage}")
-          Left(BadRequest("ApiConnector:submitDeclaration: bad request"))
-        case e: Exception =>
-          logger.error(s"ApiConnector:submitDeclaration: something went wrong: ${e.getMessage}")
-          Left(InternalServerError("ApiConnector:submitDeclaration: something went wrong"))
+          response.status match {
+            case x if is2xx(x) =>
+              logger.debug(s"ApiConnector:submitDeclaration: success: ${response.status}-${response.body}")
+              Right(response)
+            case BAD_REQUEST =>
+              logger.info(s"ApiConnector:submitDeclaration: bad request: ${response.body}")
+              Left(BadRequest("ApiConnector:submitDeclaration: bad request"))
+            case _ =>
+              logger.error(s"ApiConnector:submitDeclaration: something went wrong: ${response.body}")
+              Left(InternalServerError("ApiConnector:submitDeclaration: something went wrong"))
+          }
       }
   }
 }

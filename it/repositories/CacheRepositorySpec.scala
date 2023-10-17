@@ -55,7 +55,6 @@ class CacheRepositorySpec extends CacheRepositorySpecBase {
   "get" must {
 
     "return UserAnswers when given an LocalReferenceNumber and EoriNumber" in {
-      findOne(userAnswers3.mrn, userAnswers3.eoriNumber) should not be defined
 
       val result = repository.get(userAnswers1.mrn, userAnswers1.eoriNumber).futureValue
 
@@ -65,7 +64,6 @@ class CacheRepositorySpec extends CacheRepositorySpecBase {
     }
 
     "return None when no UserAnswers match LocalReferenceNumber" in {
-      findOne(userAnswers3.mrn, userAnswers3.eoriNumber) should not be defined
 
       val result = repository.get(userAnswers3.mrn, userAnswers1.eoriNumber).futureValue
 
@@ -83,7 +81,6 @@ class CacheRepositorySpec extends CacheRepositorySpecBase {
   "set" must {
 
     "create new document when given valid UserAnswers" in {
-      findOne(userAnswers3.mrn, userAnswers3.eoriNumber) should not be defined
 
       findOne(userAnswers3.mrn, userAnswers3.eoriNumber) should not be defined
 
