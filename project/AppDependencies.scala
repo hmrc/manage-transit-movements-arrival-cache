@@ -1,11 +1,8 @@
-import play.core.PlayVersion
-import play.sbt.PlayImport._
-import sbt.Keys.libraryDependencies
-import sbt._
+import sbt.*
 
 object AppDependencies {
 
-  private val bootstrapVersion = "7.19.0"
+  private val bootstrapVersion = "7.22.0"
   private val hmrcMongoVersion = "1.3.0"
 
   val compile: Seq[ModuleID] = Seq(
