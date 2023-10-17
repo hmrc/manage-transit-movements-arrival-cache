@@ -53,23 +53,6 @@ package object submission {
       }
   }
 
-  implicit class RichOptionalJsArray(arr: Option[JsArray]) {
-
-    def readValuesAs[T](implicit reads: Int => Reads[T]): Seq[T] =
-      arr.mapWithSequenceNumber {
-        case (value, index) => value.as[T](reads(index))
-      }
-
-    def mapWithSequenceNumber[T](f: (JsValue, Int) => T): Seq[T] =
-      arr.map(_.mapWithSequenceNumber(f)).getOrElse(Nil)
-  }
-
-  implicit class RichOptionalJsObject(obj: Option[JsObject]) {
-
-    def readValueAs[T](implicit reads: Reads[T]): Option[T] =
-      obj.map(_.as[T])
-  }
-
   implicit def boolToFlag(x: Option[Boolean]): Option[Flag] =
     x.map(boolToFlag)
 
