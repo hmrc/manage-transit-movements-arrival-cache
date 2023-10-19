@@ -36,11 +36,11 @@ class CacheRepository @Inject() (
   mongoComponent: MongoComponent,
   appConfig: AppConfig,
   clock: Clock
-)(implicit ec: ExecutionContext)
+)(implicit ec: ExecutionContext, sensitiveFormats: SensitiveFormats)
     extends PlayMongoRepository[UserAnswers](
       mongoComponent = mongoComponent,
       collectionName = CacheRepository.collectionName,
-      domainFormat = UserAnswers.mongoFormat,
+      domainFormat = UserAnswers.sensitiveFormat,
       indexes = CacheRepository.indexes(appConfig)
     ) {
 
@@ -66,8 +66,7 @@ class CacheRepository @Inject() (
     val updates = Updates.combine(
       Updates.setOnInsert("mrn", data.mrn),
       Updates.setOnInsert("eoriNumber", data.eoriNumber),
-      Updates.set("data", Codecs.toBson(data.data)),
-      Updates.set("tasks", Codecs.toBson(data.tasks)),
+      Updates.set("data", Codecs.toBson(data.data)(sensitiveFormats.jsObjectWrites)),
       Updates.setOnInsert("createdAt", now),
       Updates.set("lastUpdated", now),
       Updates.setOnInsert("_id", Codecs.toBson(UUID.randomUUID()))

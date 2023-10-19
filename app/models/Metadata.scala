@@ -16,18 +16,32 @@
 
 package models
 
-import play.api.libs.json.{Format, JsObject, Json}
+import play.api.libs.functional.syntax._
+import play.api.libs.json._
 
 case class Metadata(
   mrn: String,
   eoriNumber: String,
-  data: JsObject,
-  tasks: Option[Map[String, Status.Value]] = Some(Map())
+  data: JsObject = Json.obj()
 )
 
 object Metadata {
 
-  def apply(mrn: String, eoriNumber: String): Metadata = Metadata(mrn, eoriNumber, Json.obj())
+  implicit val nonSensitiveReads: Reads[Metadata] = Json.reads[Metadata]
 
-  implicit val format: Format[Metadata] = Json.format[Metadata]
+  implicit val nonSensitiveWrites: Writes[Metadata] = Json.writes[Metadata]
+
+  def sensitiveReads(implicit sensitiveFormats: SensitiveFormats): Reads[Metadata] =
+    (
+      (__ \ "mrn").read[String] and
+        (__ \ "eoriNumber").read[String] and
+        (__ \ "data").read[JsObject](sensitiveFormats.jsObjectReads)
+    )(Metadata.apply _)
+
+  def sensitiveWrites(implicit sensitiveFormats: SensitiveFormats): Writes[Metadata] =
+    (
+      (__ \ "mrn").write[String] and
+        (__ \ "eoriNumber").write[String] and
+        (__ \ "data").write[JsObject](sensitiveFormats.jsObjectWrites)
+    )(unlift(Metadata.unapply))
 }

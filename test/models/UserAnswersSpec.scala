@@ -16,27 +16,20 @@
 
 package models
 
-import base.SpecBase
-import play.api.libs.json.{JsSuccess, JsValue, Json}
+import base.{AppWithDefaultMockFixtures, SpecBase}
+import play.api.libs.json.{Format, JsSuccess, JsValue, Json}
+import play.api.test.Helpers.running
 
 import java.time.{Instant, LocalDateTime}
 import java.util.UUID
 
-class UserAnswersSpec extends SpecBase {
+class UserAnswersSpec extends SpecBase with AppWithDefaultMockFixtures {
 
   private val userAnswers = UserAnswers(
     metadata = Metadata(
       mrn = mrn,
       eoriNumber = eoriNumber,
-      data = Json.obj(),
-      tasks = Some(
-        Map(
-          "task1" -> Status.Completed,
-          "task2" -> Status.InProgress,
-          "task3" -> Status.NotStarted,
-          "task4" -> Status.CannotStartYet
-        )
-      )
+      data = Json.obj()
     ),
     createdAt = Instant.ofEpochMilli(1662393524188L),
     lastUpdated = Instant.ofEpochMilli(1662546803472L),
@@ -49,18 +42,12 @@ class UserAnswersSpec extends SpecBase {
 
       val json: JsValue = Json.parse(s"""
           |{
-          |    "_id" : "$uuid",
-          |    "mrn" : "$mrn",
-          |    "eoriNumber" : "$eoriNumber",
-          |    "data" : {},
-          |    "tasks" : {
-          |        "task1" : "completed",
-          |        "task2" : "in-progress",
-          |        "task3" : "not-started",
-          |        "task4" : "cannot-start-yet"
-          |    },
-          |    "createdAt" : "2022-09-05T15:58:44.188Z",
-          |    "lastUpdated" : "2022-09-07T10:33:23.472Z"
+          |  "_id" : "$uuid",
+          |  "mrn" : "$mrn",
+          |  "eoriNumber" : "$eoriNumber",
+          |  "data" : {},
+          |  "createdAt" : "2022-09-05T15:58:44.188Z",
+          |  "lastUpdated" : "2022-09-07T10:33:23.472Z"
           |}
           |""".stripMargin)
 
@@ -80,43 +67,87 @@ class UserAnswersSpec extends SpecBase {
       }
     }
 
-    "being passed between backend and mongo" should {
+    "being passed between backend and mongo" when {
 
-      val json: JsValue = Json.parse(s"""
-          |{
-          |    "_id" : "$uuid",
-          |    "mrn" : "$mrn",
-          |    "eoriNumber" : "$eoriNumber",
-          |    "data" : {},
-          |    "tasks" : {
-          |        "task1" : "completed",
-          |        "task2" : "in-progress",
-          |        "task3" : "not-started",
-          |        "task4" : "cannot-start-yet"
-          |    },
-          |    "createdAt" : {
-          |        "$$date" : {
-          |            "$$numberLong" : "1662393524188"
-          |        }
-          |    },
-          |    "lastUpdated" : {
-          |        "$$date" : {
-          |            "$$numberLong" : "1662546803472"
-          |        }
-          |    }
-          |}
-          |""".stripMargin)
+      "encryption enabled" must {
+        val app = guiceApplicationBuilder()
+          .configure("encryption.enabled" -> true)
+          .build()
 
-      "read correctly" in {
-        val result = json.as[UserAnswers](UserAnswers.mongoFormat)
-        result shouldBe userAnswers
+        running(app) {
+          val sensitiveFormats                     = app.injector.instanceOf[SensitiveFormats]
+          implicit val format: Format[UserAnswers] = UserAnswers.sensitiveFormat(sensitiveFormats)
+
+          val json: JsValue = Json.parse(s"""
+               |{
+               |  "_id" : "$uuid",
+               |  "mrn" : "$mrn",
+               |  "eoriNumber" : "$eoriNumber",
+               |  "data" : "T+FWrvLPJMKyRZ1aoW8rdZmETyL89CdpWxaog0joG6B/hxCF",
+               |  "createdAt" : {
+               |    "$$date" : {
+               |      "$$numberLong" : "1662393524188"
+               |    }
+               |  },
+               |  "lastUpdated" : {
+               |    "$$date" : {
+               |      "$$numberLong" : "1662546803472"
+               |    }
+               |  }
+               |}
+               |""".stripMargin)
+
+          "read correctly" in {
+            val result = json.as[UserAnswers]
+            result shouldBe userAnswers
+          }
+
+          "write and read correctly" in {
+            val result = Json.toJson(userAnswers).as[UserAnswers]
+            result shouldBe userAnswers
+          }
+        }
       }
 
-      "write correctly" in {
-        val result = Json.toJson(userAnswers)(UserAnswers.mongoFormat)
-        result shouldBe json
+      "encryption disabled" must {
+        val app = guiceApplicationBuilder()
+          .configure("encryption.enabled" -> false)
+          .build()
+
+        running(app) {
+          val sensitiveFormats                     = app.injector.instanceOf[SensitiveFormats]
+          implicit val format: Format[UserAnswers] = UserAnswers.sensitiveFormat(sensitiveFormats)
+
+          val json: JsValue = Json.parse(s"""
+               |{
+               |  "_id" : "$uuid",
+               |  "mrn" : "$mrn",
+               |  "eoriNumber" : "$eoriNumber",
+               |  "data" : {},
+               |  "createdAt" : {
+               |    "$$date" : {
+               |      "$$numberLong" : "1662393524188"
+               |    }
+               |  },
+               |  "lastUpdated" : {
+               |    "$$date" : {
+               |      "$$numberLong" : "1662546803472"
+               |    }
+               |  }
+               |}
+               |""".stripMargin)
+
+          "read correctly" in {
+            val result = json.as[UserAnswers]
+            result shouldBe userAnswers
+          }
+
+          "write correctly" in {
+            val result = Json.toJson(userAnswers)
+            result shouldBe json
+          }
+        }
       }
     }
   }
-
 }
