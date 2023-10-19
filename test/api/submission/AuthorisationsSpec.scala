@@ -16,12 +16,12 @@
 
 package api.submission
 
-import base.SpecBase
+import base.{AppWithDefaultMockFixtures, SpecBase}
 import generated._
 import models.UserAnswers
 import play.api.libs.json.{JsValue, Json}
 
-class AuthorisationsSpec extends SpecBase {
+class AuthorisationsSpec extends SpecBase with AppWithDefaultMockFixtures {
 
   "Authorisations" when {
 
@@ -98,20 +98,12 @@ class AuthorisationsSpec extends SpecBase {
              |      }
              |    ]
              |  },
-             |  "lastUpdated" : {
-             |    "$$date" : {
-             |      "$$numberLong" : "1662546803472"
-             |    }
-             |  },
-             |  "createdAt" : {
-             |    "$$date" : {
-             |      "$$numberLong" : "1662546803472"
-             |    }
-             |  }
+             |  "createdAt" : "2022-09-05T15:58:44.188Z",
+             |  "lastUpdated" : "2022-09-07T10:33:23.472Z"
              |}
              |""".stripMargin)
 
-        val uA: UserAnswers = json.as[UserAnswers](UserAnswers.mongoFormat)
+        val uA: UserAnswers = json.as[UserAnswers]
 
         val converted = Authorisations.transform(uA)
 
@@ -197,20 +189,12 @@ class AuthorisationsSpec extends SpecBase {
              |      }
              |    ]
              |  },
-             |  "lastUpdated" : {
-             |    "$$date" : {
-             |      "$$numberLong" : "1662546803472"
-             |    }
-             |  },
-             |  "createdAt" : {
-             |    "$$date" : {
-             |      "$$numberLong" : "1662546803472"
-             |    }
-             |  }
+             |  "createdAt" : "2022-09-05T15:58:44.188Z",
+             |  "lastUpdated" : "2022-09-07T10:33:23.472Z"
              |}
              |""".stripMargin)
 
-        val uA: UserAnswers = json.as[UserAnswers](UserAnswers.mongoFormat)
+        val uA: UserAnswers = json.as[UserAnswers]
 
         val converted = Authorisations.transform(uA)
 
@@ -295,20 +279,12 @@ class AuthorisationsSpec extends SpecBase {
              |      }
              |    ]
              |  },
-             |  "lastUpdated" : {
-             |    "$$date" : {
-             |      "$$numberLong" : "1662546803472"
-             |    }
-             |  },
-             |  "createdAt" : {
-             |    "$$date" : {
-             |      "$$numberLong" : "1662546803472"
-             |    }
-             |  }
+             |  "createdAt" : "2022-09-05T15:58:44.188Z",
+             |  "lastUpdated" : "2022-09-07T10:33:23.472Z"
              |}
              |""".stripMargin)
 
-        val uA: UserAnswers = json.as[UserAnswers](UserAnswers.mongoFormat)
+        val uA: UserAnswers = json.as[UserAnswers]
 
         val converted = Authorisations.transform(uA)
 
