@@ -16,121 +16,105 @@
 
 package connectors
 
-import base.AppWithDefaultMockFixtures
+import base.{AppWithDefaultMockFixtures, SpecBase}
 import com.github.tomakehurst.wiremock.client.WireMock._
 import helper.WireMockServerHandler
 import models.UserAnswers
-import org.scalatest.freespec.AnyFreeSpec
-import org.scalatest.matchers.must.Matchers
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.Results.{BadRequest, InternalServerError}
 import play.api.test.Helpers._
-import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
+import uk.gov.hmrc.http.HttpResponse
 
-class ApiConnectorSpec extends AnyFreeSpec with AppWithDefaultMockFixtures with WireMockServerHandler with Matchers {
+class ApiConnectorSpec extends SpecBase with AppWithDefaultMockFixtures with WireMockServerHandler {
 
-  val mrn        = "mrn"
-  val eoriNumber = "eori"
-  val uuid       = "2e8ede47-dbfb-44ea-a1e3-6c57b1fe6fe2"
+  private val json: JsValue = Json.parse(s"""
+    |{
+    |  "_id" : "$uuid",
+    |  "mrn" : "$mrn",
+    |  "eoriNumber" : "$eoriNumber",
+    |  "data" : {
+    |    "identification" : {
+    |      "destinationOffice" : {
+    |        "id" : "GB000142",
+    |        "name" : "Belfast EPU",
+    |        "phoneNumber" : "+44 (0)3000 523068"
+    |      },
+    |      "identificationNumber" : "GB123456789000",
+    |      "isSimplifiedProcedure" : "normal"
+    |    },
+    |    "locationOfGoods" : {
+    |      "typeOfLocation" : {
+    |        "type": "B",
+    |        "description": "Authorised place"
+    |      },
+    |      "qualifierOfIdentification" : {
+    |        "qualifier": "V",
+    |        "description": "Customs office identifier"
+    |      },
+    |      "qualifierOfIdentificationDetails" : {
+    |        "customsOffice" : {
+    |          "id" : "GB000142",
+    |          "name" : "Belfast EPU",
+    |          "phoneNumber" : "+44 (0)3000 523068"
+    |        }
+    |      }
+    |    },
+    |    "incidentFlag" : true,
+    |    "incidents" : [
+    |      {
+    |        "incidentCountry" : {
+    |          "code" : "FR",
+    |          "description" : "France"
+    |        },
+    |        "incidentCode" : {
+    |          "code": "4",
+    |          "description": "Imminent danger necessitates immediate partial or total unloading of the sealed means of transport."
+    |        },
+    |        "incidentText" : "foo",
+    |        "addEndorsement" : true,
+    |        "endorsement" : {
+    |          "date" : "2022-01-01",
+    |          "authority" : "bar",
+    |          "country" : {
+    |            "code" : "FR",
+    |            "description" : "France"
+    |          },
+    |          "location" : "foobar"
+    |        },
+    |        "qualifierOfIdentification" : {
+    |          "qualifier": "U",
+    |          "description": "UN/LOCODE"
+    |        },
+    |        "unLocode" : "DEAAL",
+    |        "equipments" : [
+    |          {
+    |            "containerIdentificationNumberYesNo" : true,
+    |            "containerIdentificationNumber" : "1",
+    |            "addSealsYesNo" : true,
+    |            "seals" : [
+    |              {
+    |                "sealIdentificationNumber" : "1"
+    |              }
+    |            ],
+    |            "addGoodsItemNumberYesNo" : true,
+    |            "itemNumbers" : [
+    |              {
+    |                "itemNumber" : "1"
+    |              }
+    |            ]
+    |          }
+    |        ]
+    |      }
+    |    ]
+    |  },
+    |  "tasks" : {},
+    |  "createdAt" : "2022-09-05T15:58:44.188Z",
+    |  "lastUpdated" : "2022-09-07T10:33:23.472Z"
+    |}
+    |""".stripMargin)
 
-  implicit val hc: HeaderCarrier = HeaderCarrier()
-
-  val json: JsValue = Json.parse(s"""
-                                    |{
-                                    |  "_id" : "$uuid",
-                                    |  "mrn" : "$mrn",
-                                    |  "eoriNumber" : "$eoriNumber",
-                                    |  "data" : {
-                                    |    "identification" : {
-                                    |      "destinationOffice" : {
-                                    |        "id" : "GB000142",
-                                    |        "name" : "Belfast EPU",
-                                    |        "phoneNumber" : "+44 (0)3000 523068"
-                                    |      },
-                                    |      "identificationNumber" : "GB123456789000",
-                                    |      "isSimplifiedProcedure" : "normal"
-                                    |    },
-                                    |    "locationOfGoods" : {
-                                    |      "typeOfLocation" : {
-                                    |        "type": "B",
-                                    |        "description": "Authorised place"
-                                    |      },
-                                    |      "qualifierOfIdentification" : {
-                                    |        "qualifier": "V",
-                                    |        "description": "Customs office identifier"
-                                    |      },
-                                    |      "qualifierOfIdentificationDetails" : {
-                                    |        "customsOffice" : {
-                                    |          "id" : "GB000142",
-                                    |          "name" : "Belfast EPU",
-                                    |          "phoneNumber" : "+44 (0)3000 523068"
-                                    |        }
-                                    |      }
-                                    |    },
-                                    |    "incidentFlag" : true,
-                                    |    "incidents" : [
-                                    |      {
-                                    |        "incidentCountry" : {
-                                    |          "code" : "FR",
-                                    |          "description" : "France"
-                                    |        },
-                                    |        "incidentCode" : {
-                                    |          "code": "4",
-                                    |          "description": "Imminent danger necessitates immediate partial or total unloading of the sealed means of transport."
-                                    |        },
-                                    |        "incidentText" : "foo",
-                                    |        "addEndorsement" : true,
-                                    |        "endorsement" : {
-                                    |          "date" : "2022-01-01",
-                                    |          "authority" : "bar",
-                                    |          "country" : {
-                                    |            "code" : "FR",
-                                    |            "description" : "France"
-                                    |          },
-                                    |          "location" : "foobar"
-                                    |        },
-                                    |        "qualifierOfIdentification" : {
-                                    |          "qualifier": "U",
-                                    |          "description": "UN/LOCODE"
-                                    |        },
-                                    |        "unLocode" : "DEAAL",
-                                    |        "equipments" : [
-                                    |          {
-                                    |            "containerIdentificationNumberYesNo" : true,
-                                    |            "containerIdentificationNumber" : "1",
-                                    |            "addSealsYesNo" : true,
-                                    |            "seals" : [
-                                    |              {
-                                    |                "sealIdentificationNumber" : "1"
-                                    |              }
-                                    |            ],
-                                    |            "addGoodsItemNumberYesNo" : true,
-                                    |            "itemNumbers" : [
-                                    |              {
-                                    |                "itemNumber" : "1"
-                                    |              }
-                                    |            ]
-                                    |          }
-                                    |        ]
-                                    |      }
-                                    |    ]
-                                    |  },
-                                    |  "tasks" : {},
-                                    |  "createdAt" : {
-                                    |    "$$date" : {
-                                    |      "$$numberLong" : "1662393524188"
-                                    |    }
-                                    |  },
-                                    |  "lastUpdated" : {
-                                    |    "$$date" : {
-                                    |      "$$numberLong" : "1662546803472"
-                                    |    }
-                                    |  }
-                                    |}
-                                    |""".stripMargin)
-
-  val uA: UserAnswers = json.as[UserAnswers](UserAnswers.mongoFormat)
+  private lazy val uA: UserAnswers = json.as[UserAnswers]
 
   override def guiceApplicationBuilder(): GuiceApplicationBuilder =
     super
@@ -139,9 +123,9 @@ class ApiConnectorSpec extends AnyFreeSpec with AppWithDefaultMockFixtures with 
 
   private lazy val connector: ApiConnector = app.injector.instanceOf[ApiConnector]
 
-  val arrivalId: String = "someid"
+  private val arrivalId: String = "someid"
 
-  val expected: String = Json
+  private val expected: String = Json
     .obj(
       "_links" -> Json.obj(
         "self" -> Json.obj(
@@ -155,41 +139,32 @@ class ApiConnectorSpec extends AnyFreeSpec with AppWithDefaultMockFixtures with 
     .toString()
     .stripMargin
 
-  val uri = "/movements/arrivals"
+  private val uri = "/movements/arrivals"
 
-  "ApiConnector" - {
+  "ApiConnector" when {
 
-    "submitDeclaration is called" - {
+    "submitDeclaration is called" when {
 
-      "for success" in {
-
+      "success" in {
         server.stubFor(post(urlEqualTo(uri)).willReturn(okJson(expected)))
 
         val res = await(connector.submitDeclaration(uA))
-        res.toString mustBe Right(HttpResponse(OK, expected)).toString
-
+        res.toString shouldBe Right(HttpResponse(OK, expected)).toString
       }
 
-      "for bad request" in {
-
+      "bad request" in {
         server.stubFor(post(urlEqualTo(uri)).willReturn(badRequest()))
 
         val res = await(connector.submitDeclaration(uA))
-        res mustBe Left(BadRequest("ApiConnector:submitDeclaration: bad request"))
-
+        res shouldBe Left(BadRequest("ApiConnector:submitDeclaration: bad request"))
       }
 
-      "for internal server error" in {
-
+      "internal server error" in {
         server.stubFor(post(urlEqualTo(uri)).willReturn(serverError()))
 
         val res = await(connector.submitDeclaration(uA))
-        res mustBe Left(InternalServerError("ApiConnector:submitDeclaration: something went wrong"))
-
+        res shouldBe Left(InternalServerError("ApiConnector:submitDeclaration: something went wrong"))
       }
-
     }
-
   }
-
 }

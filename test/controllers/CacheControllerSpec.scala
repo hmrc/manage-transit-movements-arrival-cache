@@ -16,7 +16,7 @@
 
 package controllers
 
-import base.SpecBase
+import base.{AppWithDefaultMockFixtures, SpecBase}
 import models.{Metadata, UserAnswers, UserAnswersSummary}
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
@@ -29,7 +29,7 @@ import java.time.Instant
 import java.util.UUID
 import scala.concurrent.Future
 
-class CacheControllerSpec extends SpecBase {
+class CacheControllerSpec extends SpecBase with AppWithDefaultMockFixtures {
 
   "get" should {
 

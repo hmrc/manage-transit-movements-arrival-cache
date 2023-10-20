@@ -14,20 +14,21 @@
  * limitations under the License.
  */
 
-package models
+package config
 
-import play.api.libs.json.{Format, Json}
+import com.google.inject.{AbstractModule, Provides, Singleton}
+import models.SensitiveFormats
+import uk.gov.hmrc.crypto.{Decrypter, Encrypter, SymmetricCryptoFactory}
 
-sealed trait Status
+class SensitiveModule extends AbstractModule {
 
-object Status extends Enumeration {
+  override def configure(): Unit = super.configure()
 
-  type Status = Value
+  @Provides
+  @Singleton
+  def provideSensitiveFormats(appConfig: AppConfig): SensitiveFormats = {
+    implicit val crypto: Encrypter with Decrypter = SymmetricCryptoFactory.aesGcmCrypto(appConfig.encryptionKey)
+    new SensitiveFormats(appConfig.encryptionEnabled)
+  }
 
-  val Completed: Status      = Value("completed")
-  val InProgress: Status     = Value("in-progress")
-  val NotStarted: Status     = Value("not-started")
-  val CannotStartYet: Status = Value("cannot-start-yet")
-
-  implicit val format: Format[Status] = Json.formatEnum(this)
 }

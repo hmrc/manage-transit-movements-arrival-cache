@@ -18,7 +18,7 @@ package repositories
 
 import itbase.CacheRepositorySpecBase
 import models.Sort.{SortByCreatedAtAsc, SortByCreatedAtDesc, SortByMRNAsc, SortByMRNDesc}
-import models.{Metadata, Status, UserAnswers, UserAnswersSummary}
+import models.{Metadata, UserAnswers, UserAnswersSummary}
 import org.mongodb.scala.Document
 import org.mongodb.scala.bson.{BsonDocument, BsonString}
 import org.mongodb.scala.model.Filters
@@ -100,8 +100,7 @@ class CacheRepositorySpec extends CacheRepositorySpecBase {
       val firstGet = findOne(userAnswers1.mrn, userAnswers1.eoriNumber).get
 
       val metadata = userAnswers1.metadata.copy(
-        data = Json.obj("foo" -> "bar"),
-        tasks = Some(Map(".task" -> Status.InProgress))
+        data = Json.obj("foo" -> "bar")
       )
       val setResult = repository.set(metadata).futureValue
 
