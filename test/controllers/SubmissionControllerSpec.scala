@@ -18,6 +18,7 @@ package controllers
 
 import base.{AppWithDefaultMockFixtures, SpecBase}
 import connectors.ApiConnector
+import models.AuditType.ArrivalNotification
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito.{never, reset, verify, when}
 import play.api.inject.bind
@@ -26,6 +27,7 @@ import play.api.libs.json.Json
 import play.api.mvc.Results.BadRequest
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
+import services.AuditService
 import uk.gov.hmrc.http.HttpResponse
 
 import scala.concurrent.Future
@@ -34,17 +36,21 @@ class SubmissionControllerSpec extends SpecBase with AppWithDefaultMockFixtures 
 
   private lazy val mockApiConnector = mock[ApiConnector]
 
+  private lazy val mockAuditService = mock[AuditService]
+
   override def guiceApplicationBuilder(): GuiceApplicationBuilder =
     super
       .guiceApplicationBuilder()
       .overrides(
-        bind[ApiConnector].toInstance(mockApiConnector)
+        bind[ApiConnector].toInstance(mockApiConnector),
+        bind[AuditService].toInstance(mockAuditService)
       )
 
   override def beforeEach(): Unit = {
     super.beforeEach()
     reset(mockCacheRepository)
     reset(mockApiConnector)
+    reset(mockAuditService)
   }
 
   "post" should {
@@ -68,6 +74,7 @@ class SubmissionControllerSpec extends SpecBase with AppWithDefaultMockFixtures 
 
         verify(mockCacheRepository).get(eqTo(mrn), eqTo(eoriNumber))
         verify(mockApiConnector).submitDeclaration(eqTo(userAnswers))(any())
+        verify(mockAuditService).audit(eqTo(ArrivalNotification), eqTo(userAnswers))(any())
       }
     }
 
