@@ -18,10 +18,12 @@ package controllers
 
 import connectors.ApiConnector
 import controllers.actions.AuthenticateActionProvider
+import models.AuditType.ArrivalNotification
 import play.api.Logging
 import play.api.libs.json.{JsError, JsSuccess, JsValue}
 import play.api.mvc.{Action, ControllerComponents}
 import repositories.CacheRepository
+import services.AuditService
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
 import javax.inject.{Inject, Singleton}
@@ -32,7 +34,8 @@ class SubmissionController @Inject() (
   cc: ControllerComponents,
   authenticate: AuthenticateActionProvider,
   apiConnector: ApiConnector,
-  cacheRepository: CacheRepository
+  cacheRepository: CacheRepository,
+  auditService: AuditService
 )(implicit ec: ExecutionContext)
     extends BackendController(cc)
     with Logging {
@@ -42,10 +45,13 @@ class SubmissionController @Inject() (
       request.body.validate[String] match {
         case JsSuccess(mrn, _) =>
           cacheRepository.get(mrn, request.eoriNumber).flatMap {
-            case Some(uA) =>
-              apiConnector.submitDeclaration(uA).map {
-                case Right(response) => Ok(response.body)
-                case Left(error)     => error
+            case Some(userAnswers) =>
+              apiConnector.submitDeclaration(userAnswers).map {
+                case Right(response) =>
+                  auditService.audit(ArrivalNotification, userAnswers)
+                  Ok(response.body)
+                case Left(error) =>
+                  error
               }
             case None => Future.successful(InternalServerError)
           }
