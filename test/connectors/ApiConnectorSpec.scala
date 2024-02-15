@@ -19,102 +19,15 @@ package connectors
 import base.{AppWithDefaultMockFixtures, SpecBase}
 import com.github.tomakehurst.wiremock.client.WireMock._
 import helper.WireMockServerHandler
-import models.UserAnswers
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.libs.json.{JsValue, Json}
+import play.api.libs.json.Json
 import play.api.mvc.Results.{BadRequest, InternalServerError}
 import play.api.test.Helpers._
 import uk.gov.hmrc.http.HttpResponse
 
+import scala.xml.NodeSeq
+
 class ApiConnectorSpec extends SpecBase with AppWithDefaultMockFixtures with WireMockServerHandler {
-
-  private val json: JsValue = Json.parse(s"""
-    |{
-    |  "_id" : "$uuid",
-    |  "mrn" : "$mrn",
-    |  "eoriNumber" : "$eoriNumber",
-    |  "data" : {
-    |    "identification" : {
-    |      "destinationOffice" : {
-    |        "id" : "GB000142",
-    |        "name" : "Belfast EPU",
-    |        "phoneNumber" : "+44 (0)3000 523068"
-    |      },
-    |      "identificationNumber" : "GB123456789000",
-    |      "isSimplifiedProcedure" : "normal"
-    |    },
-    |    "locationOfGoods" : {
-    |      "typeOfLocation" : {
-    |        "type": "B",
-    |        "description": "Authorised place"
-    |      },
-    |      "qualifierOfIdentification" : {
-    |        "qualifier": "V",
-    |        "description": "Customs office identifier"
-    |      },
-    |      "qualifierOfIdentificationDetails" : {
-    |        "customsOffice" : {
-    |          "id" : "GB000142",
-    |          "name" : "Belfast EPU",
-    |          "phoneNumber" : "+44 (0)3000 523068"
-    |        }
-    |      }
-    |    },
-    |    "incidentFlag" : true,
-    |    "incidents" : [
-    |      {
-    |        "incidentCountry" : {
-    |          "code" : "FR",
-    |          "description" : "France"
-    |        },
-    |        "incidentCode" : {
-    |          "code": "4",
-    |          "description": "Imminent danger necessitates immediate partial or total unloading of the sealed means of transport."
-    |        },
-    |        "incidentText" : "foo",
-    |        "addEndorsement" : true,
-    |        "endorsement" : {
-    |          "date" : "2022-01-01",
-    |          "authority" : "bar",
-    |          "country" : {
-    |            "code" : "FR",
-    |            "description" : "France"
-    |          },
-    |          "location" : "foobar"
-    |        },
-    |        "qualifierOfIdentification" : {
-    |          "qualifier": "U",
-    |          "description": "UN/LOCODE"
-    |        },
-    |        "unLocode" : "DEAAL",
-    |        "equipments" : [
-    |          {
-    |            "containerIdentificationNumberYesNo" : true,
-    |            "containerIdentificationNumber" : "1",
-    |            "addSealsYesNo" : true,
-    |            "seals" : [
-    |              {
-    |                "sealIdentificationNumber" : "1"
-    |              }
-    |            ],
-    |            "addGoodsItemNumberYesNo" : true,
-    |            "itemNumbers" : [
-    |              {
-    |                "itemNumber" : "1"
-    |              }
-    |            ]
-    |          }
-    |        ]
-    |      }
-    |    ]
-    |  },
-    |  "tasks" : {},
-    |  "createdAt" : "2022-09-05T15:58:44.188Z",
-    |  "lastUpdated" : "2022-09-07T10:33:23.472Z"
-    |}
-    |""".stripMargin)
-
-  private lazy val uA: UserAnswers = json.as[UserAnswers]
 
   override def guiceApplicationBuilder(): GuiceApplicationBuilder =
     super
@@ -139,30 +52,34 @@ class ApiConnectorSpec extends SpecBase with AppWithDefaultMockFixtures with Wir
     .toString()
     .stripMargin
 
-  private val uri = "/movements/arrivals"
-
   "ApiConnector" when {
 
     "submitDeclaration is called" when {
+      val url = "/movements/arrivals"
+
+      val payload: NodeSeq =
+        <ncts:CC007C PhaseID="NCTS5.0" xmlns:ncts="http://ncts.dgtaxud.ec">
+          <foo>bar</foo>
+        </ncts:CC007C>
 
       "success" in {
-        server.stubFor(post(urlEqualTo(uri)).willReturn(okJson(expected)))
+        server.stubFor(post(urlEqualTo(url)).willReturn(okJson(expected)))
 
-        val res = await(connector.submitDeclaration(uA))
+        val res = await(connector.submitDeclaration(payload))
         res.toString shouldBe Right(HttpResponse(OK, expected)).toString
       }
 
       "bad request" in {
-        server.stubFor(post(urlEqualTo(uri)).willReturn(badRequest()))
+        server.stubFor(post(urlEqualTo(url)).willReturn(badRequest()))
 
-        val res = await(connector.submitDeclaration(uA))
+        val res = await(connector.submitDeclaration(payload))
         res shouldBe Left(BadRequest("ApiConnector:submitDeclaration: bad request"))
       }
 
       "internal server error" in {
-        server.stubFor(post(urlEqualTo(uri)).willReturn(serverError()))
+        server.stubFor(post(urlEqualTo(url)).willReturn(serverError()))
 
-        val res = await(connector.submitDeclaration(uA))
+        val res = await(connector.submitDeclaration(payload))
         res shouldBe Left(InternalServerError("ApiConnector:submitDeclaration: something went wrong"))
       }
     }

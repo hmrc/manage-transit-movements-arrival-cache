@@ -17,7 +17,6 @@
 package controllers
 
 import base.{AppWithDefaultMockFixtures, SpecBase}
-import connectors.ApiConnector
 import models.AuditType.ArrivalNotification
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito.{never, reset, verify, when}
@@ -27,14 +26,14 @@ import play.api.libs.json.Json
 import play.api.mvc.Results.BadRequest
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import services.AuditService
+import services.{ApiService, AuditService}
 import uk.gov.hmrc.http.HttpResponse
 
 import scala.concurrent.Future
 
 class SubmissionControllerSpec extends SpecBase with AppWithDefaultMockFixtures {
 
-  private lazy val mockApiConnector = mock[ApiConnector]
+  private lazy val mockApiService = mock[ApiService]
 
   private lazy val mockAuditService = mock[AuditService]
 
@@ -42,14 +41,14 @@ class SubmissionControllerSpec extends SpecBase with AppWithDefaultMockFixtures 
     super
       .guiceApplicationBuilder()
       .overrides(
-        bind[ApiConnector].toInstance(mockApiConnector),
+        bind[ApiService].toInstance(mockApiService),
         bind[AuditService].toInstance(mockAuditService)
       )
 
   override def beforeEach(): Unit = {
     super.beforeEach()
     reset(mockCacheRepository)
-    reset(mockApiConnector)
+    reset(mockApiService)
     reset(mockAuditService)
   }
 
@@ -61,7 +60,7 @@ class SubmissionControllerSpec extends SpecBase with AppWithDefaultMockFixtures 
         when(mockCacheRepository.get(any(), any())).thenReturn(Future.successful(Some(userAnswers)))
 
         val body = Json.toJson("foo")
-        when(mockApiConnector.submitDeclaration(any())(any()))
+        when(mockApiService.submitDeclaration(any())(any()))
           .thenReturn(Future.successful(Right(HttpResponse(OK, Json.stringify(body)))))
 
         val request = FakeRequest(POST, routes.SubmissionController.post().url)
@@ -73,7 +72,7 @@ class SubmissionControllerSpec extends SpecBase with AppWithDefaultMockFixtures 
         contentAsJson(result) shouldBe body
 
         verify(mockCacheRepository).get(eqTo(mrn), eqTo(eoriNumber))
-        verify(mockApiConnector).submitDeclaration(eqTo(userAnswers))(any())
+        verify(mockApiService).submitDeclaration(eqTo(userAnswers))(any())
         verify(mockAuditService).audit(eqTo(ArrivalNotification), eqTo(userAnswers))(any())
       }
     }
@@ -83,7 +82,7 @@ class SubmissionControllerSpec extends SpecBase with AppWithDefaultMockFixtures 
         val userAnswers = emptyUserAnswers
         when(mockCacheRepository.get(any(), any())).thenReturn(Future.successful(Some(userAnswers)))
 
-        when(mockApiConnector.submitDeclaration(any())(any()))
+        when(mockApiService.submitDeclaration(any())(any()))
           .thenReturn(Future.successful(Left(BadRequest)))
 
         val request = FakeRequest(POST, routes.SubmissionController.post().url)
@@ -94,7 +93,7 @@ class SubmissionControllerSpec extends SpecBase with AppWithDefaultMockFixtures 
         status(result) shouldBe BAD_REQUEST
 
         verify(mockCacheRepository).get(eqTo(mrn), eqTo(eoriNumber))
-        verify(mockApiConnector).submitDeclaration(eqTo(userAnswers))(any())
+        verify(mockApiService).submitDeclaration(eqTo(userAnswers))(any())
       }
 
       "document not found in cache" in {
@@ -108,7 +107,7 @@ class SubmissionControllerSpec extends SpecBase with AppWithDefaultMockFixtures 
         status(result) shouldBe INTERNAL_SERVER_ERROR
 
         verify(mockCacheRepository).get(eqTo(mrn), eqTo(eoriNumber))
-        verify(mockApiConnector, never()).submitDeclaration(any())(any())
+        verify(mockApiService, never()).submitDeclaration(any())(any())
       }
 
       "request body can't be validated as a string" in {
@@ -122,7 +121,7 @@ class SubmissionControllerSpec extends SpecBase with AppWithDefaultMockFixtures 
         status(result) shouldBe BAD_REQUEST
 
         verify(mockCacheRepository, never()).get(any(), any())
-        verify(mockApiConnector, never()).submitDeclaration(any())(any())
+        verify(mockApiService, never()).submitDeclaration(any())(any())
       }
     }
   }
