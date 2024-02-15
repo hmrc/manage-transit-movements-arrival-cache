@@ -19,10 +19,14 @@ package api.submission
 import generated._
 import models.UserAnswers
 import play.api.libs.json.JsSuccess
+import services.{DateTimeService, MessageIdentificationService}
 
-import java.time.LocalDateTime
+import javax.inject.Inject
 
-object Header {
+class Header @Inject() (
+  dateTimeService: DateTimeService,
+  messageIdentificationService: MessageIdentificationService
+) {
 
   def message(uA: UserAnswers): MESSAGESequence =
     uA.metadata.data.validate((identificationPath \ "destinationOffice" \ "id").read[String].map(_.take(2))) match {
@@ -31,12 +35,12 @@ object Header {
           messageSender = uA.eoriNumber,
           messagE_1Sequence2 = MESSAGE_1Sequence(
             messageRecipient = s"NTA.$officeOfDestinationCountryCode",
-            preparationDateAndTime = LocalDateTime.now(),
-            messageIdentification = "CC007C" // TODO - check this with API team? What should this be set to?
+            preparationDateAndTime = dateTimeService.now,
+            messageIdentification = messageIdentificationService.randomIdentifier
           ),
           messagE_TYPESequence3 = MESSAGE_TYPESequence(CC007C),
           correlatioN_IDENTIFIERSequence4 = CORRELATION_IDENTIFIERSequence(
-            correlationIdentifier = None // TODO - What should this be?
+            correlationIdentifier = None
           )
         )
       case _ => throw new Exception("Json did not contain office of destination ID")

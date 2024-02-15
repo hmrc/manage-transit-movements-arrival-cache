@@ -16,14 +16,13 @@
 
 package controllers
 
-import connectors.ApiConnector
 import controllers.actions.AuthenticateActionProvider
 import models.AuditType.ArrivalNotification
 import play.api.Logging
 import play.api.libs.json.{JsError, JsSuccess, JsValue}
 import play.api.mvc.{Action, ControllerComponents}
 import repositories.CacheRepository
-import services.AuditService
+import services.{ApiService, AuditService}
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
 import javax.inject.{Inject, Singleton}
@@ -33,7 +32,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class SubmissionController @Inject() (
   cc: ControllerComponents,
   authenticate: AuthenticateActionProvider,
-  apiConnector: ApiConnector,
+  apiService: ApiService,
   cacheRepository: CacheRepository,
   auditService: AuditService
 )(implicit ec: ExecutionContext)
@@ -46,7 +45,7 @@ class SubmissionController @Inject() (
         case JsSuccess(mrn, _) =>
           cacheRepository.get(mrn, request.eoriNumber).flatMap {
             case Some(userAnswers) =>
-              apiConnector.submitDeclaration(userAnswers).map {
+              apiService.submitDeclaration(userAnswers).map {
                 case Right(response) =>
                   auditService.audit(ArrivalNotification, userAnswers)
                   Ok(response.body)
