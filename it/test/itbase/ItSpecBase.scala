@@ -22,39 +22,27 @@ import controllers.actions.{
   FakeAuthenticateActionProvider,
   FakeAuthenticateAndLockActionProvider
 }
-import models.{Metadata, UserAnswers}
 import org.scalatest.OptionValues
-import org.scalatest.concurrent.ScalaFutures
+import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
 import play.api.Application
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.libs.ws.WSClient
-import uk.gov.hmrc.mongo.MongoComponent
-import uk.gov.hmrc.mongo.test.MongoSupport
+import uk.gov.hmrc.http.HeaderCarrier
 
-import java.time.Instant
-import java.util.UUID
+trait ItSpecBase extends AnyWordSpec with Matchers with ScalaFutures with OptionValues with GuiceOneServerPerSuite with IntegrationPatience {
 
-trait ItSpecBase extends AnyWordSpec with Matchers with ScalaFutures with OptionValues with GuiceOneServerPerSuite {
-  self: MongoSupport =>
+  implicit val hc: HeaderCarrier = HeaderCarrier()
 
-  val mrn        = "mrn"
-  val eoriNumber = "eori"
-
-  def emptyMetadata: Metadata       = Metadata(mrn, eoriNumber)
-  def emptyUserAnswers: UserAnswers = UserAnswers(emptyMetadata, Instant.now(), Instant.now(), UUID.randomUUID())
-
-  val wsClient: WSClient = app.injector.instanceOf[WSClient]
-  val baseUrl            = s"http://localhost:$port"
-
-  override def fakeApplication(): Application =
+  def guiceApplicationBuilder(): GuiceApplicationBuilder =
     GuiceApplicationBuilder()
       .configure("metrics.enabled" -> false)
-      .overrides(bind[MongoComponent].toInstance(mongoComponent))
       .overrides(bind[AuthenticateActionProvider].toInstance(new FakeAuthenticateActionProvider))
       .overrides(bind[AuthenticateAndLockActionProvider].toInstance(new FakeAuthenticateAndLockActionProvider))
+
+  final override def fakeApplication(): Application =
+    guiceApplicationBuilder()
       .build()
 }

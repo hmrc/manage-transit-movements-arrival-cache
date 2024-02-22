@@ -8,7 +8,8 @@ object AppDependencies {
   val compile: Seq[ModuleID] = Seq(
     "uk.gov.hmrc"             %% "bootstrap-backend-play-30"  % bootstrapVersion,
     "uk.gov.hmrc.mongo"       %% "hmrc-mongo-play-30"         % hmrcMongoVersion,
-    "uk.gov.hmrc"             %% "crypto-json-play-30"        % "7.6.0"
+    "uk.gov.hmrc"             %% "crypto-json-play-30"        % "7.6.0",
+    "javax.xml.bind"           % "jaxb-api"                   % "2.3.1"
   )
 
   val test: Seq[ModuleID] = Seq(
@@ -18,5 +19,5 @@ object AppDependencies {
     "org.scalatestplus"       %% "mockito-4-6"                % "3.2.15.0",
     "org.scalacheck"          %% "scalacheck"                 % "1.17.0",
     "org.scalatestplus"       %% "scalacheck-1-17"            % "3.2.15.0",
-  ).map(_ % "test, it")
+  ).map(_ % "test")
 }

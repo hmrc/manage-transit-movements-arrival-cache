@@ -18,40 +18,38 @@ package connectors
 
 import config.AppConfig
 import play.api.Logging
-import play.api.http.HeaderNames
+import play.api.http.HeaderNames._
 import play.api.http.Status._
 import play.api.mvc.Result
 import play.api.mvc.Results.{BadRequest, InternalServerError}
 import uk.gov.hmrc.http.HttpReads.Implicits._
-import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpErrorFunctions, HttpResponse}
+import uk.gov.hmrc.http.client.HttpClientV2
+import uk.gov.hmrc.http.{HeaderCarrier, HttpErrorFunctions, HttpResponse, StringContextOps}
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 import scala.xml.NodeSeq
 
-class ApiConnector @Inject() (httpClient: HttpClient, appConfig: AppConfig)(implicit ec: ExecutionContext) extends HttpErrorFunctions with Logging {
+class ApiConnector @Inject() (http: HttpClientV2, appConfig: AppConfig)(implicit ec: ExecutionContext) extends HttpErrorFunctions with Logging {
 
-  private val requestHeaders = Seq(
-    HeaderNames.ACCEPT       -> "application/vnd.hmrc.2.0+json",
-    HeaderNames.CONTENT_TYPE -> "application/xml"
-  )
-
-  def submitDeclaration(payload: NodeSeq)(implicit hc: HeaderCarrier): Future[Either[Result, HttpResponse]] = {
-    val url = s"${appConfig.apiUrl}/movements/arrivals"
-
-    httpClient
-      .POSTString[HttpResponse](url, payload.toString(), requestHeaders)
+  def submitDeclaration(xml: NodeSeq)(implicit hc: HeaderCarrier): Future[Either[Result, HttpResponse]] = {
+    val url = url"${appConfig.apiUrl}/movements/arrivals"
+    http
+      .post(url)
+      .setHeader(ACCEPT -> "application/vnd.hmrc.2.0+json")
+      .setHeader(CONTENT_TYPE -> "application/xml")
+      .withBody(xml)
+      .execute[HttpResponse]
       .map {
         response =>
           response.status match {
             case x if is2xx(x) =>
-              logger.debug(s"ApiConnector:submitDeclaration: success: ${response.status}-${response.body}")
               Right(response)
             case BAD_REQUEST =>
-              logger.info(s"ApiConnector:submitDeclaration: bad request: ${response.body}")
+              logger.info(s"ApiConnector:submitDeclaration: bad request")
               Left(BadRequest("ApiConnector:submitDeclaration: bad request"))
-            case _ =>
-              logger.error(s"ApiConnector:submitDeclaration: something went wrong: ${response.body}")
+            case e =>
+              logger.error(s"ApiConnector:submitDeclaration: something went wrong: $e")
               Left(InternalServerError("ApiConnector:submitDeclaration: something went wrong"))
           }
       }

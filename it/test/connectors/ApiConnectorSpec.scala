@@ -16,9 +16,8 @@
 
 package connectors
 
-import base.{AppWithDefaultMockFixtures, SpecBase}
 import com.github.tomakehurst.wiremock.client.WireMock._
-import helper.WireMockServerHandler
+import itbase.{ItSpecBase, WireMockServerHandler}
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
 import play.api.mvc.Results.{BadRequest, InternalServerError}
@@ -27,7 +26,7 @@ import uk.gov.hmrc.http.HttpResponse
 
 import scala.xml.NodeSeq
 
-class ApiConnectorSpec extends SpecBase with AppWithDefaultMockFixtures with WireMockServerHandler {
+class ApiConnectorSpec extends ItSpecBase with WireMockServerHandler {
 
   override def guiceApplicationBuilder(): GuiceApplicationBuilder =
     super
