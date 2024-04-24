@@ -58,7 +58,7 @@ class HeaderSpec extends SpecBase with AppWithDefaultMockFixtures with ScalaChec
 
     "message is called" should {
 
-      def uA(officeOfDestination: String): UserAnswers = {
+      def uA(officeOfDestinationCountryId: String): UserAnswers = {
         val json: JsValue = Json.parse(s"""
              |{
              |  "_id" : "$uuid",
@@ -68,9 +68,10 @@ class HeaderSpec extends SpecBase with AppWithDefaultMockFixtures with ScalaChec
              |  "data" : {
              |    "identification" : {
              |      "destinationOffice" : {
-             |        "id" : "$officeOfDestination",
+             |        "id" : "foo",
              |        "name" : "Belfast EPU",
-             |        "phoneNumber" : "+44 (0)3000 523068"
+             |        "phoneNumber" : "+44 (0)3000 523068",
+             |        "countryId" : "$officeOfDestinationCountryId"
              |      }
              |    }
              |  },
@@ -89,7 +90,7 @@ class HeaderSpec extends SpecBase with AppWithDefaultMockFixtures with ScalaChec
               when(mockDateTimeService.now).thenReturn(dateTime)
               when(mockMessageIdentificationService.randomIdentifier).thenReturn(messageIdentification)
 
-              val result = header.message(uA("GB000011"))
+              val result = header.message(uA("GB"))
 
               result.messageSender shouldBe eoriNumber
               result.messagE_1Sequence2.messageRecipient shouldBe "NTA.GB"
@@ -106,7 +107,7 @@ class HeaderSpec extends SpecBase with AppWithDefaultMockFixtures with ScalaChec
               when(mockDateTimeService.now).thenReturn(dateTime)
               when(mockMessageIdentificationService.randomIdentifier).thenReturn(messageIdentification)
 
-              val result = header.message(uA("XIREX001"))
+              val result = header.message(uA("XI"))
 
               result.messageSender shouldBe eoriNumber
               result.messagE_1Sequence2.messageRecipient shouldBe "NTA.XI"
