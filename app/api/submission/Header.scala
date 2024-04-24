@@ -29,7 +29,7 @@ class Header @Inject() (
 ) {
 
   def message(uA: UserAnswers): MESSAGESequence =
-    uA.metadata.data.validate((identificationPath \ "destinationOffice" \ "id").read[String].map(_.take(2))) match {
+    uA.metadata.data.validate((identificationPath \ "destinationOffice" \ "countryId").read[String]) match {
       case JsSuccess(officeOfDestinationCountryCode, _) =>
         MESSAGESequence(
           messageSender = uA.eoriNumber,
