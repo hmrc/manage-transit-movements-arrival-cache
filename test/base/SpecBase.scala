@@ -17,13 +17,14 @@
 package base
 
 import config.AppConfig
-import models.{Metadata, SensitiveFormats, UserAnswers}
+import models.{Metadata, SensitiveFormats, SubmissionStatus, UserAnswers}
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.{EitherValues, OptionValues}
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
+import play.api.libs.json.Json
 import play.api.mvc.AnyContent
 import play.api.test.FakeRequest
 import uk.gov.hmrc.http.HeaderCarrier
@@ -39,7 +40,7 @@ trait SpecBase extends AnyWordSpec with Matchers with MockitoSugar with GuiceOne
 
   implicit val hc: HeaderCarrier = HeaderCarrier()
 
-  val emptyMetadata: Metadata       = Metadata(mrn, eoriNumber)
+  val emptyMetadata: Metadata       = Metadata(mrn, eoriNumber, Json.obj(), SubmissionStatus.NotSubmitted)
   val emptyUserAnswers: UserAnswers = UserAnswers(emptyMetadata, Instant.now(), Instant.now(), UUID.randomUUID())
 
   def fakeRequest: FakeRequest[AnyContent] = FakeRequest("", "")

@@ -17,7 +17,7 @@
 package controllers
 
 import base.{AppWithDefaultMockFixtures, SpecBase}
-import models.{Metadata, UserAnswers, UserAnswersSummary}
+import models.{Metadata, SubmissionStatus, UserAnswers, UserAnswersSummary}
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito.{never, verify, when}
@@ -254,8 +254,8 @@ class CacheControllerSpec extends SpecBase with AppWithDefaultMockFixtures {
     "return 200" when {
 
       "read from mongo is successful" in {
-        val userAnswer1 = UserAnswers(Metadata("AB123", eoriNumber), Instant.now(), Instant.now(), UUID.randomUUID())
-        val userAnswer2 = UserAnswers(Metadata("CD123", eoriNumber), Instant.now(), Instant.now(), UUID.randomUUID())
+        val userAnswer1 = UserAnswers(Metadata("AB123", eoriNumber, Json.obj(), SubmissionStatus.NotSubmitted), Instant.now(), Instant.now(), UUID.randomUUID())
+        val userAnswer2 = UserAnswers(Metadata("CD123", eoriNumber, Json.obj(), SubmissionStatus.NotSubmitted), Instant.now(), Instant.now(), UUID.randomUUID())
 
         when(mockCacheRepository.getAll(any(), any(), any(), any(), any()))
           .thenReturn(Future.successful(UserAnswersSummary(eoriNumber, Seq(userAnswer1, userAnswer2), 30, 2, 2)))
