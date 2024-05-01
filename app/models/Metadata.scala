@@ -22,7 +22,8 @@ import play.api.libs.json._
 case class Metadata(
   mrn: String,
   eoriNumber: String,
-  data: JsObject = Json.obj()
+  data: JsObject,
+  submissionStatus: SubmissionStatus
 )
 
 object Metadata {
@@ -35,13 +36,15 @@ object Metadata {
     (
       (__ \ "mrn").read[String] and
         (__ \ "eoriNumber").read[String] and
-        (__ \ "data").read[JsObject](sensitiveFormats.jsObjectReads)
+        (__ \ "data").read[JsObject](sensitiveFormats.jsObjectReads) and
+        (__ \ "submissionStatus").read[SubmissionStatus]
     )(Metadata.apply _)
 
   def sensitiveWrites(implicit sensitiveFormats: SensitiveFormats): Writes[Metadata] =
     (
       (__ \ "mrn").write[String] and
         (__ \ "eoriNumber").write[String] and
-        (__ \ "data").write[JsObject](sensitiveFormats.jsObjectWrites)
+        (__ \ "data").write[JsObject](sensitiveFormats.jsObjectWrites) and
+        (__ \ "submissionStatus").write[SubmissionStatus]
     )(unlift(Metadata.unapply))
 }

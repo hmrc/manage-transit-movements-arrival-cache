@@ -17,7 +17,7 @@
 package controllers
 
 import itbase.CacheRepositorySpecBase
-import models.{Metadata, UserAnswers}
+import models.{Metadata, SubmissionStatus, UserAnswers}
 import org.mongodb.scala.model.Filters
 import play.api.libs.json.{JsObject, JsString, Json}
 
@@ -211,14 +211,14 @@ class CacheControllerSpec extends CacheRepositorySpecBase {
     "documents do exist" should {
       "respond with 200 status" in {
         val userAnswers1 = UserAnswers(
-          metadata = Metadata("AB123", eoriNumber),
+          metadata = Metadata("AB123", eoriNumber, Json.obj(), SubmissionStatus.NotSubmitted),
           createdAt = Instant.now(),
           lastUpdated = Instant.now(),
           id = UUID.randomUUID()
         )
 
         val userAnswers2 = UserAnswers(
-          metadata = Metadata("CD123", eoriNumber),
+          metadata = Metadata("CD123", eoriNumber, Json.obj(), SubmissionStatus.NotSubmitted),
           createdAt = Instant.now().minus(1, DAYS),
           lastUpdated = Instant.now().minus(1, DAYS),
           id = UUID.randomUUID()

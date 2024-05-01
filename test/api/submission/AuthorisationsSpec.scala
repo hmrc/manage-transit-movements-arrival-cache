@@ -99,7 +99,8 @@ class AuthorisationsSpec extends SpecBase with AppWithDefaultMockFixtures {
              |    ]
              |  },
              |  "createdAt" : "2022-09-05T15:58:44.188Z",
-             |  "lastUpdated" : "2022-09-07T10:33:23.472Z"
+             |  "lastUpdated" : "2022-09-07T10:33:23.472Z",
+             |  "submissionStatus" : "notSubmitted"
              |}
              |""".stripMargin)
 
@@ -190,7 +191,8 @@ class AuthorisationsSpec extends SpecBase with AppWithDefaultMockFixtures {
              |    ]
              |  },
              |  "createdAt" : "2022-09-05T15:58:44.188Z",
-             |  "lastUpdated" : "2022-09-07T10:33:23.472Z"
+             |  "lastUpdated" : "2022-09-07T10:33:23.472Z",
+             |  "submissionStatus" : "notSubmitted"
              |}
              |""".stripMargin)
 
@@ -280,7 +282,8 @@ class AuthorisationsSpec extends SpecBase with AppWithDefaultMockFixtures {
              |    ]
              |  },
              |  "createdAt" : "2022-09-05T15:58:44.188Z",
-             |  "lastUpdated" : "2022-09-07T10:33:23.472Z"
+             |  "lastUpdated" : "2022-09-07T10:33:23.472Z",
+             |  "submissionStatus" : "notSubmitted"
              |}
              |""".stripMargin)
 

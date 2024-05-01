@@ -18,7 +18,7 @@ package repositories
 
 import itbase.CacheRepositorySpecBase
 import models.Sort.{SortByCreatedAtAsc, SortByCreatedAtDesc, SortByMRNAsc, SortByMRNDesc}
-import models.{Metadata, UserAnswers, UserAnswersSummary}
+import models.{UserAnswers, UserAnswersSummary}
 import org.mongodb.scala.Document
 import org.mongodb.scala.bson.{BsonDocument, BsonString}
 import org.mongodb.scala.model.Filters
@@ -29,12 +29,31 @@ import java.time.temporal.ChronoUnit._
 
 class CacheRepositorySpec extends CacheRepositorySpecBase {
 
-  private lazy val userAnswers1 = emptyUserAnswers.copy(metadata = Metadata("ABCD1111111111111", "EoriNumber1"))
-  private lazy val userAnswers2 = emptyUserAnswers.copy(metadata = Metadata("ABCD2222222222222", "EoriNumber2"))
-  private lazy val userAnswers3 = emptyUserAnswers.copy(metadata = Metadata("ABCD3333333333333", "EoriNumber3"))
-  private lazy val userAnswers4 = emptyUserAnswers.copy(metadata = Metadata("ABCD1111111111111", "EoriNumber4"), createdAt = Instant.now())
-  private lazy val userAnswers5 = emptyUserAnswers.copy(metadata = Metadata("ABCD2222222222222", "EoriNumber4"), createdAt = Instant.now().minus(1, HOURS))
-  private lazy val userAnswers6 = emptyUserAnswers.copy(metadata = Metadata("EFGH3333333333333", "EoriNumber4"))
+  private lazy val userAnswers1 = emptyUserAnswers.copy(
+    metadata = emptyMetadata.copy(mrn = "ABCD1111111111111", eoriNumber = "EoriNumber1")
+  )
+
+  private lazy val userAnswers2 = emptyUserAnswers.copy(
+    metadata = emptyMetadata.copy(mrn = "ABCD2222222222222", eoriNumber = "EoriNumber2")
+  )
+
+  private lazy val userAnswers3 = emptyUserAnswers.copy(
+    metadata = emptyMetadata.copy(mrn = "ABCD3333333333333", eoriNumber = "EoriNumber3")
+  )
+
+  private lazy val userAnswers4 = emptyUserAnswers.copy(
+    metadata = emptyMetadata.copy(mrn = "ABCD1111111111111", eoriNumber = "EoriNumber4"),
+    createdAt = Instant.now()
+  )
+
+  private lazy val userAnswers5 = emptyUserAnswers.copy(
+    metadata = emptyMetadata.copy(mrn = "ABCD2222222222222", eoriNumber = "EoriNumber4"),
+    createdAt = Instant.now().minus(1, HOURS)
+  )
+
+  private lazy val userAnswers6 = emptyUserAnswers.copy(
+    metadata = emptyMetadata.copy(mrn = "EFGH3333333333333", eoriNumber = "EoriNumber4")
+  )
 
   override def beforeEach(): Unit = {
     super.beforeEach()
@@ -220,10 +239,25 @@ class CacheRepositorySpec extends CacheRepositorySpecBase {
 
       "return UserAnswersSummary to limit sorted by createdDate" in {
 
-        val userAnswers1 = emptyUserAnswers.copy(metadata = Metadata("XI1111111111111", "AB123")).copy(createdAt = Instant.now())
-        val userAnswers2 = emptyUserAnswers.copy(metadata = Metadata("X22222222222222", "AB123"), createdAt = Instant.now().minus(1, HOURS))
-        val userAnswers3 = emptyUserAnswers.copy(metadata = Metadata("GB13333333333333", "AB123"), createdAt = Instant.now().minus(2, DAYS))
-        val userAnswers4 = emptyUserAnswers.copy(metadata = Metadata("GB24444444444444", "AB123"), createdAt = Instant.now().minus(1, DAYS))
+        val userAnswers1 = emptyUserAnswers.copy(
+          metadata = emptyMetadata.copy(mrn = "XI1111111111111", eoriNumber = "AB123"),
+          createdAt = Instant.now()
+        )
+
+        val userAnswers2 = emptyUserAnswers.copy(
+          metadata = emptyMetadata.copy(mrn = "X22222222222222", eoriNumber = "AB123"),
+          createdAt = Instant.now().minus(1, HOURS)
+        )
+
+        val userAnswers3 = emptyUserAnswers.copy(
+          metadata = emptyMetadata.copy(mrn = "GB13333333333333", eoriNumber = "AB123"),
+          createdAt = Instant.now().minus(2, DAYS)
+        )
+
+        val userAnswers4 = emptyUserAnswers.copy(
+          metadata = emptyMetadata.copy(mrn = "GB24444444444444", eoriNumber = "AB123"),
+          createdAt = Instant.now().minus(1, DAYS)
+        )
 
         insert(userAnswers1).futureValue
         insert(userAnswers2).futureValue
@@ -246,12 +280,35 @@ class CacheRepositorySpec extends CacheRepositorySpecBase {
 
       "return UserAnswersSummary to limit and to mrn param sorted by createdDate" in {
 
-        val userAnswers1 = emptyUserAnswers.copy(metadata = Metadata("XI1111111111111", "AB123"), createdAt = Instant.now())
-        val userAnswers2 = emptyUserAnswers.copy(metadata = Metadata("XI2222222222222", "AB123"), createdAt = Instant.now().minus(1, HOURS))
-        val userAnswers3 = emptyUserAnswers.copy(metadata = Metadata("XI3333333333333", "AB123"), createdAt = Instant.now().minus(2, HOURS))
-        val userAnswers4 = emptyUserAnswers.copy(metadata = Metadata("GB1111111111111", "AB123"), createdAt = Instant.now())
-        val userAnswers5 = emptyUserAnswers.copy(metadata = Metadata("GB2222222222222", "AB123"), createdAt = Instant.now().minus(1, DAYS))
-        val userAnswers6 = emptyUserAnswers.copy(metadata = Metadata("GB3333333333333", "AB123"), createdAt = Instant.now().minus(2, DAYS))
+        val userAnswers1 = emptyUserAnswers.copy(
+          metadata = emptyMetadata.copy(mrn = "XI1111111111111", eoriNumber = "AB123"),
+          createdAt = Instant.now()
+        )
+
+        val userAnswers2 = emptyUserAnswers.copy(
+          metadata = emptyMetadata.copy(mrn = "XI2222222222222", eoriNumber = "AB123"),
+          createdAt = Instant.now().minus(1, HOURS)
+        )
+
+        val userAnswers3 = emptyUserAnswers.copy(
+          metadata = emptyMetadata.copy(mrn = "XI3333333333333", eoriNumber = "AB123"),
+          createdAt = Instant.now().minus(2, HOURS)
+        )
+
+        val userAnswers4 = emptyUserAnswers.copy(
+          metadata = emptyMetadata.copy(mrn = "GB1111111111111", eoriNumber = "AB123"),
+          createdAt = Instant.now()
+        )
+
+        val userAnswers5 = emptyUserAnswers.copy(
+          metadata = emptyMetadata.copy(mrn = "GB2222222222222", eoriNumber = "AB123"),
+          createdAt = Instant.now().minus(1, DAYS)
+        )
+
+        val userAnswers6 = emptyUserAnswers.copy(
+          metadata = emptyMetadata.copy(mrn = "GB3333333333333", eoriNumber = "AB123"),
+          createdAt = Instant.now().minus(2, DAYS)
+        )
 
         insert(userAnswers1).futureValue
         insert(userAnswers2).futureValue
@@ -278,12 +335,35 @@ class CacheRepositorySpec extends CacheRepositorySpecBase {
 
       "return UserAnswersSummary, skipping based on skip param and limit param" in {
 
-        val userAnswers1 = emptyUserAnswers.copy(metadata = Metadata("GB111", "AB123"), createdAt = Instant.now())
-        val userAnswers2 = emptyUserAnswers.copy(metadata = Metadata("GB222", "AB123"), createdAt = Instant.now().minus(1, HOURS))
-        val userAnswers3 = emptyUserAnswers.copy(metadata = Metadata("GB333", "AB123"), createdAt = Instant.now().minus(1, DAYS))
-        val userAnswers4 = emptyUserAnswers.copy(metadata = Metadata("GB444", "AB123"), createdAt = Instant.now().minus(2, DAYS))
-        val userAnswers5 = emptyUserAnswers.copy(metadata = Metadata("GB555", "AB123"), createdAt = Instant.now().minus(3, DAYS))
-        val userAnswers6 = emptyUserAnswers.copy(metadata = Metadata("GB666", "AB123"), createdAt = Instant.now().minus(4, DAYS))
+        val userAnswers1 = emptyUserAnswers.copy(
+          metadata = emptyMetadata.copy(mrn = "GB111", eoriNumber = "AB123"),
+          createdAt = Instant.now()
+        )
+
+        val userAnswers2 = emptyUserAnswers.copy(
+          metadata = emptyMetadata.copy(mrn = "GB222", eoriNumber = "AB123"),
+          createdAt = Instant.now().minus(1, HOURS)
+        )
+
+        val userAnswers3 = emptyUserAnswers.copy(
+          metadata = emptyMetadata.copy(mrn = "GB333", eoriNumber = "AB123"),
+          createdAt = Instant.now().minus(1, DAYS)
+        )
+
+        val userAnswers4 = emptyUserAnswers.copy(
+          metadata = emptyMetadata.copy(mrn = "GB444", eoriNumber = "AB123"),
+          createdAt = Instant.now().minus(2, DAYS)
+        )
+
+        val userAnswers5 = emptyUserAnswers.copy(
+          metadata = emptyMetadata.copy(mrn = "GB555", eoriNumber = "AB123"),
+          createdAt = Instant.now().minus(3, DAYS)
+        )
+
+        val userAnswers6 = emptyUserAnswers.copy(
+          metadata = emptyMetadata.copy(mrn = "GB666", eoriNumber = "AB123"),
+          createdAt = Instant.now().minus(4, DAYS)
+        )
 
         insert(userAnswers1).futureValue
         insert(userAnswers2).futureValue
@@ -330,12 +410,35 @@ class CacheRepositorySpec extends CacheRepositorySpecBase {
 
       "return UserAnswersSummary to limit, mrn and skip param sorted by createdDate" in {
 
-        val userAnswers1 = emptyUserAnswers.copy(metadata = Metadata("XI1111111111111", "AB123"), createdAt = Instant.now())
-        val userAnswers2 = emptyUserAnswers.copy(metadata = Metadata("XI2222222222222", "AB123"), createdAt = Instant.now().minus(1, HOURS))
-        val userAnswers3 = emptyUserAnswers.copy(metadata = Metadata("XI3333333333333", "AB123"), createdAt = Instant.now().minus(2, HOURS))
-        val userAnswers4 = emptyUserAnswers.copy(metadata = Metadata("GB1111111111111", "AB123"), createdAt = Instant.now())
-        val userAnswers5 = emptyUserAnswers.copy(metadata = Metadata("GB2222222222222", "AB123"), createdAt = Instant.now().minus(1, DAYS))
-        val userAnswers6 = emptyUserAnswers.copy(metadata = Metadata("GB3333333333333", "AB123"), createdAt = Instant.now().minus(2, DAYS))
+        val userAnswers1 = emptyUserAnswers.copy(
+          metadata = emptyMetadata.copy(mrn = "XI1111111111111", eoriNumber = "AB123"),
+          createdAt = Instant.now()
+        )
+
+        val userAnswers2 = emptyUserAnswers.copy(
+          metadata = emptyMetadata.copy(mrn = "XI2222222222222", eoriNumber = "AB123"),
+          createdAt = Instant.now().minus(1, HOURS)
+        )
+
+        val userAnswers3 = emptyUserAnswers.copy(
+          metadata = emptyMetadata.copy(mrn = "XI3333333333333", eoriNumber = "AB123"),
+          createdAt = Instant.now().minus(2, HOURS)
+        )
+
+        val userAnswers4 = emptyUserAnswers.copy(
+          metadata = emptyMetadata.copy(mrn = "GB1111111111111", eoriNumber = "AB123"),
+          createdAt = Instant.now()
+        )
+
+        val userAnswers5 = emptyUserAnswers.copy(
+          metadata = emptyMetadata.copy(mrn = "GB2222222222222", eoriNumber = "AB123"),
+          createdAt = Instant.now().minus(1, DAYS)
+        )
+
+        val userAnswers6 = emptyUserAnswers.copy(
+          metadata = emptyMetadata.copy(mrn = "GB3333333333333", eoriNumber = "AB123"),
+          createdAt = Instant.now().minus(2, DAYS)
+        )
 
         insert(userAnswers1).futureValue
         insert(userAnswers2).futureValue
@@ -359,12 +462,35 @@ class CacheRepositorySpec extends CacheRepositorySpecBase {
 
     "when given sortBy param" should {
 
-      val userAnswers1 = emptyUserAnswers.copy(metadata = Metadata("AA1111111111111", "AB123"), createdAt = Instant.now().minus(3, DAYS))
-      val userAnswers2 = emptyUserAnswers.copy(metadata = Metadata("BB2222222222222", "AB123"), createdAt = Instant.now().minus(6, DAYS))
-      val userAnswers3 = emptyUserAnswers.copy(metadata = Metadata("CC3333333333333", "AB123"), createdAt = Instant.now().minus(5, DAYS))
-      val userAnswers4 = emptyUserAnswers.copy(metadata = Metadata("DD1111111111111", "AB123"), createdAt = Instant.now().minus(4, DAYS))
-      val userAnswers5 = emptyUserAnswers.copy(metadata = Metadata("EE2222222222222", "AB123"), createdAt = Instant.now().minus(1, DAYS))
-      val userAnswers6 = emptyUserAnswers.copy(metadata = Metadata("FF3333333333333", "AB123"), createdAt = Instant.now().minus(2, DAYS))
+      val userAnswers1 = emptyUserAnswers.copy(
+        metadata = emptyMetadata.copy(mrn = "AA1111111111111", eoriNumber = "AB123"),
+        createdAt = Instant.now().minus(3, DAYS)
+      )
+
+      val userAnswers2 = emptyUserAnswers.copy(
+        metadata = emptyMetadata.copy(mrn = "BB2222222222222", eoriNumber = "AB123"),
+        createdAt = Instant.now().minus(6, DAYS)
+      )
+
+      val userAnswers3 = emptyUserAnswers.copy(
+        metadata = emptyMetadata.copy(mrn = "CC3333333333333", eoriNumber = "AB123"),
+        createdAt = Instant.now().minus(5, DAYS)
+      )
+
+      val userAnswers4 = emptyUserAnswers.copy(
+        metadata = emptyMetadata.copy(mrn = "DD1111111111111", eoriNumber = "AB123"),
+        createdAt = Instant.now().minus(4, DAYS)
+      )
+
+      val userAnswers5 = emptyUserAnswers.copy(
+        metadata = emptyMetadata.copy(mrn = "EE2222222222222", eoriNumber = "AB123"),
+        createdAt = Instant.now().minus(1, DAYS)
+      )
+
+      val userAnswers6 = emptyUserAnswers.copy(
+        metadata = emptyMetadata.copy(mrn = "FF3333333333333", eoriNumber = "AB123"),
+        createdAt = Instant.now().minus(2, DAYS)
+      )
 
       "return UserAnswersSummary, which is sorted by mrn in ascending order when sortBy is mrn.asc" in {
 

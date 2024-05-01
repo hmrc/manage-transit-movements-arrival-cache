@@ -17,7 +17,7 @@
 package controllers
 
 import controllers.actions.{AuthenticateActionProvider, AuthenticateAndLockActionProvider}
-import models.Metadata
+import models.{Metadata, SubmissionStatus}
 import play.api.Logging
 import play.api.libs.json.{JsError, JsSuccess, JsValue, Json}
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
@@ -76,7 +76,7 @@ class CacheController @Inject() (
     implicit request =>
       request.body.validate[String] match {
         case JsSuccess(mrn, _) =>
-          set(Metadata(mrn, request.eoriNumber))
+          set(Metadata(mrn, request.eoriNumber, Json.obj(), SubmissionStatus.NotSubmitted))
         case JsError(errors) =>
           logger.warn(s"Failed to validate request body as String: $errors")
           Future.successful(BadRequest)

@@ -29,7 +29,8 @@ class UserAnswersSpec extends SpecBase with AppWithDefaultMockFixtures {
     metadata = Metadata(
       mrn = mrn,
       eoriNumber = eoriNumber,
-      data = Json.obj()
+      data = Json.obj(),
+      submissionStatus = SubmissionStatus.NotSubmitted
     ),
     createdAt = Instant.ofEpochMilli(1662393524188L),
     lastUpdated = Instant.ofEpochMilli(1662546803472L),
@@ -47,7 +48,8 @@ class UserAnswersSpec extends SpecBase with AppWithDefaultMockFixtures {
           |  "eoriNumber" : "$eoriNumber",
           |  "data" : {},
           |  "createdAt" : "2022-09-05T15:58:44.188Z",
-          |  "lastUpdated" : "2022-09-07T10:33:23.472Z"
+          |  "lastUpdated" : "2022-09-07T10:33:23.472Z",
+          |  "submissionStatus" : "notSubmitted"
           |}
           |""".stripMargin)
 
@@ -93,7 +95,8 @@ class UserAnswersSpec extends SpecBase with AppWithDefaultMockFixtures {
                |    "$$date" : {
                |      "$$numberLong" : "1662546803472"
                |    }
-               |  }
+               |  },
+               |  "submissionStatus" : "notSubmitted"
                |}
                |""".stripMargin)
 
@@ -133,7 +136,8 @@ class UserAnswersSpec extends SpecBase with AppWithDefaultMockFixtures {
                |    "$$date" : {
                |      "$$numberLong" : "1662546803472"
                |    }
-               |  }
+               |  },
+               |  "submissionStatus" : "notSubmitted"
                |}
                |""".stripMargin)
 

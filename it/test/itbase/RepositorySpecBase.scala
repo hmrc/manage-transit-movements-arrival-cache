@@ -16,9 +16,10 @@
 
 package itbase
 
-import models.{Metadata, UserAnswers}
+import models.{Metadata, SubmissionStatus, UserAnswers}
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
+import play.api.libs.json.Json
 import play.api.libs.ws.WSClient
 import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.test.MongoSupport
@@ -40,7 +41,7 @@ trait RepositorySpecBase extends ItSpecBase {
   val mrn        = "mrn"
   val eoriNumber = "eori"
 
-  def emptyMetadata: Metadata = Metadata(mrn, eoriNumber)
+  def emptyMetadata: Metadata = Metadata(mrn, eoriNumber, Json.obj(), SubmissionStatus.NotSubmitted)
 
   def emptyUserAnswers: UserAnswers = UserAnswers(emptyMetadata, Instant.now(), Instant.now(), UUID.randomUUID())
 }
