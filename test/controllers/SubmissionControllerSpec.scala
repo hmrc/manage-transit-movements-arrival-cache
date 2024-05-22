@@ -18,6 +18,7 @@ package controllers
 
 import base.{AppWithDefaultMockFixtures, SpecBase}
 import models.AuditType.ArrivalNotification
+import models.SubmissionStatus
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito.{never, reset, verify, when}
 import play.api.inject.bind
@@ -63,6 +64,9 @@ class SubmissionControllerSpec extends SpecBase with AppWithDefaultMockFixtures 
         when(mockApiService.submitDeclaration(any())(any()))
           .thenReturn(Future.successful(Right(HttpResponse(OK, Json.stringify(body)))))
 
+        when(mockCacheRepository.set(any()))
+          .thenReturn(Future.successful(true))
+
         val request = FakeRequest(POST, routes.SubmissionController.post().url)
           .withBody(Json.toJson(mrn))
 
@@ -72,6 +76,7 @@ class SubmissionControllerSpec extends SpecBase with AppWithDefaultMockFixtures 
         contentAsJson(result) shouldBe body
 
         verify(mockCacheRepository).get(eqTo(mrn), eqTo(eoriNumber))
+        verify(mockCacheRepository).set(eqTo(userAnswers.metadata.copy(submissionStatus = SubmissionStatus.Submitted)))
         verify(mockApiService).submitDeclaration(eqTo(userAnswers))(any())
         verify(mockAuditService).audit(eqTo(ArrivalNotification), eqTo(userAnswers))(any())
       }

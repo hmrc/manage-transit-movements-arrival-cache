@@ -18,6 +18,7 @@ package controllers
 
 import controllers.actions.AuthenticateActionProvider
 import models.AuditType.ArrivalNotification
+import models.SubmissionStatus
 import play.api.Logging
 import play.api.libs.json.{JsError, JsSuccess, JsValue}
 import play.api.mvc.{Action, ControllerComponents}
@@ -45,12 +46,16 @@ class SubmissionController @Inject() (
         case JsSuccess(mrn, _) =>
           cacheRepository.get(mrn, request.eoriNumber).flatMap {
             case Some(userAnswers) =>
-              apiService.submitDeclaration(userAnswers).map {
+              apiService.submitDeclaration(userAnswers).flatMap {
                 case Right(response) =>
-                  auditService.audit(ArrivalNotification, userAnswers)
-                  Ok(response.body)
+                  // set submission status to submitted
+                  cacheRepository.set(userAnswers.metadata.copy(submissionStatus = SubmissionStatus.Submitted)).map {
+                    _ =>
+                      auditService.audit(ArrivalNotification, userAnswers)
+                      Ok(response.body)
+                  }
                 case Left(error) =>
-                  error
+                  Future.successful(error)
               }
             case None => Future.successful(InternalServerError)
           }
