@@ -8,7 +8,7 @@ DELETE     /user-answers/:mrn                                   controllers.Cach
 
 # Submission
 POST       /declaration/submit                                  controllers.SubmissionController.post()
-
+GET        /messages/:mrn                                       controllers.SubmissionController.get(mrn: String)
 
 GET        /user-answers/:mrn/lock                              controllers.LockController.checkLock(mrn: String)
 DELETE     /user-answers/:mrn/lock                              controllers.LockController.deleteLock(mrn: String)

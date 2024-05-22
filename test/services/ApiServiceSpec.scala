@@ -19,6 +19,7 @@ package services
 import api.submission.Declaration
 import base.{AppWithDefaultMockFixtures, SpecBase}
 import connectors.ApiConnector
+import models.{Arrival, Message, Messages}
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito._
 import play.api.http.Status.OK
@@ -26,6 +27,7 @@ import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
 import uk.gov.hmrc.http.HttpResponse
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.xml.NodeSeq
 
@@ -69,6 +71,44 @@ class ApiServiceSpec extends SpecBase with AppWithDefaultMockFixtures {
       result shouldBe expectedResult
 
       verify(mockApiConnector).submitDeclaration(eqTo(xml))(any())
+    }
+  }
+
+  "get" when {
+    val mrn = "27WF9X1FQ9RCKN0TM3"
+
+    "no arrival found" must {
+      "return None" in {
+        when(mockApiConnector.getArrival(any())(any()))
+          .thenReturn(Future.successful(None))
+
+        val result = service.get(mrn).futureValue
+        result shouldBe None
+
+        verify(mockApiConnector).getArrival(eqTo(mrn))(any())
+      }
+    }
+
+    "arrival found" when {
+      val arrivalId = "63498209a2d89ad8"
+
+      "messages found" must {
+        "return list of messages" in {
+          when(mockApiConnector.getArrival(any())(any()))
+            .thenReturn(Future.successful(Some(Arrival(arrivalId, mrn))))
+
+          val messages = Messages(Seq(Message("IE007")))
+
+          when(mockApiConnector.getMessages(any())(any()))
+            .thenReturn(Future.successful(messages))
+
+          val result = service.get(mrn).futureValue
+          result shouldBe Some(messages)
+
+          verify(mockApiConnector).getArrival(eqTo(mrn))(any())
+          verify(mockApiConnector).getMessages(eqTo(arrivalId))(any())
+        }
+      }
     }
   }
 }

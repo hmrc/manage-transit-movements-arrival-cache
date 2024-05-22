@@ -17,6 +17,7 @@
 package connectors
 
 import config.AppConfig
+import models.{Arrival, Arrivals, Messages}
 import play.api.Logging
 import play.api.http.HeaderNames._
 import play.api.http.Status._
@@ -32,11 +33,13 @@ import scala.xml.NodeSeq
 
 class ApiConnector @Inject() (http: HttpClientV2, appConfig: AppConfig)(implicit ec: ExecutionContext) extends HttpErrorFunctions with Logging {
 
+  private val acceptHeader: (String, String) = (ACCEPT, "application/vnd.hmrc.2.0+json")
+
   def submitDeclaration(xml: NodeSeq)(implicit hc: HeaderCarrier): Future[Either[Result, HttpResponse]] = {
     val url = url"${appConfig.apiUrl}/movements/arrivals"
     http
       .post(url)
-      .setHeader(ACCEPT -> "application/vnd.hmrc.2.0+json")
+      .setHeader(acceptHeader)
       .setHeader(CONTENT_TYPE -> "application/xml")
       .withBody(xml)
       .execute[HttpResponse]
@@ -53,5 +56,23 @@ class ApiConnector @Inject() (http: HttpClientV2, appConfig: AppConfig)(implicit
               Left(InternalServerError("ApiConnector:submitDeclaration: something went wrong"))
           }
       }
+  }
+
+  def getArrival(mrn: String)(implicit hc: HeaderCarrier): Future[Option[Arrival]] = {
+    val url = url"${appConfig.apiUrl}/movements/arrivals"
+    http
+      .get(url)
+      .transform(_.withQueryStringParameters("movementReferenceNumber" -> mrn))
+      .setHeader(acceptHeader)
+      .execute[Arrivals]
+      .map(_.arrivals.headOption)
+  }
+
+  def getMessages(arrivalId: String)(implicit hc: HeaderCarrier): Future[Messages] = {
+    val url = url"${appConfig.apiUrl}/movements/arrivals/$arrivalId/messages"
+    http
+      .get(url)
+      .setHeader(acceptHeader)
+      .execute[Messages]
   }
 }
