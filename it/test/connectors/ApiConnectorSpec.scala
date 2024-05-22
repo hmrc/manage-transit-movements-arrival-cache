@@ -18,6 +18,7 @@ package connectors
 
 import com.github.tomakehurst.wiremock.client.WireMock._
 import itbase.{ItSpecBase, WireMockServerHandler}
+import models.{Arrival, Message, Messages}
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
 import play.api.mvc.Results.{BadRequest, InternalServerError}
@@ -35,21 +36,7 @@ class ApiConnectorSpec extends ItSpecBase with WireMockServerHandler {
 
   private lazy val connector: ApiConnector = app.injector.instanceOf[ApiConnector]
 
-  private val arrivalId: String = "someid"
-
-  private val expected: String = Json
-    .obj(
-      "_links" -> Json.obj(
-        "self" -> Json.obj(
-          "href" -> s"/customs/transits/movements/arrivals/$arrivalId"
-        ),
-        "messages" -> Json.obj(
-          "href" -> s"/customs/transits/movements/arrivals/$arrivalId/messages"
-        )
-      )
-    )
-    .toString()
-    .stripMargin
+  private val arrivalId: String = "63498209a2d89ad8"
 
   "ApiConnector" when {
 
@@ -61,11 +48,25 @@ class ApiConnectorSpec extends ItSpecBase with WireMockServerHandler {
           <foo>bar</foo>
         </ncts:CC007C>
 
+      val response: String = Json
+        .obj(
+          "_links" -> Json.obj(
+            "self" -> Json.obj(
+              "href" -> s"/customs/transits/movements/arrivals/$arrivalId"
+            ),
+            "messages" -> Json.obj(
+              "href" -> s"/customs/transits/movements/arrivals/$arrivalId/messages"
+            )
+          )
+        )
+        .toString()
+        .stripMargin
+
       "success" in {
-        server.stubFor(post(urlEqualTo(url)).willReturn(okJson(expected)))
+        server.stubFor(post(urlEqualTo(url)).willReturn(okJson(response)))
 
         val res = await(connector.submitDeclaration(payload))
-        res.toString shouldBe Right(HttpResponse(OK, expected)).toString
+        res.toString shouldBe Right(HttpResponse(OK, response)).toString
       }
 
       "bad request" in {
@@ -80,6 +81,122 @@ class ApiConnectorSpec extends ItSpecBase with WireMockServerHandler {
 
         val res = await(connector.submitDeclaration(payload))
         res shouldBe Left(InternalServerError("ApiConnector:submitDeclaration: something went wrong"))
+      }
+    }
+
+    "getArrival" when {
+      val mrn = "27WF9X1FQ9RCKN0TM3"
+      val url = s"/movements/arrivals?movementReferenceNumber=$mrn"
+
+      "success" in {
+        val response: String =
+          s"""
+             |{
+             |  "_links": {
+             |    "self": {
+             |      "href": "/customs/transits/movements/arrivals"
+             |    }
+             |  },
+             |  "totalCount": 1,
+             |  "arrivals": [
+             |    {
+             |      "_links": {
+             |        "self": {
+             |          "href": "/customs/transits/movements/arrivals/$arrivalId"
+             |        },
+             |        "messages": {
+             |          "href": "/customs/transits/movements/arrivals/$arrivalId/messages"
+             |        }
+             |      },
+             |      "id": "63651574c3447b12",
+             |      "movementReferenceNumber": "$mrn",
+             |      "created": "2022-11-04T13:36:52.332Z",
+             |      "updated": "2022-11-04T13:36:52.332Z",
+             |      "enrollmentEORINumber": "9999912345",
+             |      "movementEORINumber": "GB1234567890"
+             |    }
+             |  ]
+             |}
+             |""".stripMargin
+
+        server.stubFor(get(urlEqualTo(url)).willReturn(okJson(response)))
+
+        val res = await(connector.getArrival(mrn))
+        res shouldBe Some(
+          Arrival(
+            id = "63651574c3447b12",
+            movementReferenceNumber = mrn
+          )
+        )
+      }
+
+      "no messages found" in {
+        val response: String =
+          s"""
+             |{
+             |  "_links": {
+             |    "self": {
+             |      "href": "/customs/transits/movements/arrivals"
+             |    }
+             |  },
+             |  "totalCount": 0,
+             |  "arrivals": []
+             |}
+             |""".stripMargin
+
+        server.stubFor(get(urlEqualTo(url)).willReturn(okJson(response)))
+
+        val res = await(connector.getArrival(mrn))
+        res shouldBe None
+      }
+    }
+
+    "getMessages" when {
+      val url = s"/movements/arrivals/$arrivalId/messages"
+
+      val messageId = "634982098f02f00a"
+
+      val response: String =
+        s"""
+          |{
+          |  "_links": {
+          |    "self": {
+          |      "href": "/customs/transits/movements/arrivals/$arrivalId/messages"
+          |    },
+          |    "arrival": {
+          |      "href": "/customs/transits/movements/arrivals/$arrivalId"
+          |    }
+          |  },
+          |  "totalCount": 1,
+          |  "messages": [
+          |    {
+          |      "_links": {
+          |        "self": {
+          |          "href": "/customs/transits/movements/arrivals/$arrivalId/messages/634982098f02f00a"
+          |        },
+          |        "arrival": {
+          |          "href": "/customs/transits/movements/arrivals/$arrivalId"
+          |        }
+          |      },
+          |      "id": "$messageId",
+          |      "arrivalId": "$arrivalId",
+          |      "received": "2022-11-10T15:32:51.459Z",
+          |      "type": "IE007",
+          |      "status": "Success"
+          |    }
+          |  ]
+          |}
+          |""".stripMargin
+
+      "success" in {
+        server.stubFor(get(urlEqualTo(url)).willReturn(okJson(response)))
+
+        val res = await(connector.getMessages(arrivalId))
+        res shouldBe Messages(
+          Seq(
+            Message("IE007")
+          )
+        )
       }
     }
   }

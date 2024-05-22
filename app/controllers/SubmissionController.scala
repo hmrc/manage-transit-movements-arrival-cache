@@ -18,10 +18,10 @@ package controllers
 
 import controllers.actions.AuthenticateActionProvider
 import models.AuditType.ArrivalNotification
-import models.SubmissionStatus
+import models.{Messages, SubmissionStatus}
 import play.api.Logging
-import play.api.libs.json.{JsError, JsSuccess, JsValue}
-import play.api.mvc.{Action, ControllerComponents}
+import play.api.libs.json.{JsError, JsSuccess, JsValue, Json}
+import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import repositories.CacheRepository
 import services.{ApiService, AuditService}
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
@@ -48,7 +48,6 @@ class SubmissionController @Inject() (
             case Some(userAnswers) =>
               apiService.submitDeclaration(userAnswers).flatMap {
                 case Right(response) =>
-                  // set submission status to submitted
                   cacheRepository.set(userAnswers.metadata.copy(submissionStatus = SubmissionStatus.Submitted)).map {
                     _ =>
                       auditService.audit(ArrivalNotification, userAnswers)
@@ -62,6 +61,19 @@ class SubmissionController @Inject() (
         case JsError(errors) =>
           logger.warn(s"Failed to validate request body as String: $errors")
           Future.successful(BadRequest)
+      }
+  }
+
+  def get(mrn: String): Action[AnyContent] = authenticate().async {
+    implicit request =>
+      apiService.get(mrn).map {
+        case Some(Messages(Nil)) =>
+          NoContent
+        case Some(messages) =>
+          Ok(Json.toJson(messages))
+        case None =>
+          logger.warn(s"No messages found for MRN $mrn")
+          NotFound
       }
   }
 }

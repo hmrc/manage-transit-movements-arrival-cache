@@ -17,13 +17,14 @@
 package services
 
 import api.submission.Declaration
+import cats.implicits.toTraverseOps
 import connectors.ApiConnector
-import models.UserAnswers
+import models.{Messages, UserAnswers}
 import play.api.mvc.Result
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
 import javax.inject.Inject
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 class ApiService @Inject() (
   apiConnector: ApiConnector,
@@ -32,4 +33,11 @@ class ApiService @Inject() (
 
   def submitDeclaration(userAnswers: UserAnswers)(implicit hc: HeaderCarrier): Future[Either[Result, HttpResponse]] =
     apiConnector.submitDeclaration(declaration.transform(userAnswers))
+
+  def get(mrn: String)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Option[Messages]] =
+    apiConnector.getArrival(mrn).flatMap {
+      _.traverse {
+        arrival => apiConnector.getMessages(arrival.id)
+      }
+    }
 }

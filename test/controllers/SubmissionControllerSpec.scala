@@ -18,7 +18,7 @@ package controllers
 
 import base.{AppWithDefaultMockFixtures, SpecBase}
 import models.AuditType.ArrivalNotification
-import models.SubmissionStatus
+import models.{Message, Messages, SubmissionStatus}
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito.{never, reset, verify, when}
 import play.api.inject.bind
@@ -131,4 +131,55 @@ class SubmissionControllerSpec extends SpecBase with AppWithDefaultMockFixtures 
     }
   }
 
+  "get" should {
+    val mrn = "27WF9X1FQ9RCKN0TM3"
+
+    "return 200" when {
+      "messages found" in {
+        val messages = Messages(Seq(Message("IE007")))
+
+        when(mockApiService.get(any())(any(), any()))
+          .thenReturn(Future.successful(Some(messages)))
+
+        val request = FakeRequest(GET, routes.SubmissionController.get(mrn).url)
+
+        val result = route(app, request).value
+
+        status(result) shouldBe OK
+        contentAsJson(result) shouldBe Json.toJson(messages)
+
+        verify(mockApiService).get(eqTo(mrn))(any(), any())
+      }
+    }
+
+    "return 204" when {
+      "no messages found" in {
+        when(mockApiService.get(any())(any(), any()))
+          .thenReturn(Future.successful(Some(Messages(Nil))))
+
+        val request = FakeRequest(GET, routes.SubmissionController.get(mrn).url)
+
+        val result = route(app, request).value
+
+        status(result) shouldBe NO_CONTENT
+
+        verify(mockApiService).get(eqTo(mrn))(any(), any())
+      }
+    }
+
+    "return 404" when {
+      "no arrival found" in {
+        when(mockApiService.get(any())(any(), any()))
+          .thenReturn(Future.successful(None))
+
+        val request = FakeRequest(GET, routes.SubmissionController.get(mrn).url)
+
+        val result = route(app, request).value
+
+        status(result) shouldBe NOT_FOUND
+
+        verify(mockApiService).get(eqTo(mrn))(any(), any())
+      }
+    }
+  }
 }
