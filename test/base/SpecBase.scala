@@ -18,7 +18,7 @@ package base
 
 import config.AppConfig
 import models.{Metadata, SensitiveFormats, SubmissionStatus, UserAnswers}
-import org.scalatest.concurrent.ScalaFutures
+import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.{EitherValues, OptionValues}
@@ -32,7 +32,15 @@ import uk.gov.hmrc.http.HeaderCarrier
 import java.time.{Clock, Instant}
 import java.util.UUID
 
-trait SpecBase extends AnyWordSpec with Matchers with MockitoSugar with GuiceOneAppPerSuite with OptionValues with EitherValues with ScalaFutures {
+trait SpecBase
+    extends AnyWordSpec
+    with Matchers
+    with MockitoSugar
+    with GuiceOneAppPerSuite
+    with OptionValues
+    with EitherValues
+    with ScalaFutures
+    with IntegrationPatience {
 
   val mrn        = "mrn"
   val eoriNumber = "eori"
