@@ -68,11 +68,12 @@ class SubmissionController @Inject() (
     implicit request =>
       apiService.get(mrn).map {
         case Some(Messages(Nil)) =>
+          logger.info(s"No messages found for MRN $mrn")
           NoContent
         case Some(messages) =>
           Ok(Json.toJson(messages))
         case None =>
-          logger.warn(s"No messages found for MRN $mrn")
+          logger.warn(s"No arrival found for MRN $mrn")
           NotFound
       }
   }
