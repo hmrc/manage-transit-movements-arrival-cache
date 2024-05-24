@@ -24,7 +24,6 @@ import org.mockito.Mockito.{never, reset, verify, when}
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
-import play.api.mvc.Results.BadRequest
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import services.{ApiService, AuditService}
@@ -62,7 +61,7 @@ class SubmissionControllerSpec extends SpecBase with AppWithDefaultMockFixtures 
 
         val body = Json.toJson("foo")
         when(mockApiService.submitDeclaration(any())(any()))
-          .thenReturn(Future.successful(Right(HttpResponse(OK, Json.stringify(body)))))
+          .thenReturn(Future.successful(HttpResponse(OK, Json.stringify(body))))
 
         when(mockCacheRepository.set(any()))
           .thenReturn(Future.successful(true))
@@ -88,7 +87,7 @@ class SubmissionControllerSpec extends SpecBase with AppWithDefaultMockFixtures 
         when(mockCacheRepository.get(any(), any())).thenReturn(Future.successful(Some(userAnswers)))
 
         when(mockApiService.submitDeclaration(any())(any()))
-          .thenReturn(Future.successful(Left(BadRequest)))
+          .thenReturn(Future.successful(HttpResponse(BAD_REQUEST, "")))
 
         val request = FakeRequest(POST, routes.SubmissionController.post().url)
           .withBody(Json.toJson(mrn))
@@ -109,7 +108,7 @@ class SubmissionControllerSpec extends SpecBase with AppWithDefaultMockFixtures 
 
         val result = route(app, request).value
 
-        status(result) shouldBe INTERNAL_SERVER_ERROR
+        status(result) shouldBe NOT_FOUND
 
         verify(mockCacheRepository).get(eqTo(mrn), eqTo(eoriNumber))
         verify(mockApiService, never()).submitDeclaration(any())(any())

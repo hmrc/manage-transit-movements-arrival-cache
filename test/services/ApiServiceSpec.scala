@@ -63,7 +63,7 @@ class ApiServiceSpec extends SpecBase with AppWithDefaultMockFixtures {
   "submitDeclaration" must {
     "call connector" in {
       val userAnswers    = emptyUserAnswers
-      val expectedResult = Right(HttpResponse(OK, ""))
+      val expectedResult = HttpResponse(OK, "")
 
       when(mockApiConnector.submitDeclaration(any())(any())).thenReturn(Future.successful(expectedResult))
 
