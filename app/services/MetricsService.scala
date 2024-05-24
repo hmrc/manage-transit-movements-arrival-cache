@@ -17,6 +17,7 @@
 package services
 
 import com.codahale.metrics.MetricRegistry
+import models.AuditType.ArrivalNotification
 import play.api.mvc.BaseController
 import uk.gov.hmrc.http.HttpReads._
 import uk.gov.hmrc.http.HttpResponse
@@ -33,7 +34,7 @@ class MetricsService @Inject() (metrics: Metrics) {
     increment(response.status)
 
   def increment(status: Int): Unit = {
-    val name = "IE007"
+    val name = ArrivalNotification.name
     status match {
       case status if is4xx(status) => registry.counter(s"$name-4xx").inc()
       case status if is5xx(status) => registry.counter(s"$name-5xx").inc()
