@@ -20,9 +20,6 @@ import config.AppConfig
 import models.{Arrival, Arrivals, Messages}
 import play.api.Logging
 import play.api.http.HeaderNames._
-import play.api.http.Status._
-import play.api.mvc.Result
-import play.api.mvc.Results.{BadRequest, InternalServerError}
 import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.http.{HeaderCarrier, HttpErrorFunctions, HttpResponse, StringContextOps}
@@ -35,7 +32,7 @@ class ApiConnector @Inject() (http: HttpClientV2, appConfig: AppConfig)(implicit
 
   private val acceptHeader: (String, String) = (ACCEPT, "application/vnd.hmrc.2.0+json")
 
-  def submitDeclaration(xml: NodeSeq)(implicit hc: HeaderCarrier): Future[Either[Result, HttpResponse]] = {
+  def submitDeclaration(xml: NodeSeq)(implicit hc: HeaderCarrier): Future[HttpResponse] = {
     val url = url"${appConfig.apiUrl}/movements/arrivals"
     http
       .post(url)
@@ -43,19 +40,6 @@ class ApiConnector @Inject() (http: HttpClientV2, appConfig: AppConfig)(implicit
       .setHeader(CONTENT_TYPE -> "application/xml")
       .withBody(xml)
       .execute[HttpResponse]
-      .map {
-        response =>
-          response.status match {
-            case x if is2xx(x) =>
-              Right(response)
-            case BAD_REQUEST =>
-              logger.info(s"ApiConnector:submitDeclaration: bad request")
-              Left(BadRequest("ApiConnector:submitDeclaration: bad request"))
-            case e =>
-              logger.error(s"ApiConnector:submitDeclaration: something went wrong: $e")
-              Left(InternalServerError("ApiConnector:submitDeclaration: something went wrong"))
-          }
-      }
   }
 
   def getArrival(mrn: String)(implicit hc: HeaderCarrier): Future[Option[Arrival]] = {

@@ -20,7 +20,6 @@ import api.submission.Declaration
 import cats.implicits.toTraverseOps
 import connectors.ApiConnector
 import models.{Messages, UserAnswers}
-import play.api.mvc.Result
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
 import javax.inject.Inject
@@ -31,7 +30,7 @@ class ApiService @Inject() (
   declaration: Declaration
 ) {
 
-  def submitDeclaration(userAnswers: UserAnswers)(implicit hc: HeaderCarrier): Future[Either[Result, HttpResponse]] =
+  def submitDeclaration(userAnswers: UserAnswers)(implicit hc: HeaderCarrier): Future[HttpResponse] =
     apiConnector.submitDeclaration(declaration.transform(userAnswers))
 
   def get(mrn: String)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Option[Messages]] =

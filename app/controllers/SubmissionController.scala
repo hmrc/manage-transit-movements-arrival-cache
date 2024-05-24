@@ -23,7 +23,8 @@ import play.api.Logging
 import play.api.libs.json.{JsError, JsSuccess, JsValue, Json}
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import repositories.CacheRepository
-import services.{ApiService, AuditService}
+import services.{ApiService, AuditService, MetricsService}
+import uk.gov.hmrc.http.HttpReads.is2xx
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
 import javax.inject.{Inject, Singleton}
@@ -35,31 +36,47 @@ class SubmissionController @Inject() (
   authenticate: AuthenticateActionProvider,
   apiService: ApiService,
   cacheRepository: CacheRepository,
-  auditService: AuditService
+  auditService: AuditService,
+  metricsService: MetricsService
 )(implicit ec: ExecutionContext)
     extends BackendController(cc)
     with Logging {
 
   def post(): Action[JsValue] = authenticate().async(parse.json) {
     implicit request =>
+      val eori                                        = request.eoriNumber
+      def log(message: String, args: String*): String = s"SubmissionController:post:${args.mkString(":")} - $message"
+
       request.body.validate[String] match {
         case JsSuccess(mrn, _) =>
           cacheRepository.get(mrn, request.eoriNumber).flatMap {
             case Some(userAnswers) =>
               apiService.submitDeclaration(userAnswers).flatMap {
-                case Right(response) =>
-                  cacheRepository.set(userAnswers.metadata.copy(submissionStatus = SubmissionStatus.Submitted)).map {
-                    _ =>
-                      auditService.audit(ArrivalNotification, userAnswers)
-                      Ok(response.body)
+                response =>
+                  metricsService.increment(response.status)
+                  response.status match {
+                    case status if is2xx(status) =>
+                      cacheRepository.set(userAnswers.metadata.copy(submissionStatus = SubmissionStatus.Submitted)).map {
+                        _ =>
+                          auditService.audit(ArrivalNotification, userAnswers)
+                          Ok(response.body)
+                      }
+                    case BAD_REQUEST =>
+                      logger.warn(log("Bad request", eori, mrn))
+                      Future.successful(BadRequest)
+                    case e =>
+                      logger.error(log(s"Something went wrong: $e", eori, mrn))
+                      Future.successful(InternalServerError)
                   }
-                case Left(error) =>
-                  Future.successful(error)
               }
-            case None => Future.successful(InternalServerError)
+            case None =>
+              metricsService.increment(NOT_FOUND)
+              logger.error(log("Could not find user answers", eori, mrn))
+              Future.successful(NotFound)
           }
         case JsError(errors) =>
-          logger.warn(s"Failed to validate request body as String: $errors")
+          metricsService.increment(BAD_REQUEST)
+          logger.warn(log(s"Failed to validate request body as String: $errors", eori))
           Future.successful(BadRequest)
       }
   }
