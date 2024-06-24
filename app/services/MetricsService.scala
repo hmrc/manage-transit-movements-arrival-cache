@@ -19,7 +19,7 @@ package services
 import com.codahale.metrics.MetricRegistry
 import models.AuditType.ArrivalNotification
 import play.api.mvc.BaseController
-import uk.gov.hmrc.http.HttpReads._
+import uk.gov.hmrc.http.HttpErrorFunctions.{is4xx, is5xx}
 import uk.gov.hmrc.http.HttpResponse
 import uk.gov.hmrc.play.bootstrap.metrics.Metrics
 
