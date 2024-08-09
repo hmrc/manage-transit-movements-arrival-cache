@@ -124,7 +124,6 @@ class CacheRepository @Inject() (
     } yield UserAnswersSummary(
       eoriNumber,
       aggregateResult,
-      appConfig.mongoTtlInDays,
       totalDocuments.toInt,
       totalMatchingDocuments
     )

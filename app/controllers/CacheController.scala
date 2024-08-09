@@ -119,7 +119,7 @@ class CacheController @Inject() (
         cacheRepository
           .getAll(request.eoriNumber, mrn, limit, skip, sortBy)
           .map(
-            result => Ok(result.toHateoas(dateTimeService.timestamp))
+            result => Ok(result.toHateoas(dateTimeService.expiresInDays))
           )
           .recover {
             case e =>
