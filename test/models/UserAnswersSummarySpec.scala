@@ -69,7 +69,7 @@ class UserAnswersSummarySpec extends SpecBase {
           )
         )
 
-      userAnswersSummary.toHateoas() shouldBe expectedResult
+      userAnswersSummary.toHateoas(Instant.now()) shouldBe expectedResult
     }
   }
 }

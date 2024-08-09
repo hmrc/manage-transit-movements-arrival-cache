@@ -264,7 +264,7 @@ class CacheControllerSpec extends SpecBase with AppWithDefaultMockFixtures {
         val result  = route(app, request).value
 
         status(result) shouldBe OK
-        contentAsJson(result) shouldBe UserAnswersSummary(eoriNumber, Seq(userAnswer1, userAnswer2), 30, 2, 2).toHateoas()
+        contentAsJson(result) shouldBe UserAnswersSummary(eoriNumber, Seq(userAnswer1, userAnswer2), 30, 2, 2).toHateoas(Instant.now())
         verify(mockCacheRepository).getAll(eqTo(eoriNumber), any(), any(), any(), any())
       }
     }
