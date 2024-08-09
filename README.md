@@ -5,7 +5,7 @@
 
 ---
 
-## `GET /user-answers?mrn=[Option[String]]&limit=[Option[Int]]&skip=[Option[Int]]`
+## `GET /user-answers?mrn=[Option[String]]&limit=[Option[Int]]&skip=[Option[Int]]&sortBy=[Option[String]]`
 
 #### Params
 
@@ -13,6 +13,7 @@
     * mrn - Filters documents for partial or matching Movement Reference Number of all user answers for given eori number
     * limit - Sets the maximum number of returned documents
     * skip - Sets the increment of skipped documents for pagination purposes. The number of documents skipped is worked out as 'skip * limit'
+    * sortBy - Sorts the documents being returned. These can be sorted in ascending or descending order using the MRN or date created
 
 ### Successful response
 
@@ -46,6 +47,7 @@
       },
       "createdAt": "2023-01-26T10:32:15.648",
       "lastUpdated": "2023-01-27T08:43:17.064",
+      "expiresInDays": 29,
       "_id": "27e687a9-4544-4e22-937e-74e699d855f8"
       },
       {
@@ -57,6 +59,7 @@
     },
     "createdAt": "2023-01-26T10:32:36.96",
     "lastUpdated": "2023-01-26T10:32:41.377",
+    "expiresInDays": 29,
     "_id": "750f1f92-6c61-4a3b-ad3e-95d8c7418eb4"
     }
   ]
@@ -113,7 +116,7 @@
 
 ---
 
-##  `POST /user-answers`
+##  `POST /user-answers/:mrn`
 
 ### Successful response
 
@@ -188,6 +191,34 @@
 
 #### 500 INTERNAL_SERVER_ERROR
 * An error occurred in the mongo client
+
+---
+
+## `POST /declaration/submit`
+
+### Successful response
+
+#### 200 OK
+
+* A call is made to the `POST` endpoint with:
+  * a valid bearer token
+  * a valid `HMRC-CTC-ORG` enrolment with `EoriNumber` identifier
+  * a valid `String` request body representing the MRN
+* Then, an IE007 gets successfully submitted to the API
+
+### Unsuccessful responses (with possible causes)
+
+#### 400 BAD_REQUEST
+* Request body could not be validated as a `String`
+
+#### 401 UNAUTHORIZED
+* A generic authorization error occurred. The likely cause of this is an invalid or missing bearer token.
+
+#### 403 FORBIDDEN
+* User has insufficient enrolments
+
+#### 500 INTERNAL_SERVER_ERROR
+* An error occurred
 
 ---
 
