@@ -31,7 +31,8 @@ class AppConfig @Inject() (config: Configuration) {
   val enrolmentKey: String        = config.get[String]("enrolment.key")
   val enrolmentIdentifier: String = config.get[String]("enrolment.identifier")
 
-  val apiUrl: String = config.get[Service]("microservice.services.common-transit-convention-traders").baseUrl
+  val apiUrl: String     = config.get[Service]("microservice.services.common-transit-convention-traders").baseUrl
+  val apiVersion: String = config.get[String]("microservice.services.common-transit-convention-traders.version")
 
   val encryptionKey: String      = config.get[String]("encryption.key")
   val encryptionEnabled: Boolean = config.get[Boolean]("encryption.enabled")
