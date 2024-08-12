@@ -23,19 +23,19 @@ import play.api.Logging
 import play.api.mvc.Results.{BadRequest, Locked}
 import play.api.mvc.{ActionFilter, Result}
 import repositories.DefaultLockRepository
+import services.DateTimeService
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.http.HeaderCarrierConverter
 
-import java.time.{Clock, Instant}
 import scala.concurrent.{ExecutionContext, Future}
 
-class LockActionProvider @Inject() (repository: DefaultLockRepository, clock: Clock)(implicit ec: ExecutionContext) {
+class LockActionProvider @Inject() (repository: DefaultLockRepository, dateTimeService: DateTimeService)(implicit ec: ExecutionContext) {
 
   def apply(mrn: String): ActionFilter[AuthenticatedRequest] =
-    new LockAction(mrn, repository, clock)
+    new LockAction(mrn, repository, dateTimeService)
 }
 
-class LockAction(mrn: String, repository: DefaultLockRepository, clock: Clock)(implicit val executionContext: ExecutionContext)
+class LockAction(mrn: String, repository: DefaultLockRepository, dateTimeService: DateTimeService)(implicit val executionContext: ExecutionContext)
     extends ActionFilter[AuthenticatedRequest]
     with Logging {
 
@@ -45,7 +45,7 @@ class LockAction(mrn: String, repository: DefaultLockRepository, clock: Clock)(i
     hc.sessionId
       .map {
         sessionId =>
-          val now = Instant.now(clock)
+          val now = dateTimeService.timestamp
 
           val lock: Lock = Lock(
             sessionId = sessionId.value,

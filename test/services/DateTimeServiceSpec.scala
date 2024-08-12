@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2023 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,21 +16,24 @@
 
 package services
 
-import config.AppConfig
+import base.SpecBase
 
+import java.time.Instant
 import java.time.temporal.ChronoUnit.DAYS
-import java.time.{Clock, Duration, Instant, LocalDateTime}
-import javax.inject.Inject
 
-class DateTimeService @Inject() (
-  clock: Clock,
-  config: AppConfig
-) {
+class DateTimeServiceSpec extends SpecBase {
 
-  def now: LocalDateTime = LocalDateTime.now(clock)
+  private val service = app.injector.instanceOf[DateTimeService]
 
-  def timestamp: Instant = Instant.now(clock)
+  "expiresInDays" should {
 
-  def expiresInDays(createdAt: Instant): Long =
-    Duration.between(timestamp, createdAt.plus(config.mongoTtlInDays, DAYS)).toDays + 1
+    "return correct days for a date today" in {
+      service.expiresInDays(Instant.now()) shouldBe 30L
+    }
+
+    "return correct days for a date 5 days ago" in {
+      service.expiresInDays(Instant.now().minus(5, DAYS)) shouldBe 25L
+    }
+  }
+
 }

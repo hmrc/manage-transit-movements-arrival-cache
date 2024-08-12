@@ -258,13 +258,45 @@ class CacheControllerSpec extends SpecBase with AppWithDefaultMockFixtures {
         val userAnswer2 = UserAnswers(Metadata("CD123", eoriNumber, Json.obj(), SubmissionStatus.NotSubmitted), Instant.now(), Instant.now(), UUID.randomUUID())
 
         when(mockCacheRepository.getAll(any(), any(), any(), any(), any()))
-          .thenReturn(Future.successful(UserAnswersSummary(eoriNumber, Seq(userAnswer1, userAnswer2), 30, 2, 2)))
+          .thenReturn(Future.successful(UserAnswersSummary(eoriNumber, Seq(userAnswer1, userAnswer2), 2, 2)))
 
         val request = FakeRequest(GET, routes.CacheController.getAll().url)
         val result  = route(app, request).value
 
         status(result) shouldBe OK
-        contentAsJson(result) shouldBe UserAnswersSummary(eoriNumber, Seq(userAnswer1, userAnswer2), 30, 2, 2).toHateoas()
+        contentAsJson(result) shouldBe Json.parse(s"""
+             |{
+             |  "eoriNumber": "eori",
+             |  "totalMovements": 2,
+             |  "totalMatchingMovements": 2,
+             |  "userAnswers": [
+             |    {
+             |      "mrn": "${userAnswer1.mrn}",
+             |      "_links": {
+             |        "self": {
+             |          "href": "/manage-transit-movements-arrival-cache/user-answers/${userAnswer1.mrn}"
+             |        }
+             |      },
+             |      "createdAt": "${userAnswer1.createdAt}",
+             |      "lastUpdated": "${userAnswer1.lastUpdated}",
+             |      "expiresInDays": 30,
+             |      "_id": "${userAnswer1.id}"
+             |    },
+             |    {
+             |      "mrn": "${userAnswer2.mrn}",
+             |      "_links": {
+             |        "self": {
+             |          "href": "/manage-transit-movements-arrival-cache/user-answers/${userAnswer2.mrn}"
+             |        }
+             |      },
+             |      "createdAt": "${userAnswer2.createdAt}",
+             |      "lastUpdated": "${userAnswer2.lastUpdated}",
+             |      "expiresInDays": 30,
+             |      "_id": "${userAnswer2.id}"
+             |    }
+             |  ]
+             |}
+             |""".stripMargin)
         verify(mockCacheRepository).getAll(eqTo(eoriNumber), any(), any(), any(), any())
       }
     }

@@ -168,7 +168,7 @@ class CacheRepositorySpec extends CacheRepositorySpecBase {
         val result = repository.getAll(userAnswers4.eoriNumber).futureValue
 
         result match {
-          case UserAnswersSummary(eoriNumber, userAnswers, _, totalMovements, totalMatchingMovements) =>
+          case UserAnswersSummary(eoriNumber, userAnswers, totalMovements, totalMatchingMovements) =>
             eoriNumber shouldBe userAnswers4.eoriNumber
             totalMovements shouldBe 2
             totalMatchingMovements shouldBe 2
@@ -197,7 +197,7 @@ class CacheRepositorySpec extends CacheRepositorySpecBase {
         val result = repository.getAll(userAnswers4.eoriNumber, Some(userAnswers4.mrn)).futureValue
 
         result match {
-          case UserAnswersSummary(eoriNumber, userAnswers, _, totalMovements, totalMatchingMovements) =>
+          case UserAnswersSummary(eoriNumber, userAnswers, totalMovements, totalMatchingMovements) =>
             eoriNumber shouldBe userAnswers4.eoriNumber
             totalMovements shouldBe 3
             totalMatchingMovements shouldBe 1
@@ -214,7 +214,7 @@ class CacheRepositorySpec extends CacheRepositorySpecBase {
         val result = repository.getAll(userAnswers4.eoriNumber, Some("ABCD")).futureValue
 
         result match {
-          case UserAnswersSummary(eoriNumber, userAnswers, _, totalMovements, totalMatchingMovements) =>
+          case UserAnswersSummary(eoriNumber, userAnswers, totalMovements, totalMatchingMovements) =>
             eoriNumber shouldBe userAnswers4.eoriNumber
             totalMovements shouldBe 3
             totalMatchingMovements shouldBe 2
@@ -267,7 +267,7 @@ class CacheRepositorySpec extends CacheRepositorySpecBase {
         val result = repository.getAll(userAnswers1.eoriNumber, limit = Some(2)).futureValue
 
         result match {
-          case UserAnswersSummary(eoriNumber, userAnswers, _, totalMovements, totalMatchingMovements) =>
+          case UserAnswersSummary(eoriNumber, userAnswers, totalMovements, totalMatchingMovements) =>
             eoriNumber shouldBe userAnswers1.eoriNumber
             totalMovements shouldBe 4
             totalMatchingMovements shouldBe 4
@@ -320,7 +320,7 @@ class CacheRepositorySpec extends CacheRepositorySpecBase {
         val result = repository.getAll(userAnswers1.eoriNumber, Some("GB"), limit = Some(2)).futureValue
 
         result match {
-          case UserAnswersSummary(eoriNumber, userAnswers, _, totalMovements, totalMatchingMovements) =>
+          case UserAnswersSummary(eoriNumber, userAnswers, totalMovements, totalMatchingMovements) =>
             eoriNumber shouldBe userAnswers1.eoriNumber
             totalMovements shouldBe 6
             totalMatchingMovements shouldBe 3
@@ -377,7 +377,7 @@ class CacheRepositorySpec extends CacheRepositorySpecBase {
         val result3 = repository.getAll(userAnswers1.eoriNumber, limit = Some(3), skip = Some(1)).futureValue
 
         result1 match {
-          case UserAnswersSummary(eoriNumber, userAnswers, _, totalMovements, totalMatchingMovements) =>
+          case UserAnswersSummary(eoriNumber, userAnswers, totalMovements, totalMatchingMovements) =>
             eoriNumber shouldBe userAnswers1.eoriNumber
             totalMovements shouldBe 6
             totalMatchingMovements shouldBe 6
@@ -387,7 +387,7 @@ class CacheRepositorySpec extends CacheRepositorySpecBase {
         }
 
         result2 match {
-          case UserAnswersSummary(eoriNumber, userAnswers, _, totalMovements, totalMatchingMovements) =>
+          case UserAnswersSummary(eoriNumber, userAnswers, totalMovements, totalMatchingMovements) =>
             eoriNumber shouldBe userAnswers1.eoriNumber
             totalMovements shouldBe 6
             totalMatchingMovements shouldBe 6
@@ -397,7 +397,7 @@ class CacheRepositorySpec extends CacheRepositorySpecBase {
         }
 
         result3 match {
-          case UserAnswersSummary(eoriNumber, userAnswers, _, totalMovements, totalMatchingMovements) =>
+          case UserAnswersSummary(eoriNumber, userAnswers, totalMovements, totalMatchingMovements) =>
             eoriNumber shouldBe userAnswers1.eoriNumber
             totalMovements shouldBe 6
             totalMatchingMovements shouldBe 6
@@ -450,7 +450,7 @@ class CacheRepositorySpec extends CacheRepositorySpecBase {
         val result = repository.getAll(userAnswers1.eoriNumber, Some("GB"), limit = Some(2), skip = Some(1)).futureValue
 
         result match {
-          case UserAnswersSummary(eoriNumber, userAnswers, _, totalMovements, totalMatchingMovements) =>
+          case UserAnswersSummary(eoriNumber, userAnswers, totalMovements, totalMatchingMovements) =>
             eoriNumber shouldBe userAnswers1.eoriNumber
             totalMovements shouldBe 6
             totalMatchingMovements shouldBe 3
@@ -504,7 +504,7 @@ class CacheRepositorySpec extends CacheRepositorySpecBase {
         val result = repository.getAll(userAnswers1.eoriNumber, sortBy = Some(SortByMRNAsc.convertParams)).futureValue
 
         result match {
-          case UserAnswersSummary(_, userAnswers, _, _, _) =>
+          case UserAnswersSummary(_, userAnswers, _, _) =>
             userAnswers.head.mrn shouldBe userAnswers1.mrn
             userAnswers(1).mrn shouldBe userAnswers2.mrn
             userAnswers(2).mrn shouldBe userAnswers3.mrn
@@ -526,7 +526,7 @@ class CacheRepositorySpec extends CacheRepositorySpecBase {
         val result = repository.getAll(userAnswers1.eoriNumber, sortBy = Some(SortByMRNDesc.convertParams)).futureValue
 
         result match {
-          case UserAnswersSummary(_, userAnswers, _, _, _) =>
+          case UserAnswersSummary(_, userAnswers, _, _) =>
             userAnswers.head.mrn shouldBe userAnswers6.mrn
             userAnswers(1).mrn shouldBe userAnswers5.mrn
             userAnswers(2).mrn shouldBe userAnswers4.mrn
@@ -548,7 +548,7 @@ class CacheRepositorySpec extends CacheRepositorySpecBase {
         val result = repository.getAll(userAnswers1.eoriNumber, sortBy = Some(SortByCreatedAtAsc.convertParams)).futureValue
 
         result match {
-          case UserAnswersSummary(_, userAnswers, _, _, _) =>
+          case UserAnswersSummary(_, userAnswers, _, _) =>
             userAnswers.head.mrn shouldBe userAnswers2.mrn
             userAnswers(1).mrn shouldBe userAnswers3.mrn
             userAnswers(2).mrn shouldBe userAnswers4.mrn
@@ -570,7 +570,7 @@ class CacheRepositorySpec extends CacheRepositorySpecBase {
         val result = repository.getAll(userAnswers1.eoriNumber, sortBy = Some(SortByCreatedAtDesc.convertParams)).futureValue
 
         result match {
-          case UserAnswersSummary(_, userAnswers, _, _, _) =>
+          case UserAnswersSummary(_, userAnswers, _, _) =>
             userAnswers.head.mrn shouldBe userAnswers5.mrn
             userAnswers(1).mrn shouldBe userAnswers6.mrn
             userAnswers(2).mrn shouldBe userAnswers1.mrn
@@ -593,7 +593,7 @@ class CacheRepositorySpec extends CacheRepositorySpecBase {
         val result = repository.getAll(userAnswers1.eoriNumber, sortBy = None).futureValue
 
         result match {
-          case UserAnswersSummary(_, userAnswers, _, _, _) =>
+          case UserAnswersSummary(_, userAnswers, _, _) =>
             userAnswers.head.mrn shouldBe userAnswers5.mrn
             userAnswers(1).mrn shouldBe userAnswers6.mrn
             userAnswers(2).mrn shouldBe userAnswers1.mrn

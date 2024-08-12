@@ -22,9 +22,9 @@ import play.api.Logging
 import play.api.libs.json.{JsError, JsSuccess, JsValue, Json}
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import repositories.CacheRepository
+import services.DateTimeService
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
-import java.time.Clock
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -33,8 +33,9 @@ class CacheController @Inject() (
   cc: ControllerComponents,
   authenticate: AuthenticateActionProvider,
   authenticateAndLock: AuthenticateAndLockActionProvider,
-  cacheRepository: CacheRepository
-)(implicit ec: ExecutionContext, clock: Clock)
+  cacheRepository: CacheRepository,
+  dateTimeService: DateTimeService
+)(implicit ec: ExecutionContext)
     extends BackendController(cc)
     with Logging {
 
@@ -118,7 +119,7 @@ class CacheController @Inject() (
         cacheRepository
           .getAll(request.eoriNumber, mrn, limit, skip, sortBy)
           .map(
-            result => Ok(result.toHateoas())
+            result => Ok(result.toHateoas(dateTimeService.expiresInDays))
           )
           .recover {
             case e =>
