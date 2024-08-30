@@ -204,6 +204,9 @@
   * a valid bearer token
   * a valid `HMRC-CTC-ORG` enrolment with `EoriNumber` identifier
   * a valid `String` request body representing the MRN
+  * an `Accept` header with either:
+    * `application/vnd.hmrc.2.0+json` for transition rules
+    * `application/vnd.hmrc.2.1+json` for final rules
 * Then, an IE007 gets successfully submitted to the API
 
 ### Unsuccessful responses (with possible causes)
@@ -216,6 +219,40 @@
 
 #### 403 FORBIDDEN
 * User has insufficient enrolments
+
+#### 500 INTERNAL_SERVER_ERROR
+* An error occurred
+
+---
+
+## `GET /messages/:mrn`
+
+### Successful response
+
+#### 200 OK
+
+* A call is made to the `GET` endpoint with:
+  * a valid bearer token
+  * a valid `HMRC-CTC-ORG` enrolment with `EoriNumber` identifier
+  * an `Accept` header with either:
+    * `application/vnd.hmrc.2.0+json` for transition rules
+    * `application/vnd.hmrc.2.1+json` for final rules
+* An arrival is found in the API for the given MRN and EORI number (extracted from the enrolment)
+* Then, the messages corresponding to this arrival ID are retrieved
+
+### Unsuccessful responses (with possible causes)
+
+#### 204 NO_CONTENT
+* The arrival was found, but it contained no messages
+
+#### 401 UNAUTHORIZED
+* A generic authorization error occurred. The likely cause of this is an invalid or missing bearer token.
+
+#### 403 FORBIDDEN
+* User has insufficient enrolments
+
+#### 404 NOT_FOUND
+* The arrival was not found
 
 #### 500 INTERNAL_SERVER_ERROR
 * An error occurred
