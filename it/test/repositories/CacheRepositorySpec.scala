@@ -19,10 +19,10 @@ package repositories
 import itbase.CacheRepositorySpecBase
 import models.Sort.{SortByCreatedAtAsc, SortByCreatedAtDesc, SortByMRNAsc, SortByMRNDesc}
 import models.{UserAnswers, UserAnswersSummary}
-import org.mongodb.scala.Document
 import org.mongodb.scala.bson.{BsonDocument, BsonString}
 import org.mongodb.scala.model.Filters
 import play.api.libs.json.Json
+import org.mongodb.scala._
 
 import java.time.Instant
 import java.time.temporal.ChronoUnit._
@@ -132,7 +132,7 @@ class CacheRepositorySpec extends CacheRepositorySpecBase {
       firstGet.eoriNumber shouldBe secondGet.eoriNumber
       firstGet.metadata shouldNot equal(secondGet.metadata)
       firstGet.createdAt shouldBe secondGet.createdAt
-      firstGet.lastUpdated isBefore secondGet.lastUpdated shouldBe true
+      firstGet.lastUpdated `isBefore` secondGet.lastUpdated shouldBe true
     }
   }
 

@@ -16,7 +16,7 @@
 
 package api.submission
 
-import generated.{CC007C, CC007CType, MESSAGESequence, NCTS5u461, PhaseIDtype}
+import generated.{CC007C, CC007CType, Generated_CC007CTypeFormat, Generated_PhaseIDtypeFormat, MESSAGESequence, NCTS5u461, PhaseIDtype}
 import models.UserAnswers
 import scalaxb.DataRecord
 import scalaxb.`package`.toXML
@@ -50,6 +50,6 @@ class Declaration @Inject() (header: Header) {
     )
   }
 
-  def attributes: Map[String, DataRecord[_]] =
+  def attributes: Map[String, DataRecord[?]] =
     Map("@PhaseID" -> DataRecord(PhaseIDtype.fromString(NCTS5u461.toString, scope)))
 }

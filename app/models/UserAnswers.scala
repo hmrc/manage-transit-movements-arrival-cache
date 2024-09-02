@@ -58,7 +58,7 @@ object UserAnswers {
         (__ \ "createdAt").read[Instant] and
         (__ \ "lastUpdated").read[Instant] and
         (__ \ "_id").read[UUID]
-    )(UserAnswers.apply _)
+    )(UserAnswers.apply)
 
   private def writes(implicit instantWrites: Writes[Instant], metaDataWrites: Writes[Metadata]): Writes[UserAnswers] =
     (
@@ -66,6 +66,8 @@ object UserAnswers {
         (__ \ "createdAt").write[Instant] and
         (__ \ "lastUpdated").write[Instant] and
         (__ \ "_id").write[UUID]
-    )(unlift(UserAnswers.unapply))
+    )(
+      ua => Tuple.fromProductTyped(ua)
+    )
 
 }

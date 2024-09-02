@@ -23,6 +23,7 @@ import play.api.http.HeaderNames._
 import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.http.{HeaderCarrier, HttpErrorFunctions, HttpResponse, StringContextOps}
+import play.api.libs.ws.XMLBodyWritables._
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
@@ -37,7 +38,7 @@ class ApiConnector @Inject() (http: HttpClientV2, appConfig: AppConfig)(implicit
     val url = url"${appConfig.apiUrl}/movements/arrivals"
     http
       .post(url)
-      .setHeader(headers: _*)
+      .setHeader(headers *)
       .setHeader(CONTENT_TYPE -> "application/xml")
       .withBody(xml)
       .execute[HttpResponse]
@@ -48,7 +49,7 @@ class ApiConnector @Inject() (http: HttpClientV2, appConfig: AppConfig)(implicit
     http
       .get(url)
       .transform(_.withQueryStringParameters("movementReferenceNumber" -> mrn))
-      .setHeader(headers: _*)
+      .setHeader(headers *)
       .execute[Arrivals]
       .map(_.arrivals.headOption)
   }
@@ -57,7 +58,7 @@ class ApiConnector @Inject() (http: HttpClientV2, appConfig: AppConfig)(implicit
     val url = url"${appConfig.apiUrl}/movements/arrivals/$arrivalId/messages"
     http
       .get(url)
-      .setHeader(headers: _*)
+      .setHeader(headers *)
       .execute[Messages]
   }
 }

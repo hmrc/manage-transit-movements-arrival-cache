@@ -33,7 +33,7 @@ object consignmentType01 {
   implicit val reads: Reads[ConsignmentType01] = (
     (__ \ "locationOfGoods").read[LocationOfGoodsType01](locationOfGoodsType01.reads) and
       (__ \ "incidents").readArray[IncidentType01](incidentType01.reads)
-  )(ConsignmentType01.apply _)
+  )(ConsignmentType01.apply)
 }
 
 object locationOfGoodsType01 {
@@ -52,19 +52,19 @@ object locationOfGoodsType01 {
         (__ \ "qualifierOfIdentificationDetails").read[Option[AddressType14]](addressType14.reads) and
         (__ \ "qualifierOfIdentificationDetails" \ "postalCode").readNullable[PostcodeAddressType02](postcodeAddressType02.reads) and
         (__ \ "contactPerson").readNullable[ContactPersonType06](contactPersonType06.reads)
-    )(LocationOfGoodsType01.apply _)
+    )(LocationOfGoodsType01.apply)
 }
 
 object economicOperatorType03 {
 
   implicit val reads: Reads[EconomicOperatorType03] =
-    __.read[String].map(EconomicOperatorType03)
+    __.read[String].map(EconomicOperatorType03.apply)
 }
 
 object customsOfficeType01 {
 
   implicit val reads: Reads[CustomsOfficeType01] =
-    (__ \ "id").read[String].map(CustomsOfficeType01)
+    (__ \ "id").read[String].map(CustomsOfficeType01.apply)
 }
 
 object gnssType {
@@ -72,7 +72,7 @@ object gnssType {
   implicit val reads: Reads[GNSSType] = (
     (__ \ "latitude").read[String] and
       (__ \ "longitude").read[String]
-  )(GNSSType.apply _)
+  )(GNSSType.apply)
 }
 
 object addressType14 {
@@ -96,7 +96,7 @@ object addressType01 {
     (__ \ "numberAndStreet").read[String] and
       (__ \ "postalCode").readNullable[String] and
       (__ \ "city").read[String]
-  )(AddressType01.apply _)
+  )(AddressType01.apply)
 
 }
 
@@ -106,7 +106,7 @@ object postcodeAddressType02 {
     (__ \ "streetNumber").readNullable[String] and
       (__ \ "postalCode").read[String] and
       (__ \ "country" \ "code").read[String]
-  )(PostcodeAddressType02.apply _)
+  )(PostcodeAddressType02.apply)
 
 }
 
@@ -126,7 +126,7 @@ object contactPerson {
 object contactPersonType06 {
 
   implicit val reads: Reads[ContactPersonType06] =
-    contactPerson.reads(ContactPersonType06)
+    contactPerson.reads(ContactPersonType06.apply)
 
 }
 
@@ -140,7 +140,7 @@ object incidentType01 {
       __.read[LocationType01](locationType01.reads) and
       (__ \ "equipments").readArray[TransportEquipmentType01](transportEquipmentType01.reads) and
       __.read[Option[TranshipmentType01]](transhipmentType01.reads)
-  )(IncidentType01.apply _)
+  )(IncidentType01.apply)
 
 }
 
@@ -151,7 +151,7 @@ object endorsementType01 {
       (__ \ "authority").read[String] and
       (__ \ "location").read[String] and
       (__ \ "country" \ "code").read[String]
-  )(EndorsementType01.apply _)
+  )(EndorsementType01.apply)
 
 }
 
@@ -163,7 +163,7 @@ object locationType01 {
       (__ \ "incidentCountry" \ "code").read[String] and
       (__ \ "coordinates").readNullable[GNSSType](gnssType.reads) and
       (__ \ "address").readNullable[AddressType01](addressType01.reads)
-  )(LocationType01.apply _)
+  )(LocationType01.apply)
 
 }
 
@@ -182,7 +182,7 @@ object transportEquipmentType01 {
       (__ \ "containerIdentificationNumber").readNullable[String] and
       (__ \ "seals").readArray[SealType05](sealType05.reads) and
       (__ \ "itemNumbers").readArray[GoodsReferenceType01](goodsReferenceType01.reads)
-  )(transportEquipmentType01.apply _)
+  )(transportEquipmentType01.apply)
 
 }
 
@@ -191,7 +191,7 @@ object sealType05 {
   def reads(index: Int): Reads[SealType05] = (
     (index.toString: Reads[String]) and
       (__ \ "sealIdentificationNumber").read[String]
-  )(SealType05.apply _)
+  )(SealType05.apply)
 
 }
 
@@ -200,7 +200,7 @@ object goodsReferenceType01 {
   def reads(index: Int): Reads[GoodsReferenceType01] = (
     (index.toString: Reads[String]) and
       (__ \ "itemNumber").read[String].map(BigInt(_))
-  )(GoodsReferenceType01.apply _)
+  )(GoodsReferenceType01.apply)
 
 }
 
@@ -228,6 +228,6 @@ object transportMeansType01 {
     (__ \ "identification" \ "type").read[String] and
       (__ \ "identificationNumber").read[String] and
       (__ \ "transportNationality" \ "code").read[String]
-  )(TransportMeansType01.apply _)
+  )(TransportMeansType01.apply)
 
 }
