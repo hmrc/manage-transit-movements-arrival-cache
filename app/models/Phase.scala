@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,23 +14,25 @@
  * limitations under the License.
  */
 
-package generators
+package models
 
-import models.{Phase, SubmissionStatus}
-import org.scalacheck.{Arbitrary, Gen}
+sealed trait Phase {
+  val version: String
+}
 
-trait ModelGenerators {
+object Phase {
 
-  implicit lazy val arbitrarySubmissionState: Arbitrary[SubmissionStatus] = Arbitrary {
-    val values = Seq(
-      SubmissionStatus.NotSubmitted,
-      SubmissionStatus.Submitted,
-      SubmissionStatus.Amending
-    )
-    Gen.oneOf(values)
+  case object Transition extends Phase {
+    override val version: String = "2.0"
   }
 
-  implicit lazy val arbitraryPhase: Arbitrary[Phase] = Arbitrary {
-    Gen.oneOf(Phase.Transition, Phase.PostTransition)
+  case object PostTransition extends Phase {
+    override val version: String = "2.1"
+  }
+
+  def apply(header: String): Option[Phase] = header match {
+    case Transition.version     => Some(Transition)
+    case PostTransition.version => Some(PostTransition)
+    case _                      => None
   }
 }
