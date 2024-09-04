@@ -16,7 +16,7 @@
 
 package controllers
 
-import controllers.actions.AuthenticateActionProvider
+import controllers.actions.{AuthenticateActionProvider, VersionedAction}
 import models.AuditType.ArrivalNotification
 import models.{Messages, SubmissionStatus}
 import play.api.Logging
@@ -34,6 +34,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class SubmissionController @Inject() (
   cc: ControllerComponents,
   authenticate: AuthenticateActionProvider,
+  getVersion: VersionedAction,
   apiService: ApiService,
   cacheRepository: CacheRepository,
   auditService: AuditService,
@@ -42,16 +43,16 @@ class SubmissionController @Inject() (
     extends BackendController(cc)
     with Logging {
 
-  def post(): Action[JsValue] = authenticate().async(parse.json) {
+  def post(): Action[JsValue] = (authenticate() andThen getVersion).async(parse.json) {
     implicit request =>
-      val eori                                        = request.eoriNumber
       def log(message: String, args: String*): String = s"SubmissionController:post:${args.mkString(":")} - $message"
 
+      val eori = request.eoriNumber
       request.body.validate[String] match {
         case JsSuccess(mrn, _) =>
           cacheRepository.get(mrn, request.eoriNumber).flatMap {
             case Some(userAnswers) =>
-              apiService.submitDeclaration(userAnswers).flatMap {
+              apiService.submitDeclaration(userAnswers, request.phase).flatMap {
                 response =>
                   metricsService.increment(response.status)
                   response.status match {
@@ -81,9 +82,9 @@ class SubmissionController @Inject() (
       }
   }
 
-  def get(mrn: String): Action[AnyContent] = authenticate().async {
+  def get(mrn: String): Action[AnyContent] = (authenticate() andThen getVersion).async {
     implicit request =>
-      apiService.get(mrn).map {
+      apiService.get(mrn, request.phase).map {
         case Some(Messages(Nil)) =>
           logger.info(s"No messages found for MRN $mrn")
           NoContent

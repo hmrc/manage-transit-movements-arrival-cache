@@ -19,9 +19,12 @@ package services
 import api.submission.Declaration
 import base.{AppWithDefaultMockFixtures, SpecBase}
 import connectors.ApiConnector
-import models.{Arrival, Message, Messages}
+import generators.Generators
+import models.{Arrival, Message, Messages, Phase}
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito._
+import org.scalacheck.Arbitrary.arbitrary
+import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import play.api.http.Status.OK
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
@@ -31,7 +34,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.xml.NodeSeq
 
-class ApiServiceSpec extends SpecBase with AppWithDefaultMockFixtures {
+class ApiServiceSpec extends SpecBase with AppWithDefaultMockFixtures with ScalaCheckPropertyChecks with Generators {
 
   private lazy val mockApiConnector = mock[ApiConnector]
   private lazy val mockDeclaration  = mock[Declaration]
@@ -62,15 +65,20 @@ class ApiServiceSpec extends SpecBase with AppWithDefaultMockFixtures {
 
   "submitDeclaration" must {
     "call connector" in {
-      val userAnswers    = emptyUserAnswers
-      val expectedResult = HttpResponse(OK, "")
+      forAll(arbitrary[Phase]) {
+        phase =>
+          beforeEach()
 
-      when(mockApiConnector.submitDeclaration(any())(any())).thenReturn(Future.successful(expectedResult))
+          val userAnswers    = emptyUserAnswers
+          val expectedResult = HttpResponse(OK, "")
 
-      val result = service.submitDeclaration(userAnswers).futureValue
-      result shouldBe expectedResult
+          when(mockApiConnector.submitDeclaration(any(), any())(any())).thenReturn(Future.successful(expectedResult))
 
-      verify(mockApiConnector).submitDeclaration(eqTo(xml))(any())
+          val result = service.submitDeclaration(userAnswers, phase).futureValue
+          result shouldBe expectedResult
+
+          verify(mockApiConnector).submitDeclaration(eqTo(xml), eqTo(phase))(any())
+      }
     }
   }
 
@@ -79,13 +87,18 @@ class ApiServiceSpec extends SpecBase with AppWithDefaultMockFixtures {
 
     "no arrival found" must {
       "return None" in {
-        when(mockApiConnector.getArrival(any())(any()))
-          .thenReturn(Future.successful(None))
+        forAll(arbitrary[Phase]) {
+          phase =>
+            beforeEach()
 
-        val result = service.get(mrn).futureValue
-        result shouldBe None
+            when(mockApiConnector.getArrival(any(), any())(any()))
+              .thenReturn(Future.successful(None))
 
-        verify(mockApiConnector).getArrival(eqTo(mrn))(any())
+            val result = service.get(mrn, phase).futureValue
+            result shouldBe None
+
+            verify(mockApiConnector).getArrival(eqTo(mrn), eqTo(phase))(any())
+        }
       }
     }
 
@@ -94,19 +107,24 @@ class ApiServiceSpec extends SpecBase with AppWithDefaultMockFixtures {
 
       "messages found" must {
         "return list of messages" in {
-          when(mockApiConnector.getArrival(any())(any()))
-            .thenReturn(Future.successful(Some(Arrival(arrivalId, mrn))))
+          forAll(arbitrary[Phase]) {
+            phase =>
+              beforeEach()
 
-          val messages = Messages(Seq(Message("IE007")))
+              when(mockApiConnector.getArrival(any(), any())(any()))
+                .thenReturn(Future.successful(Some(Arrival(arrivalId, mrn))))
 
-          when(mockApiConnector.getMessages(any())(any()))
-            .thenReturn(Future.successful(messages))
+              val messages = Messages(Seq(Message("IE007")))
 
-          val result = service.get(mrn).futureValue
-          result shouldBe Some(messages)
+              when(mockApiConnector.getMessages(any(), any())(any()))
+                .thenReturn(Future.successful(messages))
 
-          verify(mockApiConnector).getArrival(eqTo(mrn))(any())
-          verify(mockApiConnector).getMessages(eqTo(arrivalId))(any())
+              val result = service.get(mrn, phase).futureValue
+              result shouldBe Some(messages)
+
+              verify(mockApiConnector).getArrival(eqTo(mrn), eqTo(phase))(any())
+              verify(mockApiConnector).getMessages(eqTo(arrivalId), eqTo(phase))(any())
+          }
         }
       }
     }
