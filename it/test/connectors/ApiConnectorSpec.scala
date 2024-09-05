@@ -18,7 +18,7 @@ package connectors
 
 import com.github.tomakehurst.wiremock.client.WireMock._
 import itbase.{ItSpecBase, WireMockServerHandler}
-import models.{Arrival, Message, Messages}
+import models.{Arrival, Message, Messages, Phase}
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
 import play.api.test.Helpers._
@@ -72,7 +72,7 @@ class ApiConnectorSpec extends ItSpecBase with WireMockServerHandler {
             .willReturn(okJson(response))
         )
 
-        val res = await(connector.submitDeclaration(payload))
+        val res = await(connector.submitDeclaration(payload, Phase.Transition))
         res.status shouldBe OK
       }
 
@@ -83,7 +83,7 @@ class ApiConnectorSpec extends ItSpecBase with WireMockServerHandler {
             .willReturn(badRequest())
         )
 
-        val res = await(connector.submitDeclaration(payload))
+        val res = await(connector.submitDeclaration(payload, Phase.Transition))
         res.status shouldBe BAD_REQUEST
       }
 
@@ -94,7 +94,7 @@ class ApiConnectorSpec extends ItSpecBase with WireMockServerHandler {
             .willReturn(serverError())
         )
 
-        val res = await(connector.submitDeclaration(payload))
+        val res = await(connector.submitDeclaration(payload, Phase.Transition))
         res.status shouldBe INTERNAL_SERVER_ERROR
       }
     }
@@ -140,7 +140,7 @@ class ApiConnectorSpec extends ItSpecBase with WireMockServerHandler {
             .willReturn(okJson(response))
         )
 
-        val res = await(connector.getArrival(mrn))
+        val res = await(connector.getArrival(mrn, Phase.Transition))
         res shouldBe Some(
           Arrival(
             id = "63651574c3447b12",
@@ -169,7 +169,7 @@ class ApiConnectorSpec extends ItSpecBase with WireMockServerHandler {
             .willReturn(okJson(response))
         )
 
-        val res = await(connector.getArrival(mrn))
+        val res = await(connector.getArrival(mrn, Phase.Transition))
         res shouldBe None
       }
     }
@@ -218,7 +218,7 @@ class ApiConnectorSpec extends ItSpecBase with WireMockServerHandler {
             .willReturn(okJson(response))
         )
 
-        val res = await(connector.getMessages(arrivalId))
+        val res = await(connector.getMessages(arrivalId, Phase.Transition))
         res shouldBe Messages(
           Seq(
             Message("IE007")

@@ -17,7 +17,7 @@
 package connectors
 
 import config.AppConfig
-import models.{Arrival, Arrivals, Messages}
+import models.{Arrival, Arrivals, Messages, Phase}
 import play.api.Logging
 import play.api.http.HeaderNames._
 import uk.gov.hmrc.http.HttpReads.Implicits._
@@ -31,34 +31,31 @@ import scala.xml.NodeSeq
 
 class ApiConnector @Inject() (http: HttpClientV2, appConfig: AppConfig)(implicit ec: ExecutionContext) extends HttpErrorFunctions with Logging {
 
-  private def headers(implicit hc: HeaderCarrier): Seq[(String, String)] =
-    hc.headers(Seq(ACCEPT))
-
-  def submitDeclaration(xml: NodeSeq)(implicit hc: HeaderCarrier): Future[HttpResponse] = {
+  def submitDeclaration(xml: NodeSeq, phase: Phase)(implicit hc: HeaderCarrier): Future[HttpResponse] = {
     val url = url"${appConfig.apiUrl}/movements/arrivals"
     http
       .post(url)
-      .setHeader(headers *)
+      .setHeader(ACCEPT -> s"application/vnd.hmrc.${phase.version}+json")
       .setHeader(CONTENT_TYPE -> "application/xml")
       .withBody(xml)
       .execute[HttpResponse]
   }
 
-  def getArrival(mrn: String)(implicit hc: HeaderCarrier): Future[Option[Arrival]] = {
+  def getArrival(mrn: String, phase: Phase)(implicit hc: HeaderCarrier): Future[Option[Arrival]] = {
     val url = url"${appConfig.apiUrl}/movements/arrivals"
     http
       .get(url)
       .transform(_.withQueryStringParameters("movementReferenceNumber" -> mrn))
-      .setHeader(headers *)
+      .setHeader(ACCEPT -> s"application/vnd.hmrc.${phase.version}+json")
       .execute[Arrivals]
       .map(_.arrivals.headOption)
   }
 
-  def getMessages(arrivalId: String)(implicit hc: HeaderCarrier): Future[Messages] = {
+  def getMessages(arrivalId: String, phase: Phase)(implicit hc: HeaderCarrier): Future[Messages] = {
     val url = url"${appConfig.apiUrl}/movements/arrivals/$arrivalId/messages"
     http
       .get(url)
-      .setHeader(headers *)
+      .setHeader(ACCEPT -> s"application/vnd.hmrc.${phase.version}+json")
       .execute[Messages]
   }
 }
