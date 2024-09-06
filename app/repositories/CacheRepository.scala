@@ -25,6 +25,7 @@ import org.mongodb.scala.model._
 import services.DateTimeService
 import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.play.json.{Codecs, PlayMongoRepository}
+import org.mongodb.scala._
 
 import java.util.UUID
 import java.util.concurrent.TimeUnit
@@ -66,7 +67,11 @@ class CacheRepository @Inject() (
     val updates = Updates.combine(
       Updates.setOnInsert("mrn", data.mrn),
       Updates.setOnInsert("eoriNumber", data.eoriNumber),
-      Updates.set("data", Codecs.toBson(data.data)(sensitiveFormats.jsObjectWrites)),
+      Updates.set("data",
+                  Codecs.toBson(data.data)(using {
+                    sensitiveFormats.jsObjectWrites
+                  })
+      ),
       Updates.setOnInsert("createdAt", now),
       Updates.set("lastUpdated", now),
       Updates.setOnInsert("_id", Codecs.toBson(UUID.randomUUID())),
@@ -137,7 +142,7 @@ object CacheRepository {
   def indexes(appConfig: AppConfig): Seq[IndexModel] = {
     val userAnswersCreatedAtIndex: IndexModel = IndexModel(
       keys = Indexes.ascending("createdAt"),
-      indexOptions = IndexOptions().name("user-answers-created-at-index").expireAfter(appConfig.mongoTtlInDays, TimeUnit.DAYS)
+      indexOptions = IndexOptions().name("user-answers-created-at-index").expireAfter(appConfig.mongoTtlInDays.asInstanceOf[Number].longValue, TimeUnit.DAYS)
     )
 
     val eoriNumberAndMrnCompoundIndex: IndexModel = IndexModel(
