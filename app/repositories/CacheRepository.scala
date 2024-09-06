@@ -152,5 +152,4 @@ object CacheRepository {
 
     Seq(userAnswersCreatedAtIndex, eoriNumberAndMrnCompoundIndex)
   }
-
 }
