@@ -139,7 +139,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures {
                 ),
                 Incident = Seq(
                   IncidentType01(
-                    sequenceNumber = "1",
+                    sequenceNumber = 1,
                     code = "4",
                     text = "foo",
                     Endorsement = Some(
@@ -166,15 +166,15 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures {
                     ),
                     TransportEquipment = Seq(
                       TransportEquipmentType01(
-                        sequenceNumber = "1",
+                        sequenceNumber = 1,
                         containerIdentificationNumber = Some("1"),
                         numberOfSeals = Some(BigInt(1)),
                         Seal = Seq(
-                          SealType05(sequenceNumber = "1", identifier = "1")
+                          SealType05(sequenceNumber = 1, identifier = "1")
                         ),
                         GoodsReference = Seq(
                           GoodsReferenceType01(
-                            sequenceNumber = "1",
+                            sequenceNumber = 1,
                             declarationGoodsItemNumber = BigInt(1)
                           )
                         )
@@ -310,7 +310,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures {
             ),
             Incident = Seq(
               IncidentType01(
-                sequenceNumber = "1",
+                sequenceNumber = 1,
                 code = "4",
                 text = "foo",
                 Endorsement = Some(
@@ -337,15 +337,15 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures {
                 ),
                 TransportEquipment = Seq(
                   TransportEquipmentType01(
-                    sequenceNumber = "1",
+                    sequenceNumber = 1,
                     containerIdentificationNumber = Some("1"),
                     numberOfSeals = Some(BigInt(1)),
                     Seal = Seq(
-                      SealType05(sequenceNumber = "1", identifier = "1")
+                      SealType05(sequenceNumber = 1, identifier = "1")
                     ),
                     GoodsReference = Seq(
                       GoodsReferenceType01(
-                        sequenceNumber = "1",
+                        sequenceNumber = 1,
                         declarationGoodsItemNumber = BigInt(1)
                       )
                     )

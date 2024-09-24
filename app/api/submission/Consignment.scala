@@ -110,30 +110,20 @@ object postcodeAddressType02 {
 
 }
 
-object contactPerson {
-
-  val name: String            = "name"
-  val telephoneNumber: String = "telephoneNumber"
-
-  def reads[T](apply: (String, String, Option[String]) => T): Reads[T] = (
-    (__ \ name).read[String] and
-      (__ \ telephoneNumber).read[String] and
-      None
-  )(apply)
-
-}
-
 object contactPersonType06 {
 
-  implicit val reads: Reads[ContactPersonType06] =
-    contactPerson.reads(ContactPersonType06.apply)
+  implicit val reads: Reads[ContactPersonType06] = (
+    (__ \ "name").read[String] and
+      (__ \ "telephoneNumber").read[String] and
+      Reads.pure[Option[String]](None)
+  )(ContactPersonType06.apply)
 
 }
 
 object incidentType01 {
 
   def reads(index: Int): Reads[IncidentType01] = (
-    (index.toString: Reads[String]) and
+    Reads.pure[BigInt](index) and
       (__ \ "incidentCode" \ "code").read[String] and
       (__ \ "incidentText").read[String] and
       (__ \ "endorsement").readNullable[EndorsementType01](endorsementType01.reads) and
@@ -170,7 +160,7 @@ object locationType01 {
 object transportEquipmentType01 {
 
   def apply(
-    sequenceNumber: String,
+    sequenceNumber: BigInt,
     containerIdentificationNumber: Option[String],
     Seal: Seq[SealType05],
     GoodsReference: Seq[GoodsReferenceType01]
@@ -178,7 +168,7 @@ object transportEquipmentType01 {
     TransportEquipmentType01(sequenceNumber, containerIdentificationNumber, Some(Seal.length), Seal, GoodsReference)
 
   def reads(index: Int): Reads[TransportEquipmentType01] = (
-    (index.toString: Reads[String]) and
+    Reads.pure[BigInt](index) and
       (__ \ "containerIdentificationNumber").readNullable[String] and
       (__ \ "seals").readArray[SealType05](sealType05.reads) and
       (__ \ "itemNumbers").readArray[GoodsReferenceType01](goodsReferenceType01.reads)
@@ -189,7 +179,7 @@ object transportEquipmentType01 {
 object sealType05 {
 
   def reads(index: Int): Reads[SealType05] = (
-    (index.toString: Reads[String]) and
+    Reads.pure[BigInt](index) and
       (__ \ "sealIdentificationNumber").read[String]
   )(SealType05.apply)
 
@@ -198,7 +188,7 @@ object sealType05 {
 object goodsReferenceType01 {
 
   def reads(index: Int): Reads[GoodsReferenceType01] = (
-    (index.toString: Reads[String]) and
+    Reads.pure[BigInt](index) and
       (__ \ "itemNumber").read[String].map(BigInt(_))
   )(GoodsReferenceType01.apply)
 
