@@ -16,7 +16,7 @@
 
 package repositories
 
-import com.mongodb.client.model.Filters.{regex, and => mAnd, eq => mEq}
+import com.mongodb.client.model.Filters.{and => mAnd, eq => mEq, regex}
 import config.AppConfig
 import models._
 import org.bson.conversions.Bson
@@ -67,11 +67,13 @@ class CacheRepository @Inject() (
     val updates = Updates.combine(
       Updates.setOnInsert("mrn", data.mrn),
       Updates.setOnInsert("eoriNumber", data.eoriNumber),
+      // format: off
       Updates.set("data",
                   Codecs.toBson(data.data)(using {
                     sensitiveFormats.jsObjectWrites
                   })
       ),
+      // format: on
       Updates.setOnInsert("createdAt", now),
       Updates.set("lastUpdated", now),
       Updates.setOnInsert("_id", Codecs.toBson(UUID.randomUUID())),
