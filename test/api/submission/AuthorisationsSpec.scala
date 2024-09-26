@@ -110,7 +110,7 @@ class AuthorisationsSpec extends SpecBase with AppWithDefaultMockFixtures {
 
         val expected = Seq(
           AuthorisationType01(
-            sequenceNumber = "1",
+            sequenceNumber = 1,
             typeValue = "C522",
             referenceNumber = "SSE1"
           )
@@ -202,7 +202,7 @@ class AuthorisationsSpec extends SpecBase with AppWithDefaultMockFixtures {
 
         val expected = Seq(
           AuthorisationType01(
-            sequenceNumber = "1",
+            sequenceNumber = 1,
             typeValue = "C522",
             referenceNumber = "SSE1"
           )

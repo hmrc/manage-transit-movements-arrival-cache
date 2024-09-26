@@ -76,8 +76,4 @@ package object submission {
     localDateTime.format(formatterNoMillis)
   }
 
-  implicit def successfulReads[T](value: T): Reads[T] = Reads {
-    _ => JsSuccess(value)
-  }
-
 }
