@@ -254,8 +254,31 @@ class CacheControllerSpec extends SpecBase with AppWithDefaultMockFixtures {
     "return 200" when {
 
       "read from mongo is successful" in {
-        val userAnswer1 = UserAnswers(Metadata("AB123", eoriNumber, Json.obj(), SubmissionStatus.NotSubmitted), Instant.now(), Instant.now(), UUID.randomUUID())
-        val userAnswer2 = UserAnswers(Metadata("CD123", eoriNumber, Json.obj(), SubmissionStatus.NotSubmitted), Instant.now(), Instant.now(), UUID.randomUUID())
+        val userAnswer1 = UserAnswers(
+          metadata = Metadata(
+            mrn = "AB123",
+            eoriNumber = eoriNumber,
+            data = Json.obj(),
+            submissionStatus = SubmissionStatus.NotSubmitted
+          ),
+          createdAt = Instant.now(),
+          lastUpdated = Instant.now(),
+          id = UUID.randomUUID(),
+          isTransitional = true
+        )
+
+        val userAnswer2 = UserAnswers(
+          metadata = Metadata(
+            mrn = "CD123",
+            eoriNumber = eoriNumber,
+            data = Json.obj(),
+            submissionStatus = SubmissionStatus.NotSubmitted
+          ),
+          createdAt = Instant.now(),
+          lastUpdated = Instant.now(),
+          id = UUID.randomUUID(),
+          isTransitional = true
+        )
 
         when(mockCacheRepository.getAll(any(), any(), any(), any(), any()))
           .thenReturn(Future.successful(UserAnswersSummary(eoriNumber, Seq(userAnswer1, userAnswer2), 2, 2)))
@@ -280,7 +303,8 @@ class CacheControllerSpec extends SpecBase with AppWithDefaultMockFixtures {
              |      "createdAt": "${userAnswer1.createdAt}",
              |      "lastUpdated": "${userAnswer1.lastUpdated}",
              |      "expiresInDays": 30,
-             |      "_id": "${userAnswer1.id}"
+             |      "_id": "${userAnswer1.id}",
+             |      "isTransitional": true
              |    },
              |    {
              |      "mrn": "${userAnswer2.mrn}",
@@ -292,7 +316,8 @@ class CacheControllerSpec extends SpecBase with AppWithDefaultMockFixtures {
              |      "createdAt": "${userAnswer2.createdAt}",
              |      "lastUpdated": "${userAnswer2.lastUpdated}",
              |      "expiresInDays": 30,
-             |      "_id": "${userAnswer2.id}"
+             |      "_id": "${userAnswer2.id}",
+             |      "isTransitional": true
              |    }
              |  ]
              |}

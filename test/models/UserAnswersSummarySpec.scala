@@ -36,8 +36,31 @@ class UserAnswersSummarySpec extends SpecBase {
       val id1 = UUID.randomUUID()
       val id2 = UUID.randomUUID()
 
-      val userAnswers1 = UserAnswers(Metadata("AB123", eoriNumber, Json.obj(), SubmissionStatus.NotSubmitted), now, now, id1)
-      val userAnswers2 = UserAnswers(Metadata("CD123", eoriNumber, Json.obj(), SubmissionStatus.NotSubmitted), now.minus(1, DAYS), now.minus(1, DAYS), id2)
+      val userAnswers1 = UserAnswers(
+        metadata = Metadata(
+          mrn = "AB123",
+          eoriNumber = eoriNumber,
+          data = Json.obj(),
+          submissionStatus = SubmissionStatus.NotSubmitted
+        ),
+        createdAt = now,
+        lastUpdated = now,
+        id = id1,
+        isTransitional = true
+      )
+
+      val userAnswers2 = UserAnswers(
+        metadata = Metadata(
+          mrn = "CD123",
+          eoriNumber = eoriNumber,
+          data = Json.obj(),
+          submissionStatus = SubmissionStatus.NotSubmitted
+        ),
+        createdAt = now.minus(1, DAYS),
+        lastUpdated = now.minus(1, DAYS),
+        id = id2,
+        isTransitional = true
+      )
 
       val userAnswersSummary = UserAnswersSummary(eoriNumber, Seq(userAnswers1, userAnswers2), 2, 2)
 
@@ -52,20 +75,22 @@ class UserAnswersSummarySpec extends SpecBase {
               "_links" -> Json.obj(
                 "self" -> Json.obj("href" -> controllers.routes.CacheController.get("AB123").url)
               ),
-              "createdAt"     -> now,
-              "lastUpdated"   -> now,
-              "expiresInDays" -> 30,
-              "_id"           -> id1
+              "createdAt"      -> now,
+              "lastUpdated"    -> now,
+              "expiresInDays"  -> 30,
+              "_id"            -> id1,
+              "isTransitional" -> true
             ),
             Json.obj(
               "mrn" -> "CD123",
               "_links" -> Json.obj(
                 "self" -> Json.obj("href" -> controllers.routes.CacheController.get("CD123").url)
               ),
-              "createdAt"     -> now.minus(1, DAYS),
-              "lastUpdated"   -> now.minus(1, DAYS),
-              "expiresInDays" -> 29,
-              "_id"           -> id2
+              "createdAt"      -> now.minus(1, DAYS),
+              "lastUpdated"    -> now.minus(1, DAYS),
+              "expiresInDays"  -> 29,
+              "_id"            -> id2,
+              "isTransitional" -> true
             )
           )
         )

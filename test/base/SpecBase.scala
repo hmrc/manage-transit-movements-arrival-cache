@@ -48,8 +48,20 @@ trait SpecBase
 
   implicit val hc: HeaderCarrier = HeaderCarrier()
 
-  val emptyMetadata: Metadata       = Metadata(mrn, eoriNumber, Json.obj(), SubmissionStatus.NotSubmitted)
-  val emptyUserAnswers: UserAnswers = UserAnswers(emptyMetadata, Instant.now(), Instant.now(), UUID.randomUUID())
+  val emptyMetadata: Metadata = Metadata(
+    mrn = mrn,
+    eoriNumber = eoriNumber,
+    data = Json.obj(),
+    submissionStatus = SubmissionStatus.NotSubmitted
+  )
+
+  val emptyUserAnswers: UserAnswers = UserAnswers(
+    metadata = emptyMetadata,
+    createdAt = Instant.now(),
+    lastUpdated = Instant.now(),
+    id = UUID.randomUUID(),
+    isTransitional = true
+  )
 
   def fakeRequest: FakeRequest[AnyContent] = FakeRequest("", "")
 
