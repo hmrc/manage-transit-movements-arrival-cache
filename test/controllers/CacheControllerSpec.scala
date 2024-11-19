@@ -38,10 +38,37 @@ class CacheControllerSpec extends SpecBase with AppWithDefaultMockFixtures {
         when(mockCacheRepository.get(any(), any())).thenReturn(Future.successful(Some(emptyUserAnswers)))
 
         val request = FakeRequest(GET, routes.CacheController.get(mrn).url)
-        val result  = route(app, request).value
+          .withHeaders("APIVersion" -> "2.0")
+
+        val result = route(app, request).value
 
         status(result) shouldBe OK
         contentAsJson(result) shouldBe Json.toJson(emptyUserAnswers)
+        verify(mockCacheRepository).get(eqTo(mrn), eqTo(eoriNumber))
+      }
+    }
+
+    "return 400" when {
+      "APIVersion header is missing" in {
+        when(mockCacheRepository.get(any(), any())).thenReturn(Future.successful(Some(emptyUserAnswers)))
+
+        val request = FakeRequest(GET, routes.CacheController.get(mrn).url)
+
+        val result = route(app, request).value
+
+        status(result) shouldBe BAD_REQUEST
+        verify(mockCacheRepository, never()).set(any(), any())
+      }
+
+      "APIVersion header does not align with saved answers" in {
+        when(mockCacheRepository.get(any(), any())).thenReturn(Future.successful(Some(emptyUserAnswers)))
+
+        val request = FakeRequest(GET, routes.CacheController.get(mrn).url)
+          .withHeaders("APIVersion" -> "2.1")
+
+        val result = route(app, request).value
+
+        status(result) shouldBe BAD_REQUEST
         verify(mockCacheRepository).get(eqTo(mrn), eqTo(eoriNumber))
       }
     }
@@ -51,7 +78,9 @@ class CacheControllerSpec extends SpecBase with AppWithDefaultMockFixtures {
         when(mockCacheRepository.get(any(), any())).thenReturn(Future.successful(None))
 
         val request = FakeRequest(GET, routes.CacheController.get(mrn).url)
-        val result  = route(app, request).value
+          .withHeaders("APIVersion" -> "2.0")
+
+        val result = route(app, request).value
 
         status(result) shouldBe NOT_FOUND
         verify(mockCacheRepository).get(eqTo(mrn), eqTo(eoriNumber))
@@ -63,7 +92,9 @@ class CacheControllerSpec extends SpecBase with AppWithDefaultMockFixtures {
         when(mockCacheRepository.get(any(), any())).thenReturn(Future.failed(new Throwable()))
 
         val request = FakeRequest(GET, routes.CacheController.get(mrn).url)
-        val result  = route(app, request).value
+          .withHeaders("APIVersion" -> "2.0")
+
+        val result = route(app, request).value
 
         status(result) shouldBe INTERNAL_SERVER_ERROR
         verify(mockCacheRepository).get(eqTo(mrn), eqTo(eoriNumber))

@@ -41,12 +41,15 @@ class CacheController @Inject() (
     with Logging {
 
   // TODO replace with getAll when param's are added
-  def get(mrn: String): Action[AnyContent] = authenticate().async {
+  def get(mrn: String): Action[AnyContent] = (authenticate() andThen getVersion).async {
     implicit request =>
       cacheRepository
         .get(mrn, request.eoriNumber)
         .map {
-          case Some(userAnswers) => Ok(Json.toJson(userAnswers))
+          case Some(userAnswers) if request.phase.isTransitional == userAnswers.isTransitional =>
+            Ok(Json.toJson(userAnswers))
+          case Some(userAnswers) =>
+            BadRequest
           case None =>
             logger.warn(s"No document found for MRN '$mrn' and EORI '${request.eoriNumber}'")
             NotFound

@@ -36,6 +36,7 @@ class CacheControllerSpec extends CacheRepositorySpecBase {
       "respond with 404 status" in {
         val response = wsClient
           .url(url)
+          .addHttpHeaders(("APIVersion", "2.0"))
           .get()
           .futureValue
 
@@ -43,27 +44,56 @@ class CacheControllerSpec extends CacheRepositorySpecBase {
       }
     }
 
-    "document does exist" should {
-      "respond with 200 status" in {
-        val userAnswers = emptyUserAnswers
-        insert(userAnswers).futureValue
-
+    "APIVersion header is missing" should {
+      "respond with 400 status" in {
         val response = wsClient
           .url(url)
           .get()
           .futureValue
 
-        response.status shouldBe 200
+        response.status shouldBe 400
+      }
+    }
 
-        response.json.as[UserAnswers].metadata shouldBe userAnswers.metadata
+    "document does exist" when {
+      "APIVersion header aligns with document" must {
+        "respond with 200 status" in {
+          val userAnswers = emptyUserAnswers
+          insert(userAnswers).futureValue
 
-        response.json.as[UserAnswers].createdAt shouldBe userAnswers.createdAt.truncatedTo(
-          java.time.temporal.ChronoUnit.MILLIS
-        )
+          val response = wsClient
+            .url(url)
+            .addHttpHeaders(("APIVersion", "2.0"))
+            .get()
+            .futureValue
 
-        response.json.as[UserAnswers].lastUpdated shouldBe userAnswers.lastUpdated.truncatedTo(
-          java.time.temporal.ChronoUnit.MILLIS
-        )
+          response.status shouldBe 200
+
+          response.json.as[UserAnswers].metadata shouldBe userAnswers.metadata
+
+          response.json.as[UserAnswers].createdAt shouldBe userAnswers.createdAt.truncatedTo(
+            java.time.temporal.ChronoUnit.MILLIS
+          )
+
+          response.json.as[UserAnswers].lastUpdated shouldBe userAnswers.lastUpdated.truncatedTo(
+            java.time.temporal.ChronoUnit.MILLIS
+          )
+        }
+      }
+
+      "APIVersion header doesn't align with document" must {
+        "respond with 400 status" in {
+          val userAnswers = emptyUserAnswers
+          insert(userAnswers).futureValue
+
+          val response = wsClient
+            .url(url)
+            .addHttpHeaders(("APIVersion", "2.1"))
+            .get()
+            .futureValue
+
+          response.status shouldBe 400
+        }
       }
     }
   }
