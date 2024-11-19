@@ -137,6 +137,7 @@ class CacheControllerSpec extends CacheRepositorySpecBase {
       "respond with 200 status" in {
         val response = wsClient
           .url(url)
+          .addHttpHeaders(("APIVersion", "2.0"))
           .put(JsString(mrn))
           .futureValue
 
@@ -155,6 +156,7 @@ class CacheControllerSpec extends CacheRepositorySpecBase {
       "respond with 400 status" in {
         val response = wsClient
           .url(url)
+          .addHttpHeaders(("APIVersion", "2.0"))
           .put(Json.obj())
           .futureValue
 
@@ -166,7 +168,19 @@ class CacheControllerSpec extends CacheRepositorySpecBase {
       "respond with 400 status" in {
         val response = wsClient
           .url(url)
+          .addHttpHeaders(("APIVersion", "2.0"))
           .put(Json.obj("foo" -> "bar"))
+          .futureValue
+
+        response.status shouldBe 400
+      }
+    }
+
+    "missing APIVersion" should {
+      "respond with 400 status" in {
+        val response = wsClient
+          .url(url)
+          .put(JsString(mrn))
           .futureValue
 
         response.status shouldBe 400
@@ -215,14 +229,16 @@ class CacheControllerSpec extends CacheRepositorySpecBase {
           metadata = Metadata("AB123", eoriNumber, Json.obj(), SubmissionStatus.NotSubmitted),
           createdAt = Instant.now(),
           lastUpdated = Instant.now(),
-          id = UUID.randomUUID()
+          id = UUID.randomUUID(),
+          isTransitional = true
         )
 
         val userAnswers2 = UserAnswers(
           metadata = Metadata("CD123", eoriNumber, Json.obj(), SubmissionStatus.NotSubmitted),
           createdAt = Instant.now().minus(1, DAYS),
           lastUpdated = Instant.now().minus(1, DAYS),
-          id = UUID.randomUUID()
+          id = UUID.randomUUID(),
+          isTransitional = true
         )
 
         insert(userAnswers1).futureValue

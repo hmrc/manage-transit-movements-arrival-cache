@@ -16,8 +16,12 @@
 
 package models
 
+import models.Phase.*
+
 sealed trait Phase {
   val version: String
+
+  def isTransitional: Boolean = this == Transition
 }
 
 object Phase {

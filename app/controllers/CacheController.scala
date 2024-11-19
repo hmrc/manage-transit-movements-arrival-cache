@@ -16,8 +16,8 @@
 
 package controllers
 
-import controllers.actions.{AuthenticateActionProvider, AuthenticateAndLockActionProvider}
-import models.{Metadata, SubmissionStatus}
+import controllers.actions.{AuthenticateActionProvider, AuthenticateAndLockActionProvider, VersionedAction}
+import models.{Metadata, Phase, SubmissionStatus}
 import play.api.Logging
 import play.api.libs.json.{JsError, JsSuccess, JsValue, Json}
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
@@ -33,6 +33,7 @@ class CacheController @Inject() (
   cc: ControllerComponents,
   authenticate: AuthenticateActionProvider,
   authenticateAndLock: AuthenticateAndLockActionProvider,
+  getVersion: VersionedAction,
   cacheRepository: CacheRepository,
   dateTimeService: DateTimeService
 )(implicit ec: ExecutionContext)
@@ -62,7 +63,7 @@ class CacheController @Inject() (
       request.body.validate[Metadata] match {
         case JsSuccess(data, _) =>
           if (request.eoriNumber == data.eoriNumber) {
-            set(data)
+            set(data, None)
           } else {
             logger.warn(s"Enrolment EORI (${request.eoriNumber}) does not match EORI in user answers (${data.eoriNumber})")
             Future.successful(Forbidden)
@@ -73,20 +74,20 @@ class CacheController @Inject() (
       }
   }
 
-  def put(): Action[JsValue] = authenticate().async(parse.json) {
+  def put(): Action[JsValue] = (authenticate() andThen getVersion).async(parse.json) {
     implicit request =>
       request.body.validate[String] match {
         case JsSuccess(mrn, _) =>
-          set(Metadata(mrn, request.eoriNumber, Json.obj(), SubmissionStatus.NotSubmitted))
+          set(Metadata(mrn, request.eoriNumber, Json.obj(), SubmissionStatus.NotSubmitted), Some(request.phase))
         case JsError(errors) =>
           logger.warn(s"Failed to validate request body as String: $errors")
           Future.successful(BadRequest)
       }
   }
 
-  private def set(data: Metadata): Future[Status] =
+  private def set(data: Metadata, phase: Option[Phase]): Future[Status] =
     cacheRepository
-      .set(data)
+      .set(data, phase)
       .map {
         case true => Ok
         case false =>
