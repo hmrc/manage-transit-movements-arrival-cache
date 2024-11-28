@@ -41,7 +41,18 @@ trait RepositorySpecBase extends ItSpecBase {
   val mrn        = "mrn"
   val eoriNumber = "eori"
 
-  def emptyMetadata: Metadata = Metadata(mrn, eoriNumber, Json.obj(), SubmissionStatus.NotSubmitted)
+  def emptyMetadata: Metadata = Metadata(
+    mrn = mrn,
+    eoriNumber = eoriNumber,
+    data = Json.obj(),
+    submissionStatus = SubmissionStatus.NotSubmitted
+  )
 
-  def emptyUserAnswers: UserAnswers = UserAnswers(emptyMetadata, Instant.now(), Instant.now(), UUID.randomUUID())
+  def emptyUserAnswers: UserAnswers = UserAnswers(
+    metadata = emptyMetadata,
+    createdAt = Instant.now(),
+    lastUpdated = Instant.now(),
+    id = UUID.randomUUID(),
+    isTransitional = true
+  )
 }

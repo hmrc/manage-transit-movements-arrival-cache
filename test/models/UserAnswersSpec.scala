@@ -34,7 +34,8 @@ class UserAnswersSpec extends SpecBase with AppWithDefaultMockFixtures {
     ),
     createdAt = Instant.ofEpochMilli(1662393524188L),
     lastUpdated = Instant.ofEpochMilli(1662546803472L),
-    id = UUID.fromString(uuid)
+    id = UUID.fromString(uuid),
+    isTransitional = true
   )
 
   "User answers" when {
@@ -49,7 +50,8 @@ class UserAnswersSpec extends SpecBase with AppWithDefaultMockFixtures {
           |  "data" : {},
           |  "createdAt" : "2022-09-05T15:58:44.188Z",
           |  "lastUpdated" : "2022-09-07T10:33:23.472Z",
-          |  "submissionStatus" : "notSubmitted"
+          |  "submissionStatus" : "notSubmitted",
+          |  "isTransitional" : true
           |}
           |""".stripMargin)
 
@@ -71,7 +73,7 @@ class UserAnswersSpec extends SpecBase with AppWithDefaultMockFixtures {
 
     "being passed between backend and mongo" when {
 
-      "encryption enabled" must {
+      "encryption enabled" when {
         val app = guiceApplicationBuilder()
           .configure("encryption.enabled" -> true)
           .build()
@@ -80,39 +82,76 @@ class UserAnswersSpec extends SpecBase with AppWithDefaultMockFixtures {
           val sensitiveFormats                     = app.injector.instanceOf[SensitiveFormats]
           implicit val format: Format[UserAnswers] = UserAnswers.sensitiveFormat(sensitiveFormats)
 
-          val json: JsValue = Json.parse(s"""
-               |{
-               |  "_id" : "$uuid",
-               |  "mrn" : "$mrn",
-               |  "eoriNumber" : "$eoriNumber",
-               |  "data" : "T+FWrvLPJMKyRZ1aoW8rdZmETyL89CdpWxaog0joG6B/hxCF",
-               |  "createdAt" : {
-               |    "$$date" : {
-               |      "$$numberLong" : "1662393524188"
-               |    }
-               |  },
-               |  "lastUpdated" : {
-               |    "$$date" : {
-               |      "$$numberLong" : "1662546803472"
-               |    }
-               |  },
-               |  "submissionStatus" : "notSubmitted"
-               |}
-               |""".stripMargin)
+          "isTransitional exists" must {
 
-          "read correctly" in {
-            val result = json.as[UserAnswers]
-            result shouldBe userAnswers
+            val json: JsValue = Json.parse(s"""
+                 |{
+                 |  "_id" : "$uuid",
+                 |  "mrn" : "$mrn",
+                 |  "eoriNumber" : "$eoriNumber",
+                 |  "data" : "T+FWrvLPJMKyRZ1aoW8rdZmETyL89CdpWxaog0joG6B/hxCF",
+                 |  "createdAt" : {
+                 |    "$$date" : {
+                 |      "$$numberLong" : "1662393524188"
+                 |    }
+                 |  },
+                 |  "lastUpdated" : {
+                 |    "$$date" : {
+                 |      "$$numberLong" : "1662546803472"
+                 |    }
+                 |  },
+                 |  "submissionStatus" : "notSubmitted",
+                 |  "isTransitional" : true
+                 |}
+                 |""".stripMargin)
+
+            "read correctly" in {
+              val result = json.as[UserAnswers]
+              result shouldBe userAnswers
+            }
+
+            "write and read correctly" in {
+              val result = Json.toJson(userAnswers).as[UserAnswers]
+              result shouldBe userAnswers
+            }
           }
 
-          "write and read correctly" in {
-            val result = Json.toJson(userAnswers).as[UserAnswers]
-            result shouldBe userAnswers
+          "isTransitional does not exist" must {
+
+            val json: JsValue = Json.parse(s"""
+                 |{
+                 |  "_id" : "$uuid",
+                 |  "mrn" : "$mrn",
+                 |  "eoriNumber" : "$eoriNumber",
+                 |  "data" : "T+FWrvLPJMKyRZ1aoW8rdZmETyL89CdpWxaog0joG6B/hxCF",
+                 |  "createdAt" : {
+                 |    "$$date" : {
+                 |      "$$numberLong" : "1662393524188"
+                 |    }
+                 |  },
+                 |  "lastUpdated" : {
+                 |    "$$date" : {
+                 |      "$$numberLong" : "1662546803472"
+                 |    }
+                 |  },
+                 |  "submissionStatus" : "notSubmitted"
+                 |}
+                 |""".stripMargin)
+
+            "read correctly" in {
+              val result = json.as[UserAnswers]
+              result shouldBe userAnswers
+            }
+
+            "write and read correctly" in {
+              val result = Json.toJson(userAnswers).as[UserAnswers]
+              result shouldBe userAnswers
+            }
           }
         }
       }
 
-      "encryption disabled" must {
+      "encryption disabled" when {
         val app = guiceApplicationBuilder()
           .configure("encryption.enabled" -> false)
           .build()
@@ -137,7 +176,8 @@ class UserAnswersSpec extends SpecBase with AppWithDefaultMockFixtures {
                |      "$$numberLong" : "1662546803472"
                |    }
                |  },
-               |  "submissionStatus" : "notSubmitted"
+               |  "submissionStatus" : "notSubmitted",
+               |  "isTransitional" : true
                |}
                |""".stripMargin)
 

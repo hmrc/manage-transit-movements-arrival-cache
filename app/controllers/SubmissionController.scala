@@ -57,7 +57,7 @@ class SubmissionController @Inject() (
                   metricsService.increment(response.status)
                   response.status match {
                     case status if is2xx(status) =>
-                      cacheRepository.set(userAnswers.metadata.copy(submissionStatus = SubmissionStatus.Submitted)).map {
+                      cacheRepository.set(userAnswers.metadata.copy(submissionStatus = SubmissionStatus.Submitted), None).map {
                         _ =>
                           auditService.audit(ArrivalNotification, userAnswers)
                           Ok(response.body)

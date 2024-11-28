@@ -63,7 +63,7 @@ class SubmissionControllerSpec extends SpecBase with AppWithDefaultMockFixtures 
         when(mockApiService.submitDeclaration(any(), any())(any()))
           .thenReturn(Future.successful(HttpResponse(OK, Json.stringify(body))))
 
-        when(mockCacheRepository.set(any()))
+        when(mockCacheRepository.set(any(), any()))
           .thenReturn(Future.successful(true))
 
         val request = FakeRequest(POST, routes.SubmissionController.post().url)
@@ -76,7 +76,7 @@ class SubmissionControllerSpec extends SpecBase with AppWithDefaultMockFixtures 
         contentAsJson(result) shouldBe body
 
         verify(mockCacheRepository).get(eqTo(mrn), eqTo(eoriNumber))
-        verify(mockCacheRepository).set(eqTo(userAnswers.metadata.copy(submissionStatus = SubmissionStatus.Submitted)))
+        verify(mockCacheRepository).set(eqTo(userAnswers.metadata.copy(submissionStatus = SubmissionStatus.Submitted)), eqTo(None))
         verify(mockApiService).submitDeclaration(eqTo(userAnswers), eqTo(Phase.Transition))(any())
         verify(mockAuditService).audit(eqTo(ArrivalNotification), eqTo(userAnswers))(any())
       }

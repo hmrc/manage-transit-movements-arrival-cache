@@ -16,16 +16,17 @@
 
 package repositories
 
-import com.mongodb.client.model.Filters.{and => mAnd, eq => mEq, regex}
+import com.mongodb.client.model.Filters.{and as mAnd, eq as mEq, regex}
 import config.AppConfig
-import models._
+import models.*
 import org.bson.conversions.Bson
 import org.mongodb.scala.model.Indexes.{ascending, compoundIndex}
-import org.mongodb.scala.model._
+import org.mongodb.scala.model.*
 import services.DateTimeService
 import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.play.json.{Codecs, PlayMongoRepository}
-import org.mongodb.scala._
+import org.mongodb.scala.*
+import play.api.libs.json.{JsObject, Writes}
 
 import java.util.UUID
 import java.util.concurrent.TimeUnit
@@ -58,31 +59,30 @@ class CacheRepository @Inject() (
       .toFutureOption()
   }
 
-  def set(data: Metadata): Future[Boolean] = {
+  def set(data: Metadata, phase: Option[Phase]): Future[Boolean] = {
     val now = dateTimeService.timestamp
     val filter = Filters.and(
       Filters.eq("mrn", data.mrn),
       Filters.eq("eoriNumber", data.eoriNumber)
     )
-    val updates = Updates.combine(
-      Updates.setOnInsert("mrn", data.mrn),
-      Updates.setOnInsert("eoriNumber", data.eoriNumber),
-      // format: off
-      Updates.set("data",
-                  Codecs.toBson(data.data)(using {
-                    sensitiveFormats.jsObjectWrites
-                  })
-      ),
-      // format: on
-      Updates.setOnInsert("createdAt", now),
-      Updates.set("lastUpdated", now),
-      Updates.setOnInsert("_id", Codecs.toBson(UUID.randomUUID())),
-      Updates.set("submissionStatus", data.submissionStatus.asString)
-    )
+
+    implicit val dataWrites: Writes[JsObject] = sensitiveFormats.jsObjectWrites
+
+    val updates: Seq[Bson] = Seq(
+      Some(Updates.setOnInsert("mrn", data.mrn)),
+      Some(Updates.setOnInsert("eoriNumber", data.eoriNumber)),
+      Some(Updates.set("data", Codecs.toBson(data.data))),
+      Some(Updates.setOnInsert("createdAt", now)),
+      Some(Updates.set("lastUpdated", now)),
+      Some(Updates.setOnInsert("_id", Codecs.toBson(UUID.randomUUID()))),
+      Some(Updates.set("submissionStatus", data.submissionStatus.asString)),
+      phase.map(_.isTransitional).map(Updates.setOnInsert("isTransitional", _))
+    ).flatten
+
     val options = UpdateOptions().upsert(true)
 
     collection
-      .updateOne(filter, updates, options)
+      .updateOne(filter, Updates.combine(updates*), options)
       .toFuture()
       .map(_.wasAcknowledged())
   }
