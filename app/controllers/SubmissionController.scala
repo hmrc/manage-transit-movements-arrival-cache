@@ -43,16 +43,17 @@ class SubmissionController @Inject() (
     extends BackendController(cc)
     with Logging {
 
+  private def log(method: String, message: String, args: String*): String =
+    s"SubmissionController:$method:${args.mkString(":")} - $message"
+
   def post(): Action[JsValue] = (authenticate() andThen getVersion).async(parse.json) {
     implicit request =>
-      def log(message: String, args: String*): String = s"SubmissionController:post:${args.mkString(":")} - $message"
-
-      val eori = request.eoriNumber
-      request.body.validate[String] match {
+      import request.*
+      body.validate[String] match {
         case JsSuccess(mrn, _) =>
-          cacheRepository.get(mrn, request.eoriNumber).flatMap {
+          cacheRepository.get(mrn, eoriNumber).flatMap {
             case Some(userAnswers) =>
-              apiService.submitDeclaration(userAnswers, request.phase).flatMap {
+              apiService.submitDeclaration(userAnswers, phase).flatMap {
                 response =>
                   metricsService.increment(response.status)
                   response.status match {
@@ -63,35 +64,36 @@ class SubmissionController @Inject() (
                           Ok(response.body)
                       }
                     case BAD_REQUEST =>
-                      logger.warn(log("Bad request", eori, mrn))
+                      logger.warn(log("post", "Bad request", eoriNumber, mrn))
                       Future.successful(BadRequest)
                     case e =>
-                      logger.error(log(s"Something went wrong: $e", eori, mrn))
+                      logger.error(log("post", s"Something went wrong: $e", eoriNumber, mrn))
                       Future.successful(InternalServerError)
                   }
               }
             case None =>
               metricsService.increment(NOT_FOUND)
-              logger.error(log("Could not find user answers", eori, mrn))
+              logger.error(log("post", "Could not find user answers", eoriNumber, mrn))
               Future.successful(NotFound)
           }
         case JsError(errors) =>
           metricsService.increment(BAD_REQUEST)
-          logger.warn(log(s"Failed to validate request body as String: $errors", eori))
+          logger.warn(log("post", s"Failed to validate request body as String: $errors", eoriNumber))
           Future.successful(BadRequest)
       }
   }
 
   def get(mrn: String): Action[AnyContent] = (authenticate() andThen getVersion).async {
     implicit request =>
-      apiService.get(mrn, request.phase).map {
+      import request.*
+      apiService.get(mrn, phase).map {
         case Some(Messages(Nil)) =>
-          logger.info(s"No messages found for MRN $mrn")
+          logger.info(log("get", "No messages found for MRN", eoriNumber, mrn))
           NoContent
         case Some(messages) =>
           Ok(Json.toJson(messages))
         case None =>
-          logger.warn(s"No arrival found for MRN $mrn")
+          logger.warn(log("get", "No arrival found for MRN", eoriNumber, mrn))
           NotFound
       }
   }
