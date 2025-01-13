@@ -40,7 +40,6 @@ class CacheController @Inject() (
     extends BackendController(cc)
     with Logging {
 
-  // TODO replace with getAll when param's are added
   def get(mrn: String): Action[AnyContent] = (authenticate() andThen getVersion).async {
     implicit request =>
       cacheRepository
