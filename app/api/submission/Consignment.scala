@@ -50,7 +50,7 @@ object locationOfGoodsType01 {
         (__ \ "qualifierOfIdentificationDetails" \ "coordinates").readNullable[GNSSType](gnssType.reads) and
         (__ \ "qualifierOfIdentificationDetails" \ "identificationNumber").readNullable[EconomicOperatorType03](economicOperatorType03.reads) and
         (__ \ "qualifierOfIdentificationDetails").read[Option[AddressType14]](addressType14.reads) and
-        (__ \ "qualifierOfIdentificationDetails" \ "postalCode").readNullable[PostcodeAddressType02](postcodeAddressType02.reads) and
+        Reads.pure[Option[PostcodeAddressType02]](None) and
         (__ \ "contactPerson").readNullable[ContactPersonType06](contactPersonType06.reads)
     )(LocationOfGoodsType01.apply)
 }
@@ -97,16 +97,6 @@ object addressType01 {
       (__ \ "postalCode").readNullable[String] and
       (__ \ "city").read[String]
   )(AddressType01.apply)
-
-}
-
-object postcodeAddressType02 {
-
-  implicit val reads: Reads[PostcodeAddressType02] = (
-    (__ \ "streetNumber").readNullable[String] and
-      (__ \ "postalCode").read[String] and
-      (__ \ "country" \ "code").read[String]
-  )(PostcodeAddressType02.apply)
 
 }
 
