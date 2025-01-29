@@ -16,7 +16,7 @@
 
 package controllers
 
-import controllers.actions.{AuthenticateActionProvider, VersionedAction}
+import controllers.actions.AuthenticateActionProvider
 import models.AuditType.ArrivalNotification
 import models.{Messages, SubmissionStatus}
 import play.api.Logging
@@ -34,7 +34,6 @@ import scala.concurrent.{ExecutionContext, Future}
 class SubmissionController @Inject() (
   cc: ControllerComponents,
   authenticate: AuthenticateActionProvider,
-  getVersion: VersionedAction,
   apiService: ApiService,
   cacheRepository: CacheRepository,
   auditService: AuditService,
@@ -46,19 +45,19 @@ class SubmissionController @Inject() (
   private def log(method: String, message: String, args: String*): String =
     s"SubmissionController:$method:${args.mkString(":")} - $message"
 
-  def post(): Action[JsValue] = (authenticate() andThen getVersion).async(parse.json) {
+  def post(): Action[JsValue] = authenticate().async(parse.json) {
     implicit request =>
       import request.*
       body.validate[String] match {
         case JsSuccess(mrn, _) =>
           cacheRepository.get(mrn, eoriNumber).flatMap {
             case Some(userAnswers) =>
-              apiService.submitDeclaration(userAnswers, phase).flatMap {
+              apiService.submitDeclaration(userAnswers).flatMap {
                 response =>
                   metricsService.increment(response.status)
                   response.status match {
                     case status if is2xx(status) =>
-                      cacheRepository.set(userAnswers.metadata.copy(submissionStatus = SubmissionStatus.Submitted), None).map {
+                      cacheRepository.set(userAnswers.metadata.copy(submissionStatus = SubmissionStatus.Submitted)).map {
                         _ =>
                           auditService.audit(ArrivalNotification, userAnswers)
                           Ok(response.body)
@@ -83,10 +82,10 @@ class SubmissionController @Inject() (
       }
   }
 
-  def get(mrn: String): Action[AnyContent] = (authenticate() andThen getVersion).async {
+  def get(mrn: String): Action[AnyContent] = authenticate().async {
     implicit request =>
       import request.*
-      apiService.get(mrn, phase).map {
+      apiService.get(mrn).map {
         case Some(Messages(Nil)) =>
           logger.info(log("get", "No messages found for MRN", eoriNumber, mrn))
           NoContent

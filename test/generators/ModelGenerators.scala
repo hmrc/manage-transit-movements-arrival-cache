@@ -16,7 +16,7 @@
 
 package generators
 
-import models.{Phase, SubmissionStatus}
+import models.SubmissionStatus
 import org.scalacheck.{Arbitrary, Gen}
 
 trait ModelGenerators {
@@ -28,9 +28,5 @@ trait ModelGenerators {
       SubmissionStatus.Amending
     )
     Gen.oneOf(values)
-  }
-
-  implicit lazy val arbitraryPhase: Arbitrary[Phase] = Arbitrary {
-    Gen.oneOf(Phase.Transition, Phase.PostTransition)
   }
 }

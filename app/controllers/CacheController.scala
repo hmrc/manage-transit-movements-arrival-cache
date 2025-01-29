@@ -16,8 +16,8 @@
 
 package controllers
 
-import controllers.actions.{AuthenticateActionProvider, AuthenticateAndLockActionProvider, VersionedAction}
-import models.{Metadata, Phase, SubmissionStatus}
+import controllers.actions.{AuthenticateActionProvider, AuthenticateAndLockActionProvider}
+import models.{Metadata, SubmissionStatus}
 import play.api.Logging
 import play.api.libs.json.{JsError, JsSuccess, JsValue, Json}
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
@@ -33,22 +33,19 @@ class CacheController @Inject() (
   cc: ControllerComponents,
   authenticate: AuthenticateActionProvider,
   authenticateAndLock: AuthenticateAndLockActionProvider,
-  getVersion: VersionedAction,
   cacheRepository: CacheRepository,
   dateTimeService: DateTimeService
 )(implicit ec: ExecutionContext)
     extends BackendController(cc)
     with Logging {
 
-  def get(mrn: String): Action[AnyContent] = (authenticate() andThen getVersion).async {
+  def get(mrn: String): Action[AnyContent] = authenticate().async {
     implicit request =>
       cacheRepository
         .get(mrn, request.eoriNumber)
         .map {
-          case Some(userAnswers) if request.phase.isTransitional == userAnswers.isTransitional =>
-            Ok(Json.toJson(userAnswers))
           case Some(userAnswers) =>
-            BadRequest
+            Ok(Json.toJson(userAnswers))
           case None =>
             logger.warn(s"No document found for MRN '$mrn' and EORI '${request.eoriNumber}'")
             NotFound
@@ -65,7 +62,7 @@ class CacheController @Inject() (
       request.body.validate[Metadata] match {
         case JsSuccess(data, _) =>
           if (request.eoriNumber == data.eoriNumber) {
-            set(data, None)
+            set(data)
           } else {
             logger.warn(s"Enrolment EORI (${request.eoriNumber}) does not match EORI in user answers (${data.eoriNumber})")
             Future.successful(Forbidden)
@@ -76,20 +73,20 @@ class CacheController @Inject() (
       }
   }
 
-  def put(): Action[JsValue] = (authenticate() andThen getVersion).async(parse.json) {
+  def put(): Action[JsValue] = authenticate().async(parse.json) {
     implicit request =>
       request.body.validate[String] match {
         case JsSuccess(mrn, _) =>
-          set(Metadata(mrn, request.eoriNumber, Json.obj(), SubmissionStatus.NotSubmitted), Some(request.phase))
+          set(Metadata(mrn, request.eoriNumber, Json.obj(), SubmissionStatus.NotSubmitted))
         case JsError(errors) =>
           logger.warn(s"Failed to validate request body as String: $errors")
           Future.successful(BadRequest)
       }
   }
 
-  private def set(data: Metadata, phase: Option[Phase]): Future[Status] =
+  private def set(data: Metadata): Future[Status] =
     cacheRepository
-      .set(data, phase)
+      .set(data)
       .map {
         case true => Ok
         case false =>

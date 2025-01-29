@@ -59,7 +59,7 @@ class CacheRepository @Inject() (
       .toFutureOption()
   }
 
-  def set(data: Metadata, phase: Option[Phase]): Future[Boolean] = {
+  def set(data: Metadata): Future[Boolean] = {
     val now = dateTimeService.timestamp
     val filter = Filters.and(
       Filters.eq("mrn", data.mrn),
@@ -76,7 +76,7 @@ class CacheRepository @Inject() (
       Some(Updates.set("lastUpdated", now)),
       Some(Updates.setOnInsert("_id", Codecs.toBson(UUID.randomUUID()))),
       Some(Updates.set("submissionStatus", data.submissionStatus.asString)),
-      phase.map(_.isTransitional).map(Updates.setOnInsert("isTransitional", _))
+      Some(Updates.setOnInsert("isTransitional", false))
     ).flatten
 
     val options = UpdateOptions().upsert(true)

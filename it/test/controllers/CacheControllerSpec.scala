@@ -44,17 +44,6 @@ class CacheControllerSpec extends CacheRepositorySpecBase {
       }
     }
 
-    "APIVersion header is missing" should {
-      "respond with 400 status" in {
-        val response = wsClient
-          .url(url)
-          .get()
-          .futureValue
-
-        response.status shouldBe 400
-      }
-    }
-
     "document does exist" when {
       "APIVersion header aligns with document" must {
         "respond with 200 status" in {
@@ -78,21 +67,6 @@ class CacheControllerSpec extends CacheRepositorySpecBase {
           response.json.as[UserAnswers].lastUpdated shouldBe userAnswers.lastUpdated.truncatedTo(
             java.time.temporal.ChronoUnit.MILLIS
           )
-        }
-      }
-
-      "APIVersion header doesn't align with document" must {
-        "respond with 400 status" in {
-          val userAnswers = emptyUserAnswers
-          insert(userAnswers).futureValue
-
-          val response = wsClient
-            .url(url)
-            .addHttpHeaders(("APIVersion", "2.1"))
-            .get()
-            .futureValue
-
-          response.status shouldBe 400
         }
       }
     }
@@ -200,17 +174,6 @@ class CacheControllerSpec extends CacheRepositorySpecBase {
           .url(url)
           .addHttpHeaders(("APIVersion", "2.0"))
           .put(Json.obj("foo" -> "bar"))
-          .futureValue
-
-        response.status shouldBe 400
-      }
-    }
-
-    "missing APIVersion" should {
-      "respond with 400 status" in {
-        val response = wsClient
-          .url(url)
-          .put(JsString(mrn))
           .futureValue
 
         response.status shouldBe 400
