@@ -18,7 +18,7 @@ package repositories
 
 import itbase.CacheRepositorySpecBase
 import models.Sort.{SortByCreatedAtAsc, SortByCreatedAtDesc, SortByMRNAsc, SortByMRNDesc}
-import models.{Phase, UserAnswers, UserAnswersSummary}
+import models.{UserAnswers, UserAnswersSummary}
 import org.mongodb.scala.bson.{BsonDocument, BsonString}
 import org.mongodb.scala.model.Filters
 import play.api.libs.json.Json
@@ -103,7 +103,7 @@ class CacheRepositorySpec extends CacheRepositorySpecBase {
 
       findOne(userAnswers3.mrn, userAnswers3.eoriNumber) should not be defined
 
-      val setResult = repository.set(userAnswers3.metadata, Some(Phase.Transition)).futureValue
+      val setResult = repository.set(userAnswers3.metadata).futureValue
 
       setResult shouldBe true
 
@@ -112,7 +112,7 @@ class CacheRepositorySpec extends CacheRepositorySpecBase {
       getResult.mrn shouldBe userAnswers3.mrn
       getResult.eoriNumber shouldBe userAnswers3.eoriNumber
       getResult.metadata shouldBe userAnswers3.metadata
-      getResult.isTransitional shouldBe true
+      getResult.isTransitional shouldBe false
     }
 
     "update document when it already exists" in {
@@ -122,7 +122,7 @@ class CacheRepositorySpec extends CacheRepositorySpecBase {
       val metadata = userAnswers1.metadata.copy(
         data = Json.obj("foo" -> "bar")
       )
-      val setResult = repository.set(metadata, None).futureValue
+      val setResult = repository.set(metadata).futureValue
 
       setResult shouldBe true
 
