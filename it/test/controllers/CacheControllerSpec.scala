@@ -36,7 +36,6 @@ class CacheControllerSpec extends CacheRepositorySpecBase {
       "respond with 404 status" in {
         val response = wsClient
           .url(url)
-          .addHttpHeaders(("APIVersion", "2.0"))
           .get()
           .futureValue
 
@@ -52,7 +51,6 @@ class CacheControllerSpec extends CacheRepositorySpecBase {
 
           val response = wsClient
             .url(url)
-            .addHttpHeaders(("APIVersion", "2.0"))
             .get()
             .futureValue
 
@@ -141,7 +139,6 @@ class CacheControllerSpec extends CacheRepositorySpecBase {
       "respond with 200 status" in {
         val response = wsClient
           .url(url)
-          .addHttpHeaders(("APIVersion", "2.0"))
           .put(JsString(mrn))
           .futureValue
 
@@ -160,7 +157,6 @@ class CacheControllerSpec extends CacheRepositorySpecBase {
       "respond with 400 status" in {
         val response = wsClient
           .url(url)
-          .addHttpHeaders(("APIVersion", "2.0"))
           .put(Json.obj())
           .futureValue
 
@@ -172,7 +168,6 @@ class CacheControllerSpec extends CacheRepositorySpecBase {
       "respond with 400 status" in {
         val response = wsClient
           .url(url)
-          .addHttpHeaders(("APIVersion", "2.0"))
           .put(Json.obj("foo" -> "bar"))
           .futureValue
 

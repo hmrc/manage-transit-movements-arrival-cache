@@ -60,7 +60,7 @@ trait SpecBase
     createdAt = Instant.now(),
     lastUpdated = Instant.now(),
     id = UUID.randomUUID(),
-    isTransitional = true
+    isTransitional = false
   )
 
   def fakeRequest: FakeRequest[AnyContent] = FakeRequest("", "")

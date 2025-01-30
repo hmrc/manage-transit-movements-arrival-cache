@@ -38,7 +38,6 @@ class CacheControllerSpec extends SpecBase with AppWithDefaultMockFixtures {
         when(mockCacheRepository.get(any(), any())).thenReturn(Future.successful(Some(emptyUserAnswers)))
 
         val request = FakeRequest(GET, routes.CacheController.get(mrn).url)
-          .withHeaders("APIVersion" -> "2.1")
 
         val result = route(app, request).value
 
@@ -48,12 +47,25 @@ class CacheControllerSpec extends SpecBase with AppWithDefaultMockFixtures {
       }
     }
 
+    "return 400" when {
+      "userAnswers is transition" in {
+        val transitionalUserAnswers = emptyUserAnswers.copy(isTransitional = true)
+        when(mockCacheRepository.get(any(), any())).thenReturn(Future.successful(Some(transitionalUserAnswers)))
+
+        val request = FakeRequest(GET, routes.CacheController.get(mrn).url)
+
+        val result = route(app, request).value
+
+        status(result) shouldBe BAD_REQUEST
+        verify(mockCacheRepository).get(eqTo(mrn), eqTo(eoriNumber))
+      }
+    }
+
     "return 404" when {
       "document not found in mongo for given mrn and eori number" in {
         when(mockCacheRepository.get(any(), any())).thenReturn(Future.successful(None))
 
         val request = FakeRequest(GET, routes.CacheController.get(mrn).url)
-          .withHeaders("APIVersion" -> "2.1")
 
         val result = route(app, request).value
 
@@ -67,7 +79,6 @@ class CacheControllerSpec extends SpecBase with AppWithDefaultMockFixtures {
         when(mockCacheRepository.get(any(), any())).thenReturn(Future.failed(new Throwable()))
 
         val request = FakeRequest(GET, routes.CacheController.get(mrn).url)
-          .withHeaders("APIVersion" -> "2.1")
 
         val result = route(app, request).value
 
@@ -166,7 +177,6 @@ class CacheControllerSpec extends SpecBase with AppWithDefaultMockFixtures {
         when(mockCacheRepository.set(any())).thenReturn(Future.successful(true))
 
         val request = FakeRequest(PUT, routes.CacheController.put().url)
-          .withHeaders("APIVersion" -> "2.1")
           .withBody(JsString(mrn))
 
         val result                                   = route(app, request).value
@@ -181,7 +191,6 @@ class CacheControllerSpec extends SpecBase with AppWithDefaultMockFixtures {
     "return 400" when {
       "request body is invalid" in {
         val request = FakeRequest(PUT, routes.CacheController.put().url)
-          .withHeaders("APIVersion" -> "2.1")
           .withBody(Json.obj("foo" -> "bar"))
 
         val result = route(app, request).value
@@ -192,7 +201,6 @@ class CacheControllerSpec extends SpecBase with AppWithDefaultMockFixtures {
 
       "request body is empty" in {
         val request = FakeRequest(PUT, routes.CacheController.put().url)
-          .withHeaders("APIVersion" -> "2.1")
           .withBody(Json.obj())
 
         val result = route(app, request).value
@@ -207,7 +215,6 @@ class CacheControllerSpec extends SpecBase with AppWithDefaultMockFixtures {
         when(mockCacheRepository.set(any())).thenReturn(Future.successful(false))
 
         val request = FakeRequest(PUT, routes.CacheController.put().url)
-          .withHeaders("APIVersion" -> "2.1")
           .withBody(JsString(mrn))
 
         val result                                   = route(app, request).value
@@ -222,7 +229,6 @@ class CacheControllerSpec extends SpecBase with AppWithDefaultMockFixtures {
         when(mockCacheRepository.set(any())).thenReturn(Future.failed(new Throwable()))
 
         val request = FakeRequest(PUT, routes.CacheController.put().url)
-          .withHeaders("APIVersion" -> "2.1")
           .withBody(JsString(mrn))
 
         val result                                   = route(app, request).value

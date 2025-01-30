@@ -44,6 +44,8 @@ class CacheController @Inject() (
       cacheRepository
         .get(mrn, request.eoriNumber)
         .map {
+          case Some(userAnswers) if userAnswers.isTransitional =>
+            BadRequest
           case Some(userAnswers) =>
             Ok(Json.toJson(userAnswers))
           case None =>
