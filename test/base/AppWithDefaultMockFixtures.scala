@@ -16,30 +16,14 @@
 
 package base
 
-import controllers.actions.{
-  AuthenticateActionProvider,
-  AuthenticateAndLockActionProvider,
-  FakeAuthenticateActionProvider,
-  FakeAuthenticateAndLockActionProvider
-}
-import org.mockito.Mockito.reset
+import controllers.actions.{AuthenticateActionProvider, FakeAuthenticateActionProvider, FakeLockActionProvider, LockActionProvider}
 import org.scalatest.{BeforeAndAfterEach, TestSuite}
 import play.api.Application
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
-import repositories.{CacheRepository, DefaultLockRepository}
 
 trait AppWithDefaultMockFixtures extends BeforeAndAfterEach {
   self: TestSuite & SpecBase =>
-
-  lazy val mockCacheRepository: CacheRepository      = mock[CacheRepository]
-  lazy val mockLockRepository: DefaultLockRepository = mock[DefaultLockRepository]
-
-  override def beforeEach(): Unit = {
-    super.beforeEach()
-    reset(mockCacheRepository)
-    reset(mockLockRepository)
-  }
 
   override def fakeApplication(): Application =
     guiceApplicationBuilder()
@@ -50,9 +34,7 @@ trait AppWithDefaultMockFixtures extends BeforeAndAfterEach {
     new GuiceApplicationBuilder()
       .configure("metrics.enabled" -> false)
       .overrides(
-        bind[AuthenticateActionProvider].to[FakeAuthenticateActionProvider],
-        bind[AuthenticateAndLockActionProvider].to[FakeAuthenticateAndLockActionProvider],
-        bind[CacheRepository].toInstance(mockCacheRepository),
-        bind[DefaultLockRepository].toInstance(mockLockRepository)
+        bind[AuthenticateActionProvider].toInstance(new FakeAuthenticateActionProvider(eoriNumber)),
+        bind[LockActionProvider].to[FakeLockActionProvider]
       )
 }

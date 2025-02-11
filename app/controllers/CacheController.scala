@@ -16,7 +16,7 @@
 
 package controllers
 
-import controllers.actions.{AuthenticateActionProvider, AuthenticateAndLockActionProvider, VersionedAction}
+import controllers.actions.Actions
 import models.{Metadata, Phase, SubmissionStatus}
 import play.api.Logging
 import play.api.libs.json.{JsError, JsSuccess, JsValue, Json}
@@ -31,16 +31,14 @@ import scala.concurrent.{ExecutionContext, Future}
 @Singleton()
 class CacheController @Inject() (
   cc: ControllerComponents,
-  authenticate: AuthenticateActionProvider,
-  authenticateAndLock: AuthenticateAndLockActionProvider,
-  getVersion: VersionedAction,
+  actions: Actions,
   cacheRepository: CacheRepository,
   dateTimeService: DateTimeService
 )(implicit ec: ExecutionContext)
     extends BackendController(cc)
     with Logging {
 
-  def get(mrn: String): Action[AnyContent] = (authenticate() andThen getVersion).async {
+  def get(mrn: String): Action[AnyContent] = actions.authenticateAndLockAndGetVersion(mrn).async {
     implicit request =>
       cacheRepository
         .get(mrn, request.eoriNumber)
@@ -60,7 +58,7 @@ class CacheController @Inject() (
         }
   }
 
-  def post(mrn: String): Action[JsValue] = authenticateAndLock(mrn).async(parse.json) {
+  def post(mrn: String): Action[JsValue] = actions.authenticateAndLock(mrn).async(parse.json) {
     implicit request =>
       request.body.validate[Metadata] match {
         case JsSuccess(data, _) =>
@@ -76,7 +74,7 @@ class CacheController @Inject() (
       }
   }
 
-  def put(): Action[JsValue] = (authenticate() andThen getVersion).async(parse.json) {
+  def put(): Action[JsValue] = actions.authenticateAndGetVersion().async(parse.json) {
     implicit request =>
       request.body.validate[String] match {
         case JsSuccess(mrn, _) =>
@@ -102,7 +100,7 @@ class CacheController @Inject() (
           InternalServerError
       }
 
-  def delete(mrn: String): Action[AnyContent] = authenticate().async {
+  def delete(mrn: String): Action[AnyContent] = actions.authenticate().async {
     implicit request =>
       cacheRepository
         .remove(mrn, request.eoriNumber)
@@ -117,7 +115,7 @@ class CacheController @Inject() (
   }
 
   def getAll(mrn: Option[String] = None, limit: Option[Int] = None, skip: Option[Int] = None, sortBy: Option[String] = None): Action[AnyContent] =
-    authenticate().async {
+    actions.authenticate().async {
       implicit request =>
         cacheRepository
           .getAll(request.eoriNumber, mrn, limit, skip, sortBy)
