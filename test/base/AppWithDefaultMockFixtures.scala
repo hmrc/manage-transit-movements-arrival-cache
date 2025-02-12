@@ -16,7 +16,7 @@
 
 package base
 
-import controllers.actions.{AuthenticateActionProvider, FakeAuthenticateActionProvider, FakeLockActionProvider, LockActionProvider}
+import controllers.actions.{AuthenticateActionProvider, FakeAuthenticateActionProvider}
 import org.scalatest.{BeforeAndAfterEach, TestSuite}
 import play.api.Application
 import play.api.inject.bind
@@ -34,7 +34,6 @@ trait AppWithDefaultMockFixtures extends BeforeAndAfterEach {
     new GuiceApplicationBuilder()
       .configure("metrics.enabled" -> false)
       .overrides(
-        bind[AuthenticateActionProvider].toInstance(new FakeAuthenticateActionProvider(eoriNumber)),
-        bind[LockActionProvider].to[FakeLockActionProvider]
+        bind[AuthenticateActionProvider].toInstance(new FakeAuthenticateActionProvider(eoriNumber))
       )
 }

@@ -24,19 +24,12 @@ import javax.inject.Inject
 class Actions @Inject() (
   buildDefault: DefaultActionBuilder,
   authenticateActionProvider: AuthenticateActionProvider,
-  lockActionProvider: LockActionProvider,
   versionedAction: VersionedAction
 ) {
 
   def authenticate(): ActionBuilder[AuthenticatedRequest, AnyContent] =
     buildDefault andThen authenticateActionProvider()
 
-  def authenticateAndLock(mrn: String): ActionBuilder[AuthenticatedRequest, AnyContent] =
-    authenticate() andThen lockActionProvider(mrn)
-
   def authenticateAndGetVersion(): ActionBuilder[VersionedRequest, AnyContent] =
     authenticate() andThen versionedAction
-
-  def authenticateAndLockAndGetVersion(mrn: String): ActionBuilder[VersionedRequest, AnyContent] =
-    authenticate() andThen lockActionProvider(mrn) andThen versionedAction
 }

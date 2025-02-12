@@ -16,7 +16,7 @@
 
 package itbase
 
-import controllers.actions.{AuthenticateActionProvider, FakeAuthenticateActionProvider, FakeLockActionProvider, LockActionProvider}
+import controllers.actions.{AuthenticateActionProvider, FakeAuthenticateActionProvider}
 import org.scalatest.OptionValues
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.matchers.should.Matchers
@@ -35,8 +35,7 @@ trait ItSpecBase extends AnyWordSpec with Matchers with ScalaFutures with Option
     GuiceApplicationBuilder()
       .configure("metrics.enabled" -> false)
       .overrides(
-        bind[AuthenticateActionProvider].toInstance(new FakeAuthenticateActionProvider("eori")),
-        bind[LockActionProvider].to[FakeLockActionProvider]
+        bind[AuthenticateActionProvider].toInstance(new FakeAuthenticateActionProvider("eori"))
       )
 
   final override def fakeApplication(): Application =

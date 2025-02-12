@@ -18,9 +18,8 @@ package repositories
 
 import config.AppConfig
 import models.Lock
-import org.mongodb.scala.bson.conversions.Bson
+import org.mongodb.scala.model.*
 import org.mongodb.scala.model.Indexes.{ascending, compoundIndex}
-import org.mongodb.scala.model._
 import services.DateTimeService
 import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.play.json.PlayMongoRepository
@@ -62,14 +61,25 @@ class LockRepository @Inject() (
       .map(_.wasAcknowledged())
   }
 
-  def lock(newLock: Lock): Future[Boolean] =
-    findLocks(newLock.eoriNumber, newLock.mrn).flatMap {
-      case Some(existingLock) if existingLock.sessionId == newLock.sessionId => updateLock(existingLock)
-      case None                                                              => insertNewLock(newLock)
-      case _                                                                 => Future.successful(false)
+  def lock(sessionId: String, eoriNumber: String, mrn: String): Future[Boolean] =
+    findLocks(eoriNumber, mrn).flatMap {
+      case Some(existingLock) if existingLock.sessionId == sessionId =>
+        updateLock(existingLock)
+      case None =>
+        val now = dateTimeService.timestamp
+        val lock = Lock(
+          sessionId = sessionId,
+          eoriNumber = eoriNumber,
+          mrn = mrn,
+          createdAt = now,
+          lastUpdated = now
+        )
+        insertNewLock(lock)
+      case _ =>
+        Future.successful(false)
     }
 
-  def findLocks(eoriNumber: String, mrn: String): Future[Option[Lock]] = {
+  private def findLocks(eoriNumber: String, mrn: String): Future[Option[Lock]] = {
     val filters = Filters.and(
       Filters.eq("eoriNumber", eoriNumber),
       Filters.eq("mrn", mrn),

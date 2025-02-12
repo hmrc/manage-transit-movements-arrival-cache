@@ -38,7 +38,7 @@ class CacheController @Inject() (
     extends BackendController(cc)
     with Logging {
 
-  def get(mrn: String): Action[AnyContent] = actions.authenticateAndLockAndGetVersion(mrn).async {
+  def get(mrn: String): Action[AnyContent] = actions.authenticateAndGetVersion().async {
     implicit request =>
       cacheRepository
         .get(mrn, request.eoriNumber)
@@ -58,7 +58,7 @@ class CacheController @Inject() (
         }
   }
 
-  def post(mrn: String): Action[JsValue] = actions.authenticateAndLock(mrn).async(parse.json) {
+  def post(mrn: String): Action[JsValue] = actions.authenticate().async(parse.json) {
     implicit request =>
       request.body.validate[Metadata] match {
         case JsSuccess(data, _) =>

@@ -17,7 +17,6 @@
 package controllers
 
 import base.{AppWithDefaultMockFixtures, SpecBase}
-import models.Lock
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.{reset, when}
 import play.api.inject.bind
@@ -27,7 +26,6 @@ import play.api.test.Helpers.*
 import repositories.LockRepository
 import uk.gov.hmrc.http.HeaderNames
 
-import java.time.Instant
 import scala.concurrent.Future
 
 class LockControllerSpec extends SpecBase with AppWithDefaultMockFixtures {
@@ -48,17 +46,9 @@ class LockControllerSpec extends SpecBase with AppWithDefaultMockFixtures {
 
   "checkLock" should {
 
-    val lock = Lock(
-      sessionId = "abc123",
-      eoriNumber = "AB123",
-      mrn = "CD123",
-      createdAt = Instant.now(),
-      lastUpdated = Instant.now()
-    )
-
     "return 200" when {
       "when document is not locked" in {
-        when(mockLockRepository.findLocks(any(), any())).thenReturn(Future.successful(None))
+        when(mockLockRepository.lock(any(), any(), any())).thenReturn(Future.successful(true))
 
         val request = FakeRequest(GET, routes.LockController.checkLock(mrn).url)
           .withHeaders((HeaderNames.xSessionId, "sessionId"))
@@ -67,23 +57,11 @@ class LockControllerSpec extends SpecBase with AppWithDefaultMockFixtures {
 
         status(result) shouldBe OK
       }
-
-      "when document is locked but header carrier session Id aligns to lock session Id" in {
-        when(mockLockRepository.findLocks(any(), any())).thenReturn(Future.successful(Some(lock)))
-
-        val request = FakeRequest(GET, routes.LockController.checkLock(mrn).url)
-          .withHeaders((HeaderNames.xSessionId, "abc123"))
-
-        val result = route(app, request).value
-
-        status(result) shouldBe OK
-      }
     }
 
     "return 423" when {
-
-      "when document is locked but header carrier session Id doesnt align to lock session Id" in {
-        when(mockLockRepository.findLocks(any(), any())).thenReturn(Future.successful(Some(lock)))
+      "when document is locked" in {
+        when(mockLockRepository.lock(any(), any(), any())).thenReturn(Future.successful(false))
 
         val request = FakeRequest(GET, routes.LockController.checkLock(mrn).url)
           .withHeaders((HeaderNames.xSessionId, "cd123"))
@@ -97,8 +75,6 @@ class LockControllerSpec extends SpecBase with AppWithDefaultMockFixtures {
     "return 500" when {
 
       "when session id is not defined" in {
-        when(mockLockRepository.findLocks(any(), any())).thenReturn(Future.successful(Some(lock)))
-
         val request = FakeRequest(GET, routes.LockController.checkLock(mrn).url)
 
         val result = route(app, request).value
