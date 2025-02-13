@@ -16,13 +16,13 @@
 
 package controllers
 
-import controllers.actions.{AuthenticateActionProvider, VersionedAction}
+import controllers.actions.Actions
 import models.AuditType.ArrivalNotification
 import models.{Messages, SubmissionStatus}
 import play.api.Logging
 import play.api.libs.json.{JsError, JsSuccess, JsValue, Json}
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
-import repositories.CacheRepository
+import repositories.{CacheRepository, LockRepository}
 import services.{ApiService, AuditService, MetricsService}
 import uk.gov.hmrc.http.HttpErrorFunctions.is2xx
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
@@ -33,10 +33,10 @@ import scala.concurrent.{ExecutionContext, Future}
 @Singleton()
 class SubmissionController @Inject() (
   cc: ControllerComponents,
-  authenticate: AuthenticateActionProvider,
-  getVersion: VersionedAction,
+  actions: Actions,
   apiService: ApiService,
   cacheRepository: CacheRepository,
+  lockRepository: LockRepository,
   auditService: AuditService,
   metricsService: MetricsService
 )(implicit ec: ExecutionContext)
@@ -46,7 +46,7 @@ class SubmissionController @Inject() (
   private def log(method: String, message: String, args: String*): String =
     s"SubmissionController:$method:${args.mkString(":")} - $message"
 
-  def post(): Action[JsValue] = (authenticate() andThen getVersion).async(parse.json) {
+  def post(): Action[JsValue] = actions.authenticateAndGetVersion().async(parse.json) {
     implicit request =>
       import request.*
       body.validate[String] match {
@@ -58,10 +58,12 @@ class SubmissionController @Inject() (
                   metricsService.increment(response.status)
                   response.status match {
                     case status if is2xx(status) =>
-                      cacheRepository.set(userAnswers.metadata.copy(submissionStatus = SubmissionStatus.Submitted), None).map {
-                        _ =>
-                          auditService.audit(ArrivalNotification, userAnswers)
-                          Ok(response.body)
+                      for {
+                        _ <- cacheRepository.set(userAnswers.metadata.copy(submissionStatus = SubmissionStatus.Submitted), None)
+                        _ <- lockRepository.unlock(eoriNumber, mrn)
+                      } yield {
+                        auditService.audit(ArrivalNotification, userAnswers)
+                        Ok(response.body)
                       }
                     case BAD_REQUEST =>
                       logger.warn(log("post", "Bad request", eoriNumber, mrn))
@@ -83,7 +85,7 @@ class SubmissionController @Inject() (
       }
   }
 
-  def get(mrn: String): Action[AnyContent] = (authenticate() andThen getVersion).async {
+  def get(mrn: String): Action[AnyContent] = actions.authenticateAndGetVersion().async {
     implicit request =>
       import request.*
       apiService.get(mrn, phase).map {
