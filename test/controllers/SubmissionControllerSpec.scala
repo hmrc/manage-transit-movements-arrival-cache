@@ -30,6 +30,7 @@ import repositories.{CacheRepository, LockRepository}
 import services.{ApiService, AuditService}
 import uk.gov.hmrc.http.HttpResponse
 
+import java.time.LocalDateTime
 import scala.concurrent.Future
 
 class SubmissionControllerSpec extends SpecBase with AppWithDefaultMockFixtures {
@@ -148,7 +149,7 @@ class SubmissionControllerSpec extends SpecBase with AppWithDefaultMockFixtures 
 
     "return 200" when {
       "messages found" in {
-        val messages = Messages(Seq(Message("IE007")))
+        val messages = Messages(Seq(Message("IE007", LocalDateTime.now())))
 
         when(mockApiService.get(any(), any())(any(), any()))
           .thenReturn(Future.successful(Some(messages)))
