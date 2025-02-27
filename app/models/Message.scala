@@ -18,7 +18,9 @@ package models
 
 import play.api.libs.json.{Format, Json}
 
-case class Message(`type`: String)
+import java.time.LocalDateTime
+
+case class Message(`type`: String, received: LocalDateTime)
 
 object Message {
 

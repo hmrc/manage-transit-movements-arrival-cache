@@ -21,8 +21,8 @@ import base.{AppWithDefaultMockFixtures, SpecBase}
 import connectors.ApiConnector
 import generators.Generators
 import models.{Arrival, Message, Messages, Phase}
-import org.mockito.ArgumentMatchers.{any, eq => eqTo}
-import org.mockito.Mockito._
+import org.mockito.ArgumentMatchers.{any, eq as eqTo}
+import org.mockito.Mockito.*
 import org.scalacheck.Arbitrary.arbitrary
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import play.api.http.Status.OK
@@ -30,6 +30,7 @@ import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
 import uk.gov.hmrc.http.HttpResponse
 
+import java.time.LocalDateTime
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.xml.NodeSeq
@@ -114,7 +115,7 @@ class ApiServiceSpec extends SpecBase with AppWithDefaultMockFixtures with Scala
               when(mockApiConnector.getArrival(any(), any())(any()))
                 .thenReturn(Future.successful(Some(Arrival(arrivalId, mrn))))
 
-              val messages = Messages(Seq(Message("IE007")))
+              val messages = Messages(Seq(Message("IE007", LocalDateTime.now())))
 
               when(mockApiConnector.getMessages(any(), any())(any()))
                 .thenReturn(Future.successful(messages))
