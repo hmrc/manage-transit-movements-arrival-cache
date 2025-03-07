@@ -18,9 +18,8 @@ package repositories
 
 import config.AppConfig
 import models.Lock
-import org.mongodb.scala.bson.conversions.Bson
+import org.mongodb.scala.model.*
 import org.mongodb.scala.model.Indexes.{ascending, compoundIndex}
-import org.mongodb.scala.model._
 import services.DateTimeService
 import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.play.json.PlayMongoRepository
@@ -30,7 +29,7 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class DefaultLockRepository @Inject() (
+class LockRepository @Inject() (
   mongoComponent: MongoComponent,
   appConfig: AppConfig,
   dateTimeService: DateTimeService
@@ -42,11 +41,6 @@ class DefaultLockRepository @Inject() (
       indexes = LockRepository.indexes(appConfig)
     ) {
 
-  private def primaryFilter(eoriNumber: String, mrn: String): Bson = Filters.and(
-    Filters.eq("eoriNumber", eoriNumber),
-    Filters.eq("mrn", mrn)
-  )
-
   private def insertNewLock(lock: Lock): Future[Boolean] =
     collection
       .insertOne(lock)
@@ -54,22 +48,46 @@ class DefaultLockRepository @Inject() (
       .map(_.wasAcknowledged())
 
   private def updateLock(existingLock: Lock): Future[Boolean] = {
+    val filters = Filters.and(
+      Filters.eq("eoriNumber", existingLock.eoriNumber),
+      Filters.eq("mrn", existingLock.mrn)
+    )
+
     val updatedLock = existingLock.copy(lastUpdated = dateTimeService.timestamp)
+
     collection
-      .replaceOne(primaryFilter(existingLock.eoriNumber, existingLock.mrn), updatedLock)
+      .replaceOne(filters, updatedLock)
       .head()
       .map(_.wasAcknowledged())
   }
 
-  def lock(newLock: Lock): Future[Boolean] =
-    findLocks(newLock.eoriNumber, newLock.mrn).flatMap {
-      case Some(existingLock) if existingLock.sessionId == newLock.sessionId => updateLock(existingLock)
-      case None                                                              => insertNewLock(newLock)
-      case _                                                                 => Future.successful(false)
+  def lock(sessionId: String, eoriNumber: String, mrn: String): Future[Boolean] =
+    findLocks(eoriNumber, mrn).flatMap {
+      case Some(existingLock) if existingLock.sessionId == sessionId =>
+        updateLock(existingLock)
+      case None =>
+        val now = dateTimeService.timestamp
+        val lock = Lock(
+          sessionId = sessionId,
+          eoriNumber = eoriNumber,
+          mrn = mrn,
+          createdAt = now,
+          lastUpdated = now
+        )
+        insertNewLock(lock)
+      case _ =>
+        Future.successful(false)
     }
 
-  def findLocks(eoriNumber: String, mrn: String): Future[Option[Lock]] =
-    collection.find(primaryFilter(eoriNumber, mrn)).headOption()
+  private def findLocks(eoriNumber: String, mrn: String): Future[Option[Lock]] = {
+    val filters = Filters.and(
+      Filters.eq("eoriNumber", eoriNumber),
+      Filters.eq("mrn", mrn),
+      Filters.gt("lastUpdated", dateTimeService.nMinutesAgo(appConfig.lockTTLInMins))
+    )
+
+    collection.find(filters).headOption()
+  }
 
   def unlock(eoriNumber: String, mrn: String, sessionId: String): Future[Boolean] = {
     val filters = Filters.and(
@@ -80,6 +98,18 @@ class DefaultLockRepository @Inject() (
 
     collection
       .deleteOne(filters)
+      .head()
+      .map(_.wasAcknowledged())
+  }
+
+  def unlock(eoriNumber: String, mrn: String): Future[Boolean] = {
+    val filters = Filters.and(
+      Filters.eq("eoriNumber", eoriNumber),
+      Filters.eq("mrn", mrn)
+    )
+
+    collection
+      .deleteMany(filters)
       .head()
       .map(_.wasAcknowledged())
   }

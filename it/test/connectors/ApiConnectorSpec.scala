@@ -16,14 +16,15 @@
 
 package connectors
 
-import com.github.tomakehurst.wiremock.client.WireMock._
+import com.github.tomakehurst.wiremock.client.WireMock.*
 import itbase.{ItSpecBase, WireMockServerHandler}
 import models.{Arrival, Message, Messages}
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import uk.gov.hmrc.http.HeaderCarrier
 
+import java.time.LocalDateTime
 import scala.xml.NodeSeq
 
 class ApiConnectorSpec extends ItSpecBase with WireMockServerHandler {
@@ -221,7 +222,7 @@ class ApiConnectorSpec extends ItSpecBase with WireMockServerHandler {
         val res = await(connector.getMessages(arrivalId))
         res shouldBe Messages(
           Seq(
-            Message("IE007")
+            Message("IE007", LocalDateTime.of(2022, 11, 10, 15, 32, 51, 459000000))
           )
         )
       }

@@ -20,16 +20,33 @@ import base.{AppWithDefaultMockFixtures, SpecBase}
 import models.{Metadata, SubmissionStatus, UserAnswers, UserAnswersSummary}
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.{any, eq as eqTo}
-import org.mockito.Mockito.{never, verify, when}
+import org.mockito.Mockito.{never, reset, verify, when}
+import play.api.inject.bind
+import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.{JsString, Json}
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
+import repositories.CacheRepository
 
 import java.time.Instant
 import java.util.UUID
 import scala.concurrent.Future
 
 class CacheControllerSpec extends SpecBase with AppWithDefaultMockFixtures {
+
+  private lazy val mockCacheRepository = mock[CacheRepository]
+
+  override def guiceApplicationBuilder(): GuiceApplicationBuilder =
+    super
+      .guiceApplicationBuilder()
+      .overrides(
+        bind[CacheRepository].toInstance(mockCacheRepository)
+      )
+
+  override def beforeEach(): Unit = {
+    super.beforeEach()
+    reset(mockCacheRepository)
+  }
 
   "get" should {
 

@@ -29,6 +29,7 @@ import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
 import uk.gov.hmrc.http.HttpResponse
 
+import java.time.LocalDateTime
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.xml.NodeSeq
@@ -107,7 +108,7 @@ class ApiServiceSpec extends SpecBase with AppWithDefaultMockFixtures with Scala
           when(mockApiConnector.getArrival(any())(any()))
             .thenReturn(Future.successful(Some(Arrival(arrivalId, mrn))))
 
-          val messages = Messages(Seq(Message("IE007")))
+          val messages = Messages(Seq(Message("IE007", LocalDateTime.now())))
 
           when(mockApiConnector.getMessages(any())(any()))
             .thenReturn(Future.successful(messages))

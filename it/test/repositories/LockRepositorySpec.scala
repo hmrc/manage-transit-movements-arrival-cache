@@ -20,7 +20,6 @@ import itbase.LockRepositorySpecBase
 import models.Lock
 
 import java.time.Instant
-import java.time.temporal.ChronoUnit.DAYS
 
 class LockRepositorySpec extends LockRepositorySpecBase {
 
@@ -32,82 +31,81 @@ class LockRepositorySpec extends LockRepositorySpecBase {
 
       "add new lock" in {
 
-        val lock1: Lock = Lock("session1", "eoriNumber", "mrn", now, now)
-
-        val result = repository.lock(lock1).futureValue
+        val result = repository.lock("session1", "eoriNumber", "mrn").futureValue
 
         result shouldBe true
       }
 
       "update lock when sessionId is the same as lock" in {
 
-        val lock1: Lock = Lock("session1", "eoriNumber", "mrn", now, now.minus(1, DAYS))
-        val lock2: Lock = Lock("session1", "eoriNumber", "mrn", now, now)
+        val lock1: Lock = Lock("session1", "eoriNumber", "mrn", now, now)
 
         insert(lock1).futureValue
 
-        val lockResult = repository.lock(lock2).futureValue
+        val lockResult = repository.lock("session1", "eoriNumber", "mrn").futureValue
 
         val numberOfDocs: Long = repository.collection.countDocuments().head().futureValue
 
         lockResult shouldBe true
         numberOfDocs shouldBe 1
+
+        val lock2 = findAll().futureValue.head
+        lock2.lastUpdated.isAfter(lock1.lastUpdated) shouldEqual true
       }
 
       "not add new lock if lock already exists and sessionId is different" in {
 
         val lock1: Lock = Lock("session1", "eoriNumber", "mrn", now, now)
-        val lock2: Lock = Lock("session2", "eoriNumber", "mrn", now, now)
 
         insert(lock1).futureValue
 
-        val result = repository.lock(lock2).futureValue
+        val result = repository.lock("session2", "eoriNumber", "mrn").futureValue
 
         val numberOfDocs: Long = repository.collection.countDocuments().head().futureValue
 
         result shouldBe false
         numberOfDocs shouldBe 1
-      }
-    }
-  }
 
-  "findLocks" when {
-
-    "looking for locks" should {
-
-      "find and return existing lock" in {
-
-        val lock1: Lock = Lock("session1", "eoriNumber", "mrn", now, now)
-
-        insert(lock1).futureValue
-
-        val result = repository.findLocks(lock1.eoriNumber, lock1.mrn).futureValue
-
-        result.value.sessionId shouldBe lock1.sessionId
-        result.value.eoriNumber shouldBe lock1.eoriNumber
-        result.value.mrn shouldBe lock1.mrn
-      }
-
-      "return None for no lock" in {
-
-        val result = repository.findLocks("eoriNumber", "mrn").futureValue
-
-        result shouldBe None
+        findAll().futureValue.head.sessionId shouldEqual "session1"
       }
     }
   }
 
   "unlock" when {
 
+    val mrn        = "mrn"
+    val eoriNumber = "eoriNumber"
+
     "when unlocking a document" should {
 
       "return true for successful unlock" in {
 
-        val lock1: Lock = Lock("session1", "eoriNumber", "mrn", now, now)
+        val sessionId = "session1"
+
+        val lock1: Lock = Lock(sessionId, eoriNumber, mrn, now, now)
 
         insert(lock1).futureValue
 
-        val result = repository.unlock(lock1.eoriNumber, lock1.mrn, "session1").futureValue
+        val result = repository.unlock(eoriNumber, mrn, sessionId).futureValue
+
+        val numberOfDocs: Long = repository.collection.countDocuments().head().futureValue
+
+        result shouldBe true
+        numberOfDocs shouldBe 0
+      }
+    }
+
+    "when unlocking multiple documents" should {
+
+      "return true for successful unlock" in {
+
+        val lock1: Lock = Lock("session1", eoriNumber, mrn, now, now)
+        val lock2: Lock = Lock("session2", eoriNumber, mrn, now, now)
+
+        insert(lock1).futureValue
+        insert(lock2).futureValue
+
+        val result = repository.unlock(lock1.eoriNumber, lock1.mrn).futureValue
 
         val numberOfDocs: Long = repository.collection.countDocuments().head().futureValue
 

@@ -19,28 +19,33 @@ package controllers
 import base.{AppWithDefaultMockFixtures, SpecBase}
 import models.AuditType.ArrivalNotification
 import models.{Message, Messages, SubmissionStatus}
-import org.mockito.ArgumentMatchers.{any, eq => eqTo}
+import org.mockito.ArgumentMatchers.{any, eq as eqTo}
 import org.mockito.Mockito.{never, reset, verify, when}
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
+import repositories.{CacheRepository, LockRepository}
 import services.{ApiService, AuditService}
 import uk.gov.hmrc.http.HttpResponse
 
+import java.time.LocalDateTime
 import scala.concurrent.Future
 
 class SubmissionControllerSpec extends SpecBase with AppWithDefaultMockFixtures {
 
-  private lazy val mockApiService = mock[ApiService]
-
-  private lazy val mockAuditService = mock[AuditService]
+  private lazy val mockCacheRepository = mock[CacheRepository]
+  private lazy val mockLockRepository  = mock[LockRepository]
+  private lazy val mockApiService      = mock[ApiService]
+  private lazy val mockAuditService    = mock[AuditService]
 
   override def guiceApplicationBuilder(): GuiceApplicationBuilder =
     super
       .guiceApplicationBuilder()
       .overrides(
+        bind[CacheRepository].toInstance(mockCacheRepository),
+        bind[LockRepository].toInstance(mockLockRepository),
         bind[ApiService].toInstance(mockApiService),
         bind[AuditService].toInstance(mockAuditService)
       )
@@ -48,6 +53,7 @@ class SubmissionControllerSpec extends SpecBase with AppWithDefaultMockFixtures 
   override def beforeEach(): Unit = {
     super.beforeEach()
     reset(mockCacheRepository)
+    reset(mockLockRepository)
     reset(mockApiService)
     reset(mockAuditService)
   }
@@ -66,6 +72,9 @@ class SubmissionControllerSpec extends SpecBase with AppWithDefaultMockFixtures 
         when(mockCacheRepository.set(any()))
           .thenReturn(Future.successful(true))
 
+        when(mockLockRepository.unlock(any(), any()))
+          .thenReturn(Future.successful(true))
+
         val request = FakeRequest(POST, routes.SubmissionController.post().url)
           .withBody(Json.toJson(mrn))
 
@@ -76,6 +85,7 @@ class SubmissionControllerSpec extends SpecBase with AppWithDefaultMockFixtures 
 
         verify(mockCacheRepository).get(eqTo(mrn), eqTo(eoriNumber))
         verify(mockCacheRepository).set(eqTo(userAnswers.metadata.copy(submissionStatus = SubmissionStatus.Submitted)))
+        verify(mockLockRepository).unlock(eqTo(eoriNumber), eqTo(mrn))
         verify(mockApiService).submitDeclaration(eqTo(userAnswers))(any())
         verify(mockAuditService).audit(eqTo(ArrivalNotification), eqTo(userAnswers))(any())
       }
@@ -135,7 +145,7 @@ class SubmissionControllerSpec extends SpecBase with AppWithDefaultMockFixtures 
 
     "return 200" when {
       "messages found" in {
-        val messages = Messages(Seq(Message("IE007")))
+        val messages = Messages(Seq(Message("IE007", LocalDateTime.now())))
 
         when(mockApiService.get(any())(any(), any()))
           .thenReturn(Future.successful(Some(messages)))
