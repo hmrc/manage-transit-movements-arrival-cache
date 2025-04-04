@@ -20,10 +20,9 @@ import api.submission.Declaration
 import base.{AppWithDefaultMockFixtures, SpecBase}
 import connectors.ApiConnector
 import generators.Generators
-import models.{Arrival, Message, Messages, Phase}
+import models.{Arrival, Message, Messages}
 import org.mockito.ArgumentMatchers.{any, eq as eqTo}
 import org.mockito.Mockito.*
-import org.scalacheck.Arbitrary.arbitrary
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import play.api.http.Status.OK
 import play.api.inject.bind
@@ -66,20 +65,18 @@ class ApiServiceSpec extends SpecBase with AppWithDefaultMockFixtures with Scala
 
   "submitDeclaration" must {
     "call connector" in {
-      forAll(arbitrary[Phase]) {
-        phase =>
-          beforeEach()
+      beforeEach()
 
-          val userAnswers    = emptyUserAnswers
-          val expectedResult = HttpResponse(OK, "")
+      val userAnswers    = emptyUserAnswers
+      val expectedResult = HttpResponse(OK, "")
 
-          when(mockApiConnector.submitDeclaration(any(), any())(any())).thenReturn(Future.successful(expectedResult))
+      when(mockApiConnector.submitDeclaration(any())(any())).thenReturn(Future.successful(expectedResult))
 
-          val result = service.submitDeclaration(userAnswers, phase).futureValue
-          result shouldBe expectedResult
+      val result = service.submitDeclaration(userAnswers).futureValue
+      result shouldBe expectedResult
 
-          verify(mockApiConnector).submitDeclaration(eqTo(xml), eqTo(phase))(any())
-      }
+      verify(mockApiConnector).submitDeclaration(eqTo(xml))(any())
+
     }
   }
 
@@ -88,18 +85,16 @@ class ApiServiceSpec extends SpecBase with AppWithDefaultMockFixtures with Scala
 
     "no arrival found" must {
       "return None" in {
-        forAll(arbitrary[Phase]) {
-          phase =>
-            beforeEach()
+        beforeEach()
 
-            when(mockApiConnector.getArrival(any(), any())(any()))
-              .thenReturn(Future.successful(None))
+        when(mockApiConnector.getArrival(any())(any()))
+          .thenReturn(Future.successful(None))
 
-            val result = service.get(mrn, phase).futureValue
-            result shouldBe None
+        val result = service.get(mrn).futureValue
+        result shouldBe None
 
-            verify(mockApiConnector).getArrival(eqTo(mrn), eqTo(phase))(any())
-        }
+        verify(mockApiConnector).getArrival(eqTo(mrn))(any())
+
       }
     }
 
@@ -108,24 +103,22 @@ class ApiServiceSpec extends SpecBase with AppWithDefaultMockFixtures with Scala
 
       "messages found" must {
         "return list of messages" in {
-          forAll(arbitrary[Phase]) {
-            phase =>
-              beforeEach()
+          beforeEach()
 
-              when(mockApiConnector.getArrival(any(), any())(any()))
-                .thenReturn(Future.successful(Some(Arrival(arrivalId, mrn))))
+          when(mockApiConnector.getArrival(any())(any()))
+            .thenReturn(Future.successful(Some(Arrival(arrivalId, mrn))))
 
-              val messages = Messages(Seq(Message("IE007", LocalDateTime.now())))
+          val messages = Messages(Seq(Message("IE007", LocalDateTime.now())))
 
-              when(mockApiConnector.getMessages(any(), any())(any()))
-                .thenReturn(Future.successful(messages))
+          when(mockApiConnector.getMessages(any())(any()))
+            .thenReturn(Future.successful(messages))
 
-              val result = service.get(mrn, phase).futureValue
-              result shouldBe Some(messages)
+          val result = service.get(mrn).futureValue
+          result shouldBe Some(messages)
 
-              verify(mockApiConnector).getArrival(eqTo(mrn), eqTo(phase))(any())
-              verify(mockApiConnector).getMessages(eqTo(arrivalId), eqTo(phase))(any())
-          }
+          verify(mockApiConnector).getArrival(eqTo(mrn))(any())
+          verify(mockApiConnector).getMessages(eqTo(arrivalId))(any())
+
         }
       }
     }

@@ -91,9 +91,6 @@
 * A call is made to the `GET` endpoint with:
     * a valid bearer token
     * a valid `HMRC-CTC-ORG` enrolment with `EoriNumber` identifier
-    * an `APIVersion` header with either:
-      * `2.0` for transition rules
-      * `2.1` for final rules
 * A document is found in the `user-answers` collection for the given MRN (the EORI number is extracted from the enrolment)
 * The response JSON has the following fields:
     * `mrn` - The movement reference number associated with the departure application
@@ -104,9 +101,6 @@
     * `id` - a UUID
 
 ### Unsuccessful responses (with possible causes)
-
-#### 400 BAD_REQUEST
-* `APIVersion` header was missing or did not align with saved answers
 
 #### 401 UNAUTHORIZED
 * A generic authorization error occurred. The likely cause of this is an invalid or missing bearer token.
@@ -164,16 +158,12 @@
     * a valid bearer token
     * a valid `HMRC-CTC-ORG` enrolment with `EoriNumber` identifier
     * a valid `String` request body representing the MRN
-    * an `APIVersion` header with either:
-      * `2.0` for transition rules
-      * `2.1` for final rules
 * Then, for the given MRN in the request body and EORI number in the enrolment, a new document gets created with an empty user answers
 
 ### Unsuccessful responses (with possible causes)
 
 #### 400 BAD_REQUEST
 * Request body could not be validated as a `String'
-* `APIVersion` header was missing
 
 #### 401 UNAUTHORIZED
 * A generic authorization error occurred. The likely cause of this is an invalid or missing bearer token.
@@ -214,16 +204,12 @@
   * a valid bearer token
   * a valid `HMRC-CTC-ORG` enrolment with `EoriNumber` identifier
   * a valid `String` request body representing the MRN
-  * an `APIVersion` header with either:
-    * `2.0` for transition rules
-    * `2.1` for final rules
 * Then, an IE007 gets successfully submitted to the API
 
 ### Unsuccessful responses (with possible causes)
 
 #### 400 BAD_REQUEST
 * Request body could not be validated as a `String`
-* `APIVersion` header was missing
 
 #### 401 UNAUTHORIZED
 * A generic authorization error occurred. The likely cause of this is an invalid or missing bearer token.
@@ -245,9 +231,6 @@
 * A call is made to the `GET` endpoint with:
   * a valid bearer token
   * a valid `HMRC-CTC-ORG` enrolment with `EoriNumber` identifier
-  * an `APIVersion` header with either:
-    * `2.0` for transition rules
-    * `2.1` for final rules
 * An arrival is found in the API for the given MRN and EORI number (extracted from the enrolment)
 * Then, the messages corresponding to this arrival ID are retrieved
 
@@ -255,9 +238,6 @@
 
 #### 204 NO_CONTENT
 * The arrival was found, but it contained no messages
-
-#### 400 BAD_REQUEST
-* `APIVersion` header was missing
 
 #### 401 UNAUTHORIZED
 * A generic authorization error occurred. The likely cause of this is an invalid or missing bearer token.

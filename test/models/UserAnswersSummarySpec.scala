@@ -30,7 +30,7 @@ class UserAnswersSummarySpec extends SpecBase {
 
   "toHateoas" must {
 
-    "turn an UserAnswersSummary to hateos jjobject" in {
+    "turn a UserAnswersSummary to hateos json object" in {
 
       val now = Instant.now(clock)
       val id1 = UUID.randomUUID()

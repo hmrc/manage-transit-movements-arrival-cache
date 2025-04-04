@@ -18,7 +18,7 @@ package connectors
 
 import com.github.tomakehurst.wiremock.client.WireMock.*
 import itbase.{ItSpecBase, WireMockServerHandler}
-import models.{Arrival, Message, Messages, Phase}
+import models.{Arrival, Message, Messages}
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
 import play.api.test.Helpers.*
@@ -30,7 +30,7 @@ import scala.xml.NodeSeq
 class ApiConnectorSpec extends ItSpecBase with WireMockServerHandler {
 
   implicit override val hc: HeaderCarrier = HeaderCarrier(
-    otherHeaders = Seq(ACCEPT -> "application/vnd.hmrc.2.0+json")
+    otherHeaders = Seq(ACCEPT -> "application/vnd.hmrc.2.1+json")
   )
 
   override def guiceApplicationBuilder(): GuiceApplicationBuilder =
@@ -69,33 +69,33 @@ class ApiConnectorSpec extends ItSpecBase with WireMockServerHandler {
       "success" in {
         server.stubFor(
           post(urlEqualTo(url))
-            .withHeader(ACCEPT, equalTo("application/vnd.hmrc.2.0+json"))
+            .withHeader(ACCEPT, equalTo("application/vnd.hmrc.2.1+json"))
             .willReturn(okJson(response))
         )
 
-        val res = await(connector.submitDeclaration(payload, Phase.Transition))
+        val res = await(connector.submitDeclaration(payload))
         res.status shouldBe OK
       }
 
       "bad request" in {
         server.stubFor(
           post(urlEqualTo(url))
-            .withHeader(ACCEPT, equalTo("application/vnd.hmrc.2.0+json"))
+            .withHeader(ACCEPT, equalTo("application/vnd.hmrc.2.1+json"))
             .willReturn(badRequest())
         )
 
-        val res = await(connector.submitDeclaration(payload, Phase.Transition))
+        val res = await(connector.submitDeclaration(payload))
         res.status shouldBe BAD_REQUEST
       }
 
       "internal server error" in {
         server.stubFor(
           post(urlEqualTo(url))
-            .withHeader(ACCEPT, equalTo("application/vnd.hmrc.2.0+json"))
+            .withHeader(ACCEPT, equalTo("application/vnd.hmrc.2.1+json"))
             .willReturn(serverError())
         )
 
-        val res = await(connector.submitDeclaration(payload, Phase.Transition))
+        val res = await(connector.submitDeclaration(payload))
         res.status shouldBe INTERNAL_SERVER_ERROR
       }
     }
@@ -137,11 +137,11 @@ class ApiConnectorSpec extends ItSpecBase with WireMockServerHandler {
 
         server.stubFor(
           get(urlEqualTo(url))
-            .withHeader(ACCEPT, equalTo("application/vnd.hmrc.2.0+json"))
+            .withHeader(ACCEPT, equalTo("application/vnd.hmrc.2.1+json"))
             .willReturn(okJson(response))
         )
 
-        val res = await(connector.getArrival(mrn, Phase.Transition))
+        val res = await(connector.getArrival(mrn))
         res shouldBe Some(
           Arrival(
             id = "63651574c3447b12",
@@ -166,11 +166,11 @@ class ApiConnectorSpec extends ItSpecBase with WireMockServerHandler {
 
         server.stubFor(
           get(urlEqualTo(url))
-            .withHeader(ACCEPT, equalTo("application/vnd.hmrc.2.0+json"))
+            .withHeader(ACCEPT, equalTo("application/vnd.hmrc.2.1+json"))
             .willReturn(okJson(response))
         )
 
-        val res = await(connector.getArrival(mrn, Phase.Transition))
+        val res = await(connector.getArrival(mrn))
         res shouldBe None
       }
     }
@@ -215,11 +215,11 @@ class ApiConnectorSpec extends ItSpecBase with WireMockServerHandler {
       "success" in {
         server.stubFor(
           get(urlEqualTo(url))
-            .withHeader(ACCEPT, equalTo("application/vnd.hmrc.2.0+json"))
+            .withHeader(ACCEPT, equalTo("application/vnd.hmrc.2.1+json"))
             .willReturn(okJson(response))
         )
 
-        val res = await(connector.getMessages(arrivalId, Phase.Transition))
+        val res = await(connector.getMessages(arrivalId))
         res shouldBe Messages(
           Seq(
             Message("IE007", LocalDateTime.of(2022, 11, 10, 15, 32, 51, 459000000))
