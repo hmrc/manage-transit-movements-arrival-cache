@@ -26,8 +26,7 @@ final case class UserAnswers(
   metadata: Metadata,
   createdAt: Instant,
   lastUpdated: Instant,
-  id: UUID,
-  isTransitional: Boolean
+  id: UUID
 ) {
 
   val mrn: String        = metadata.mrn
@@ -58,8 +57,7 @@ object UserAnswers {
       __.read[Metadata] and
         (__ \ "createdAt").read[Instant] and
         (__ \ "lastUpdated").read[Instant] and
-        (__ \ "_id").read[UUID] and
-        (__ \ "isTransitional").readWithDefault[Boolean](true)
+        (__ \ "_id").read[UUID]
     )(UserAnswers.apply)
 
   private def writes(implicit instantWrites: Writes[Instant], metaDataWrites: Writes[Metadata]): Writes[UserAnswers] =
@@ -67,8 +65,7 @@ object UserAnswers {
       __.write[Metadata] and
         (__ \ "createdAt").write[Instant] and
         (__ \ "lastUpdated").write[Instant] and
-        (__ \ "_id").write[UUID] and
-        (__ \ "isTransitional").write[Boolean]
+        (__ \ "_id").write[UUID]
     )(
       ua => Tuple.fromProductTyped(ua)
     )

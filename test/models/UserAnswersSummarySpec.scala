@@ -45,8 +45,7 @@ class UserAnswersSummarySpec extends SpecBase {
         ),
         createdAt = now,
         lastUpdated = now,
-        id = id1,
-        isTransitional = true
+        id = id1
       )
 
       val userAnswers2 = UserAnswers(
@@ -58,8 +57,7 @@ class UserAnswersSummarySpec extends SpecBase {
         ),
         createdAt = now.minus(1, DAYS),
         lastUpdated = now.minus(1, DAYS),
-        id = id2,
-        isTransitional = true
+        id = id2
       )
 
       val userAnswersSummary = UserAnswersSummary(eoriNumber, Seq(userAnswers1, userAnswers2), 2, 2)
@@ -75,22 +73,20 @@ class UserAnswersSummarySpec extends SpecBase {
               "_links" -> Json.obj(
                 "self" -> Json.obj("href" -> controllers.routes.CacheController.get("AB123").url)
               ),
-              "createdAt"      -> now,
-              "lastUpdated"    -> now,
-              "expiresInDays"  -> 30,
-              "_id"            -> id1,
-              "isTransitional" -> true
+              "createdAt"     -> now,
+              "lastUpdated"   -> now,
+              "expiresInDays" -> 30,
+              "_id"           -> id1
             ),
             Json.obj(
               "mrn" -> "CD123",
               "_links" -> Json.obj(
                 "self" -> Json.obj("href" -> controllers.routes.CacheController.get("CD123").url)
               ),
-              "createdAt"      -> now.minus(1, DAYS),
-              "lastUpdated"    -> now.minus(1, DAYS),
-              "expiresInDays"  -> 29,
-              "_id"            -> id2,
-              "isTransitional" -> true
+              "createdAt"     -> now.minus(1, DAYS),
+              "lastUpdated"   -> now.minus(1, DAYS),
+              "expiresInDays" -> 29,
+              "_id"           -> id2
             )
           )
         )
