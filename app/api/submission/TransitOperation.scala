@@ -16,20 +16,20 @@
 
 package api.submission
 
-import generated.TransitOperationType02
+import generated.{TransitOperationType01, TransitOperationType02}
 import models.UserAnswers
-import play.api.libs.functional.syntax._
+import play.api.libs.functional.syntax.*
 import play.api.libs.json.{__, Reads}
 
 import java.time.LocalDateTime
 
 object TransitOperation {
 
-  def transform(uA: UserAnswers): TransitOperationType02 =
-    uA.metadata.data.as[TransitOperationType02](transitOperationType02.reads(uA.mrn))
+  def transform(uA: UserAnswers): TransitOperationType01 =
+    uA.metadata.data.as[TransitOperationType02](transitOperationType01.reads(uA.mrn))
 }
 
-object transitOperationType02 {
+object transitOperationType01 {
 
   val isSimplifiedReader: Reads[Boolean] = (identificationPath \ "isSimplifiedProcedure").read[String].map {
     case "simplified" => true
@@ -37,12 +37,12 @@ object transitOperationType02 {
     case x            => throw new Exception(s"Invalid procedure type value: $x")
   }
 
-  def reads(mrn: String): Reads[TransitOperationType02] = (
+  def reads(mrn: String): Reads[TransitOperationType01] = (
     isSimplifiedReader and
       (__ \ "incidentFlag").readWithDefault[Boolean](false)
   ).apply {
     (isSimplified, isIncident) =>
-      TransitOperationType02(
+      TransitOperationType01(
         MRN = mrn,
         arrivalNotificationDateAndTime = LocalDateTime.now(),
         simplifiedProcedure = isSimplified,
