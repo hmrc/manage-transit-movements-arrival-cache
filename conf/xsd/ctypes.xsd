@@ -22530,7 +22530,7 @@
         </xs:annotation>
       </xs:element>
       <!-- CTCP-6436: This has been manually added for backwards compatibility between phase 5 final and phase 6.
-      In phase 5 final this will always be defined and in phase 6 this will never be defined -->
+      In phase 5 final this will always be Some(false) and in phase 6 this will always be None -->
       <xs:element name="incidentFlag" minOccurs="0" type="Flag">
         <xs:annotation>
           <xs:documentation>

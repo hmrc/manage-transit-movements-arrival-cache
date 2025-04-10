@@ -16,17 +16,16 @@
 
 package api.submission
 
-import generated.{TransitOperationType01, TransitOperationType02}
+import generated.*
 import models.UserAnswers
-import play.api.libs.functional.syntax.*
-import play.api.libs.json.{__, Reads}
+import play.api.libs.json.Reads
 
 import java.time.LocalDateTime
 
 object TransitOperation {
 
   def transform(uA: UserAnswers): TransitOperationType01 =
-    uA.metadata.data.as[TransitOperationType02](transitOperationType01.reads(uA.mrn))
+    uA.metadata.data.as[TransitOperationType01](transitOperationType01.reads(uA.mrn))
 }
 
 object transitOperationType01 {
@@ -37,16 +36,17 @@ object transitOperationType01 {
     case x            => throw new Exception(s"Invalid procedure type value: $x")
   }
 
-  def reads(mrn: String): Reads[TransitOperationType01] = (
-    isSimplifiedReader and
-      (__ \ "incidentFlag").readWithDefault[Boolean](false)
-  ).apply {
-    (isSimplified, isIncident) =>
-      TransitOperationType01(
-        MRN = mrn,
-        arrivalNotificationDateAndTime = LocalDateTime.now(),
-        simplifiedProcedure = isSimplified,
-        incidentFlag = isIncident
-      )
-  }
+  // TODO - feature flag driven by Accept header
+  //  phase 5 -> incidentFlag = Some(Number0)
+  //  phase 6 -> incidentFlag = None
+  def reads(mrn: String): Reads[TransitOperationType01] =
+    isSimplifiedReader.map {
+      isSimplified =>
+        TransitOperationType01(
+          MRN = mrn,
+          arrivalNotificationDateAndTime = LocalDateTime.now(),
+          simplifiedProcedure = isSimplified,
+          incidentFlag = Some(Number0)
+        )
+    }
 }

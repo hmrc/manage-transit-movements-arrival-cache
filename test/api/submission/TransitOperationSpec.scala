@@ -54,48 +54,7 @@ class TransitOperationSpec extends SpecBase with AppWithDefaultMockFixtures {
              |          "phoneNumber" : "+44 (0)3000 523068"
              |        }
              |      }
-             |    },
-             |    "incidentFlag" : true,
-             |    "incidents" : [
-             |      {
-             |        "incidentCountry" : {
-             |          "code" : "GB",
-             |          "description" : "United Kingdom"
-             |        },
-             |        "incidentCode" : "partiallyOrFullyUnloaded",
-             |        "incidentText" : "foo",
-             |        "addEndorsement" : true,
-             |        "endorsement" : {
-             |          "date" : "2023-01-01",
-             |          "authority" : "bar",
-             |          "country" : {
-             |            "code" : "GB",
-             |            "description" : "United Kingdom"
-             |          },
-             |          "location" : "foobar"
-             |        },
-             |        "qualifierOfIdentification" : "unlocode",
-             |        "unLocode" : "ADCAN",
-             |        "equipments" : [
-             |          {
-             |            "containerIdentificationNumberYesNo" : true,
-             |            "containerIdentificationNumber" : "1",
-             |            "addSealsYesNo" : true,
-             |            "seals" : [
-             |              {
-             |                "sealIdentificationNumber" : "1"
-             |              }
-             |            ],
-             |            "addGoodsItemNumberYesNo" : true,
-             |            "itemNumbers" : [
-             |              {
-             |                "itemNumber" : "1"
-             |              }
-             |            ]
-             |          }
-             |        ]
-             |      }
-             |    ]
+             |    }
              |  },
              |  "createdAt" : "2022-09-05T15:58:44.188Z",
              |  "lastUpdated" : "2022-09-07T10:33:23.472Z",
@@ -107,11 +66,11 @@ class TransitOperationSpec extends SpecBase with AppWithDefaultMockFixtures {
 
         val converted = TransitOperation.transform(uA)
 
-        val expected = TransitOperationType02(
+        val expected = TransitOperationType01(
           MRN = mrn,
           arrivalNotificationDateAndTime = converted.arrivalNotificationDateAndTime,
           simplifiedProcedure = Number0,
-          incidentFlag = Number1
+          incidentFlag = Some(Number0)
         )
 
         converted shouldBe expected
