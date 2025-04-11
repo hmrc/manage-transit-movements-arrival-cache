@@ -92,7 +92,7 @@ class SubmissionControllerSpec extends SpecBase with AppWithDefaultMockFixtures 
     }
 
     "return error" when {
-      "submission is unsuccessful" in {
+      "submission is invalid" in {
         val userAnswers = emptyUserAnswers
         when(mockCacheRepository.get(any(), any())).thenReturn(Future.successful(Some(userAnswers)))
 
@@ -105,6 +105,24 @@ class SubmissionControllerSpec extends SpecBase with AppWithDefaultMockFixtures 
         val result = route(app, request).value
 
         status(result) shouldBe BAD_REQUEST
+
+        verify(mockCacheRepository).get(eqTo(mrn), eqTo(eoriNumber))
+        verify(mockApiService).submitDeclaration(eqTo(userAnswers))(any())
+      }
+
+      "submission is unsuccessful" in {
+        val userAnswers = emptyUserAnswers
+        when(mockCacheRepository.get(any(), any())).thenReturn(Future.successful(Some(userAnswers)))
+
+        when(mockApiService.submitDeclaration(any())(any()))
+          .thenReturn(Future.successful(HttpResponse(INTERNAL_SERVER_ERROR, "")))
+
+        val request = FakeRequest(POST, routes.SubmissionController.post().url)
+          .withBody(Json.toJson(mrn))
+
+        val result = route(app, request).value
+
+        status(result) shouldBe INTERNAL_SERVER_ERROR
 
         verify(mockCacheRepository).get(eqTo(mrn), eqTo(eoriNumber))
         verify(mockApiService).submitDeclaration(eqTo(userAnswers))(any())
