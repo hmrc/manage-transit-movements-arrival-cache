@@ -16,8 +16,8 @@
 
 package api.submission
 
-import generated._
-import models.UserAnswers
+import generated.*
+import models.{UserAnswers, Version}
 import scalaxb.DataRecord
 import scalaxb.`package`.toXML
 
@@ -28,12 +28,12 @@ class Declaration @Inject() (header: Header) {
 
   private val scope: NamespaceBinding = scalaxb.toScope(Some("ncts") -> "http://ncts.dgtaxud.ec")
 
-  def transform(userAnswers: UserAnswers): NodeSeq =
-    toXML(IE007(userAnswers), s"ncts:${CC007C.toString}", scope)
+  def transform(userAnswers: UserAnswers, version: Version): NodeSeq =
+    toXML(IE007(userAnswers, version), s"ncts:${CC007C.toString}", scope)
 
-  private def IE007(userAnswers: UserAnswers): CC007CType = {
+  private def IE007(userAnswers: UserAnswers, version: Version): CC007CType = {
     val message: MESSAGESequence   = header.message(userAnswers)
-    val transitOperation           = TransitOperation.transform(userAnswers)
+    val transitOperation           = TransitOperation.transform(userAnswers, version)
     val authorisations             = Authorisations.transform(userAnswers)
     val customsOfficeOfDestination = DestinationDetails.customsOfficeOfDestination(userAnswers)
     val traderAtDestination        = DestinationDetails.traderAtDestination(userAnswers)
@@ -46,11 +46,10 @@ class Declaration @Inject() (header: Header) {
       CustomsOfficeOfDestinationActual = customsOfficeOfDestination,
       TraderAtDestination = traderAtDestination,
       Consignment = consignment,
-      attributes = attributes
+      attributes = attributes(version)
     )
   }
 
-  // TODO: If phase 5 set id to NCTS5u461 otherwise set to NCTS6
-  def attributes: Map[String, DataRecord[?]] =
-    Map("@PhaseID" -> DataRecord(PhaseIDtype.fromString(NCTS5u461.toString, scope)))
+  def attributes(version: Version): Map[String, DataRecord[?]] =
+    Map("@PhaseID" -> DataRecord(PhaseIDtype.fromString(version.id.toString, scope)))
 }

@@ -17,15 +17,15 @@
 package api.submission
 
 import generated.*
-import models.UserAnswers
+import models.{UserAnswers, Version}
 import play.api.libs.json.Reads
 
 import java.time.LocalDateTime
 
 object TransitOperation {
 
-  def transform(uA: UserAnswers): TransitOperationType01 =
-    uA.metadata.data.as[TransitOperationType01](transitOperationType01.reads(uA.mrn))
+  def transform(uA: UserAnswers, version: Version): TransitOperationType01 =
+    uA.metadata.data.as[TransitOperationType01](transitOperationType01.reads(uA.mrn, version))
 }
 
 object transitOperationType01 {
@@ -36,17 +36,16 @@ object transitOperationType01 {
     case x            => throw new Exception(s"Invalid procedure type value: $x")
   }
 
-  // TODO - feature flag driven by Accept header
-  //  phase 5 -> incidentFlag = Some(Number0)
-  //  phase 6 -> incidentFlag = None
-  def reads(mrn: String): Reads[TransitOperationType01] =
+  def reads(mrn: String, version: Version): Reads[TransitOperationType01] =
     isSimplifiedReader.map {
       isSimplified =>
         TransitOperationType01(
           MRN = mrn,
           arrivalNotificationDateAndTime = LocalDateTime.now(),
           simplifiedProcedure = isSimplified,
-          incidentFlag = Some(Number0)
+          incidentFlag = version match
+            case Version.Phase5 => Some(Number0)
+            case Version.Phase6 => None
         )
     }
 }

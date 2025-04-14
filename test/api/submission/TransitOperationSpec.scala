@@ -17,8 +17,8 @@
 package api.submission
 
 import base.{AppWithDefaultMockFixtures, SpecBase}
-import generated._
-import models.UserAnswers
+import generated.*
+import models.{UserAnswers, Version}
 import play.api.libs.json.{JsValue, Json}
 
 class TransitOperationSpec extends SpecBase with AppWithDefaultMockFixtures {
@@ -29,56 +29,108 @@ class TransitOperationSpec extends SpecBase with AppWithDefaultMockFixtures {
 
       "convert to API format" when {
 
-        "normal procedure" in {
+        "phase 5" when {
 
-          val json: JsValue = Json.parse(s"""
-               |{
-               |  "_id" : "c8fdf8a7-1c77-4d25-991d-2a0881e05062",
-               |  "mrn" : "$mrn",
-               |  "eoriNumber" : "GB1234567",
-               |  "data" : {
-               |    "identification" : {
-               |      "destinationOffice" : {
-               |        "id" : "GB000051",
-               |        "name" : "Felixstowe",
-               |        "phoneNumber" : "+44 (0)1394 303023 / 24 / 26"
-               |      },
-               |      "identificationNumber" : "GB123456789000",
-               |      "isSimplifiedProcedure" : "normal"
-               |    },
-               |    "locationOfGoods" : {
-               |      "typeOfLocation" : "authorisedPlace",
-               |      "qualifierOfIdentification" : "customsOffice",
-               |      "qualifierOfIdentificationDetails" : {
-               |        "customsOffice" : {
-               |          "id" : "GB000142",
-               |          "name" : "Belfast EPU",
-               |          "phoneNumber" : "+44 (0)3000 523068"
-               |        }
-               |      }
-               |    }
-               |  },
-               |  "createdAt" : "2022-09-05T15:58:44.188Z",
-               |  "lastUpdated" : "2022-09-07T10:33:23.472Z",
-               |  "submissionStatus" : "notSubmitted"
-               |}
-               |""".stripMargin)
+          "normal procedure" in {
 
-          val uA: UserAnswers = json.as[UserAnswers]
+            val json: JsValue = Json.parse(s"""
+                 |{
+                 |  "_id" : "c8fdf8a7-1c77-4d25-991d-2a0881e05062",
+                 |  "mrn" : "$mrn",
+                 |  "eoriNumber" : "GB1234567",
+                 |  "data" : {
+                 |    "identification" : {
+                 |      "destinationOffice" : {
+                 |        "id" : "GB000051",
+                 |        "name" : "Felixstowe",
+                 |        "phoneNumber" : "+44 (0)1394 303023 / 24 / 26"
+                 |      },
+                 |      "identificationNumber" : "GB123456789000",
+                 |      "isSimplifiedProcedure" : "normal"
+                 |    },
+                 |    "locationOfGoods" : {
+                 |      "typeOfLocation" : "authorisedPlace",
+                 |      "qualifierOfIdentification" : "customsOffice",
+                 |      "qualifierOfIdentificationDetails" : {
+                 |        "customsOffice" : {
+                 |          "id" : "GB000142",
+                 |          "name" : "Belfast EPU",
+                 |          "phoneNumber" : "+44 (0)3000 523068"
+                 |        }
+                 |      }
+                 |    }
+                 |  },
+                 |  "createdAt" : "2022-09-05T15:58:44.188Z",
+                 |  "lastUpdated" : "2022-09-07T10:33:23.472Z",
+                 |  "submissionStatus" : "notSubmitted"
+                 |}
+                 |""".stripMargin)
 
-          val converted = TransitOperation.transform(uA)
+            val uA: UserAnswers = json.as[UserAnswers]
 
-          val expected = TransitOperationType01(
-            MRN = mrn,
-            arrivalNotificationDateAndTime = converted.arrivalNotificationDateAndTime,
-            simplifiedProcedure = Number0,
-            incidentFlag = Some(Number0)
-          )
+            val converted = TransitOperation.transform(uA, Version.Phase5)
 
-          converted shouldEqual expected
+            val expected = TransitOperationType01(
+              MRN = mrn,
+              arrivalNotificationDateAndTime = converted.arrivalNotificationDateAndTime,
+              simplifiedProcedure = Number0,
+              incidentFlag = Some(Number0)
+            )
+
+            converted shouldEqual expected
+          }
+
+          "simplified procedure" in {
+
+            val json: JsValue = Json.parse(s"""
+                 |{
+                 |  "_id" : "c8fdf8a7-1c77-4d25-991d-2a0881e05062",
+                 |  "mrn" : "$mrn",
+                 |  "eoriNumber" : "GB1234567",
+                 |  "data" : {
+                 |    "identification" : {
+                 |      "destinationOffice" : {
+                 |        "id" : "GB000051",
+                 |        "name" : "Felixstowe",
+                 |        "phoneNumber" : "+44 (0)1394 303023 / 24 / 26"
+                 |      },
+                 |      "identificationNumber" : "GB123456789000",
+                 |      "isSimplifiedProcedure" : "simplified"
+                 |    },
+                 |    "locationOfGoods" : {
+                 |      "typeOfLocation" : "authorisedPlace",
+                 |      "qualifierOfIdentification" : "customsOffice",
+                 |      "qualifierOfIdentificationDetails" : {
+                 |        "customsOffice" : {
+                 |          "id" : "GB000142",
+                 |          "name" : "Belfast EPU",
+                 |          "phoneNumber" : "+44 (0)3000 523068"
+                 |        }
+                 |      }
+                 |    }
+                 |  },
+                 |  "createdAt" : "2022-09-05T15:58:44.188Z",
+                 |  "lastUpdated" : "2022-09-07T10:33:23.472Z",
+                 |  "submissionStatus" : "notSubmitted"
+                 |}
+                 |""".stripMargin)
+
+            val uA: UserAnswers = json.as[UserAnswers]
+
+            val converted = TransitOperation.transform(uA, Version.Phase5)
+
+            val expected = TransitOperationType01(
+              MRN = mrn,
+              arrivalNotificationDateAndTime = converted.arrivalNotificationDateAndTime,
+              simplifiedProcedure = Number1,
+              incidentFlag = Some(Number0)
+            )
+
+            converted shouldEqual expected
+          }
         }
 
-        "simplified procedure" in {
+        "phase 6" in {
 
           val json: JsValue = Json.parse(s"""
                |{
@@ -115,13 +167,13 @@ class TransitOperationSpec extends SpecBase with AppWithDefaultMockFixtures {
 
           val uA: UserAnswers = json.as[UserAnswers]
 
-          val converted = TransitOperation.transform(uA)
+          val converted = TransitOperation.transform(uA, Version.Phase6)
 
           val expected = TransitOperationType01(
             MRN = mrn,
             arrivalNotificationDateAndTime = converted.arrivalNotificationDateAndTime,
             simplifiedProcedure = Number1,
-            incidentFlag = Some(Number0)
+            incidentFlag = None
           )
 
           converted shouldEqual expected
@@ -166,7 +218,7 @@ class TransitOperationSpec extends SpecBase with AppWithDefaultMockFixtures {
 
           val uA: UserAnswers = json.as[UserAnswers]
 
-          an[Exception] should be thrownBy TransitOperation.transform(uA)
+          an[Exception] should be thrownBy TransitOperation.transform(uA, Version.Phase5)
         }
 
         "undefined procedure" in {
@@ -205,7 +257,7 @@ class TransitOperationSpec extends SpecBase with AppWithDefaultMockFixtures {
 
           val uA: UserAnswers = json.as[UserAnswers]
 
-          an[Exception] should be thrownBy TransitOperation.transform(uA)
+          an[Exception] should be thrownBy TransitOperation.transform(uA, Version.Phase5)
         }
       }
     }
