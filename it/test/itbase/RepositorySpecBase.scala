@@ -52,7 +52,6 @@ trait RepositorySpecBase extends ItSpecBase {
     metadata = emptyMetadata,
     createdAt = Instant.now(),
     lastUpdated = Instant.now(),
-    id = UUID.randomUUID(),
-    isTransitional = false
+    id = UUID.randomUUID()
   )
 }

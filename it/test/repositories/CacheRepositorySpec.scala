@@ -112,7 +112,6 @@ class CacheRepositorySpec extends CacheRepositorySpecBase {
       getResult.mrn shouldBe userAnswers3.mrn
       getResult.eoriNumber shouldBe userAnswers3.eoriNumber
       getResult.metadata shouldBe userAnswers3.metadata
-      getResult.isTransitional shouldBe false
     }
 
     "update document when it already exists" in {
@@ -134,7 +133,6 @@ class CacheRepositorySpec extends CacheRepositorySpecBase {
       firstGet.metadata shouldNot equal(secondGet.metadata)
       firstGet.createdAt shouldBe secondGet.createdAt
       firstGet.lastUpdated `isBefore` secondGet.lastUpdated shouldBe true
-      firstGet.isTransitional shouldBe secondGet.isTransitional
     }
   }
 

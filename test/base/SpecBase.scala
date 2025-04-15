@@ -59,8 +59,7 @@ trait SpecBase
     metadata = emptyMetadata,
     createdAt = Instant.now(),
     lastUpdated = Instant.now(),
-    id = UUID.randomUUID(),
-    isTransitional = false
+    id = UUID.randomUUID()
   )
 
   def fakeRequest: FakeRequest[AnyContent] = FakeRequest("", "")
