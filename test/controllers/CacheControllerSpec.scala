@@ -64,20 +64,6 @@ class CacheControllerSpec extends SpecBase with AppWithDefaultMockFixtures {
       }
     }
 
-    "return 400" when {
-      "userAnswers is transition" in {
-        val transitionalUserAnswers = emptyUserAnswers.copy(isTransitional = true)
-        when(mockCacheRepository.get(any(), any())).thenReturn(Future.successful(Some(transitionalUserAnswers)))
-
-        val request = FakeRequest(GET, routes.CacheController.get(mrn).url)
-
-        val result = route(app, request).value
-
-        status(result) shouldBe BAD_REQUEST
-        verify(mockCacheRepository).get(eqTo(mrn), eqTo(eoriNumber))
-      }
-    }
-
     "return 404" when {
       "document not found in mongo for given mrn and eori number" in {
         when(mockCacheRepository.get(any(), any())).thenReturn(Future.successful(None))
@@ -297,8 +283,7 @@ class CacheControllerSpec extends SpecBase with AppWithDefaultMockFixtures {
           ),
           createdAt = Instant.now(),
           lastUpdated = Instant.now(),
-          id = UUID.randomUUID(),
-          isTransitional = true
+          id = UUID.randomUUID()
         )
 
         val userAnswer2 = UserAnswers(
@@ -310,8 +295,7 @@ class CacheControllerSpec extends SpecBase with AppWithDefaultMockFixtures {
           ),
           createdAt = Instant.now(),
           lastUpdated = Instant.now(),
-          id = UUID.randomUUID(),
-          isTransitional = true
+          id = UUID.randomUUID()
         )
 
         when(mockCacheRepository.getAll(any(), any(), any(), any(), any()))
@@ -337,8 +321,7 @@ class CacheControllerSpec extends SpecBase with AppWithDefaultMockFixtures {
              |      "createdAt": "${userAnswer1.createdAt}",
              |      "lastUpdated": "${userAnswer1.lastUpdated}",
              |      "expiresInDays": 30,
-             |      "_id": "${userAnswer1.id}",
-             |      "isTransitional": true
+             |      "_id": "${userAnswer1.id}"
              |    },
              |    {
              |      "mrn": "${userAnswer2.mrn}",
@@ -350,8 +333,7 @@ class CacheControllerSpec extends SpecBase with AppWithDefaultMockFixtures {
              |      "createdAt": "${userAnswer2.createdAt}",
              |      "lastUpdated": "${userAnswer2.lastUpdated}",
              |      "expiresInDays": 30,
-             |      "_id": "${userAnswer2.id}",
-             |      "isTransitional": true
+             |      "_id": "${userAnswer2.id}"
              |    }
              |  ]
              |}

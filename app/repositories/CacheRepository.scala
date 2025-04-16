@@ -75,8 +75,7 @@ class CacheRepository @Inject() (
       Some(Updates.setOnInsert("createdAt", now)),
       Some(Updates.set("lastUpdated", now)),
       Some(Updates.setOnInsert("_id", Codecs.toBson(UUID.randomUUID()))),
-      Some(Updates.set("submissionStatus", data.submissionStatus.asString)),
-      Some(Updates.setOnInsert("isTransitional", false))
+      Some(Updates.set("submissionStatus", data.submissionStatus.asString))
     ).flatten
 
     val options = UpdateOptions().upsert(true)

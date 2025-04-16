@@ -34,11 +34,10 @@ case class UserAnswersSummary(eoriNumber: String, userAnswers: Seq[UserAnswers],
             "_links" -> Json.obj(
               "self" -> Json.obj("href" -> controllers.routes.CacheController.get(userAnswer.mrn).url)
             ),
-            "createdAt"      -> userAnswer.createdAt,
-            "lastUpdated"    -> userAnswer.lastUpdated,
-            "expiresInDays"  -> expiresInDays(userAnswer.createdAt),
-            "_id"            -> userAnswer.id,
-            "isTransitional" -> userAnswer.isTransitional
+            "createdAt"     -> userAnswer.createdAt,
+            "lastUpdated"   -> userAnswer.lastUpdated,
+            "expiresInDays" -> expiresInDays(userAnswer.createdAt),
+            "_id"           -> userAnswer.id
           )
       }
     )
