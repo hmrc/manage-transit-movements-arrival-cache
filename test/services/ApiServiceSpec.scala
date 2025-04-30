@@ -20,7 +20,7 @@ import api.submission.Declaration
 import base.{AppWithDefaultMockFixtures, SpecBase}
 import connectors.ApiConnector
 import generators.Generators
-import models.{Arrival, Message, Messages, Version}
+import models.{Arrival, Message, Messages}
 import org.mockito.ArgumentMatchers.{any, eq as eqTo}
 import org.mockito.Mockito.*
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
@@ -48,7 +48,7 @@ class ApiServiceSpec extends SpecBase with AppWithDefaultMockFixtures with Scala
       )
 
   private val xml: NodeSeq =
-    <ncts:CC007C PhaseID="NCTS5.1" xmlns:ncts="http://ncts.dgtaxud.ec">
+    <ncts:CC007C PhaseID="NCTS5.0" xmlns:ncts="http://ncts.dgtaxud.ec">
       <foo>bar</foo>
     </ncts:CC007C>
 
@@ -57,7 +57,7 @@ class ApiServiceSpec extends SpecBase with AppWithDefaultMockFixtures with Scala
     reset(mockApiConnector)
     reset(mockDeclaration)
 
-    when(mockDeclaration.transform(any(), any()))
+    when(mockDeclaration.transform(any()))
       .thenReturn(xml)
   }
 
@@ -72,8 +72,8 @@ class ApiServiceSpec extends SpecBase with AppWithDefaultMockFixtures with Scala
 
       when(mockApiConnector.submitDeclaration(any())(any())).thenReturn(Future.successful(expectedResult))
 
-      val result = service.submitDeclaration(userAnswers, Version.Phase5).futureValue
-      result shouldEqual expectedResult
+      val result = service.submitDeclaration(userAnswers).futureValue
+      result shouldBe expectedResult
 
       verify(mockApiConnector).submitDeclaration(eqTo(xml))(any())
 
@@ -91,7 +91,7 @@ class ApiServiceSpec extends SpecBase with AppWithDefaultMockFixtures with Scala
           .thenReturn(Future.successful(None))
 
         val result = service.get(mrn).futureValue
-        result shouldEqual None
+        result shouldBe None
 
         verify(mockApiConnector).getArrival(eqTo(mrn))(any())
 
@@ -114,7 +114,7 @@ class ApiServiceSpec extends SpecBase with AppWithDefaultMockFixtures with Scala
             .thenReturn(Future.successful(messages))
 
           val result = service.get(mrn).futureValue
-          result shouldEqual Some(messages)
+          result shouldBe Some(messages)
 
           verify(mockApiConnector).getArrival(eqTo(mrn))(any())
           verify(mockApiConnector).getMessages(eqTo(arrivalId))(any())
