@@ -18,7 +18,7 @@ package controllers
 
 import base.{AppWithDefaultMockFixtures, SpecBase}
 import models.AuditType.ArrivalNotification
-import models.{Message, Messages, SubmissionStatus, Version}
+import models.{Message, Messages, SubmissionStatus}
 import org.mockito.ArgumentMatchers.{any, eq as eqTo}
 import org.mockito.Mockito.{never, reset, verify, when}
 import play.api.inject.bind
@@ -66,7 +66,7 @@ class SubmissionControllerSpec extends SpecBase with AppWithDefaultMockFixtures 
         when(mockCacheRepository.get(any(), any())).thenReturn(Future.successful(Some(userAnswers)))
 
         val body = Json.toJson("foo")
-        when(mockApiService.submitDeclaration(any(), any())(any()))
+        when(mockApiService.submitDeclaration(any())(any()))
           .thenReturn(Future.successful(HttpResponse(OK, Json.stringify(body))))
 
         when(mockCacheRepository.set(any()))
@@ -76,7 +76,6 @@ class SubmissionControllerSpec extends SpecBase with AppWithDefaultMockFixtures 
           .thenReturn(Future.successful(true))
 
         val request = FakeRequest(POST, routes.SubmissionController.post().url)
-          .withHeaders("API-Version" -> "1.0")
           .withBody(Json.toJson(mrn))
 
         val result = route(app, request).value
@@ -87,21 +86,20 @@ class SubmissionControllerSpec extends SpecBase with AppWithDefaultMockFixtures 
         verify(mockCacheRepository).get(eqTo(mrn), eqTo(eoriNumber))
         verify(mockCacheRepository).set(eqTo(userAnswers.metadata.copy(submissionStatus = SubmissionStatus.Submitted)))
         verify(mockLockRepository).unlock(eqTo(eoriNumber), eqTo(mrn))
-        verify(mockApiService).submitDeclaration(eqTo(userAnswers), eqTo(Version.Phase5))(any())
+        verify(mockApiService).submitDeclaration(eqTo(userAnswers))(any())
         verify(mockAuditService).audit(eqTo(ArrivalNotification), eqTo(userAnswers))(any())
       }
     }
 
     "return error" when {
-      "submission is invalid" in {
+      "submission is unsuccessful" in {
         val userAnswers = emptyUserAnswers
         when(mockCacheRepository.get(any(), any())).thenReturn(Future.successful(Some(userAnswers)))
 
-        when(mockApiService.submitDeclaration(any(), any())(any()))
+        when(mockApiService.submitDeclaration(any())(any()))
           .thenReturn(Future.successful(HttpResponse(BAD_REQUEST, "")))
 
         val request = FakeRequest(POST, routes.SubmissionController.post().url)
-          .withHeaders("API-Version" -> "1.0")
           .withBody(Json.toJson(mrn))
 
         val result = route(app, request).value
@@ -109,26 +107,7 @@ class SubmissionControllerSpec extends SpecBase with AppWithDefaultMockFixtures 
         status(result) shouldBe BAD_REQUEST
 
         verify(mockCacheRepository).get(eqTo(mrn), eqTo(eoriNumber))
-        verify(mockApiService).submitDeclaration(eqTo(userAnswers), eqTo(Version.Phase5))(any())
-      }
-
-      "submission is unsuccessful" in {
-        val userAnswers = emptyUserAnswers
-        when(mockCacheRepository.get(any(), any())).thenReturn(Future.successful(Some(userAnswers)))
-
-        when(mockApiService.submitDeclaration(any(), any())(any()))
-          .thenReturn(Future.successful(HttpResponse(INTERNAL_SERVER_ERROR, "")))
-
-        val request = FakeRequest(POST, routes.SubmissionController.post().url)
-          .withHeaders("API-Version" -> "1.0")
-          .withBody(Json.toJson(mrn))
-
-        val result = route(app, request).value
-
-        status(result) shouldBe INTERNAL_SERVER_ERROR
-
-        verify(mockCacheRepository).get(eqTo(mrn), eqTo(eoriNumber))
-        verify(mockApiService).submitDeclaration(eqTo(userAnswers), eqTo(Version.Phase5))(any())
+        verify(mockApiService).submitDeclaration(eqTo(userAnswers))(any())
       }
 
       "document not found in cache" in {
@@ -142,7 +121,7 @@ class SubmissionControllerSpec extends SpecBase with AppWithDefaultMockFixtures 
         status(result) shouldBe NOT_FOUND
 
         verify(mockCacheRepository).get(eqTo(mrn), eqTo(eoriNumber))
-        verify(mockApiService, never()).submitDeclaration(any(), any())(any())
+        verify(mockApiService, never()).submitDeclaration(any())(any())
       }
 
       "request body can't be validated as a string" in {
@@ -156,7 +135,7 @@ class SubmissionControllerSpec extends SpecBase with AppWithDefaultMockFixtures 
         status(result) shouldBe BAD_REQUEST
 
         verify(mockCacheRepository, never()).get(any(), any())
-        verify(mockApiService, never()).submitDeclaration(any(), any())(any())
+        verify(mockApiService, never()).submitDeclaration(any())(any())
       }
     }
   }

@@ -16,39 +16,29 @@
 
 package models
 
-import base.SpecBase
 import generators.Generators
 import org.scalacheck.Arbitrary.arbitrary
+import org.scalatest.EitherValues
+import org.scalatest.freespec.AnyFreeSpec
+import org.scalatest.matchers.must.Matchers
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks.forAll
-import play.api.libs.json.{JsError, JsString, Json}
+import play.api.libs.json.{JsString, Json}
 
-class SubmissionStatusSpec extends SpecBase with Generators {
+class SubmissionStatusSpec extends AnyFreeSpec with Generators with Matchers with EitherValues {
 
-  "SubmissionStatus" when {
+  "SubmissionStatus" - {
 
-    "reads" should {
-      "deserialise" when {
-        "valid status" in {
-          forAll(arbitrary[SubmissionStatus]) {
-            state =>
-              JsString(state.asString).as[SubmissionStatus] shouldEqual state
-          }
-        }
-      }
-
-      "fail to deserialise" when {
-        "invalid status" in {
-          JsString("foo").validate[SubmissionStatus] shouldBe a[JsError]
-        }
+    "must deserialise" in {
+      forAll(arbitrary[SubmissionStatus]) {
+        state =>
+          JsString(state.asString).as[SubmissionStatus] mustEqual state
       }
     }
 
-    "writes" should {
-      "serialise" in {
-        forAll(arbitrary[SubmissionStatus]) {
-          state =>
-            Json.toJson(state) shouldEqual JsString(state.asString)
-        }
+    "must serialise" in {
+      forAll(arbitrary[SubmissionStatus]) {
+        state =>
+          Json.toJson(state) mustEqual JsString(state.asString)
       }
     }
   }

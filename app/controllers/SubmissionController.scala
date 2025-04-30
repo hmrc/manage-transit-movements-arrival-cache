@@ -46,14 +46,14 @@ class SubmissionController @Inject() (
   private def log(method: String, message: String, args: String*): String =
     s"SubmissionController:$method:${args.mkString(":")} - $message"
 
-  def post(): Action[JsValue] = actions.authenticateAndGetVersion().async(parse.json) {
+  def post(): Action[JsValue] = actions.authenticate().async(parse.json) {
     implicit request =>
       import request.*
       body.validate[String] match {
         case JsSuccess(mrn, _) =>
           cacheRepository.get(mrn, eoriNumber).flatMap {
             case Some(userAnswers) =>
-              apiService.submitDeclaration(userAnswers, phase).flatMap {
+              apiService.submitDeclaration(userAnswers).flatMap {
                 response =>
                   metricsService.increment(response.status)
                   response.status match {
