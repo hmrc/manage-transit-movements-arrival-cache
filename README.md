@@ -204,12 +204,16 @@
   * a valid bearer token
   * a valid `HMRC-CTC-ORG` enrolment with `EoriNumber` identifier
   * a valid `String` request body representing the MRN
+  * an `API-Version` header (optional)
+    * `1.0` or undefined - Phase 5
+    * `2.0` - Phase 6
 * Then, an IE007 gets successfully submitted to the API
 
 ### Unsuccessful responses (with possible causes)
 
 #### 400 BAD_REQUEST
 * Request body could not be validated as a `String`
+* Invalid `API-Version` header
 
 #### 401 UNAUTHORIZED
 * A generic authorization error occurred. The likely cause of this is an invalid or missing bearer token.
