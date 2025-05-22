@@ -10,7 +10,7 @@ object AppDependencies {
     "uk.gov.hmrc.mongo"       %% "hmrc-mongo-play-30"         % hmrcMongoVersion,
     "uk.gov.hmrc"             %% "crypto-json-play-30"        % "8.2.0",
     "javax.xml.bind"           % "jaxb-api"                   % "2.3.1",
-    "org.typelevel"           %% "cats-core"                  % "2.12.0"
+    "org.typelevel"           %% "cats-core"                  % "2.13.0"
   )
 
   val test: Seq[ModuleID] = Seq(
@@ -18,7 +18,7 @@ object AppDependencies {
     "uk.gov.hmrc.mongo"       %% "hmrc-mongo-test-play-30"    % hmrcMongoVersion,
     "org.scalatest"           %% "scalatest"                  % "3.2.19",
     "org.scalatestplus"       %% "mockito-4-6"                % "3.2.15.0",
-    "org.scalacheck"          %% "scalacheck"                 % "1.18.0",
+    "org.scalacheck"          %% "scalacheck"                 % "1.18.1",
     "org.scalatestplus"       %% "scalacheck-1-17"            % "3.2.18.0",
   ).map(_ % "test")
 }

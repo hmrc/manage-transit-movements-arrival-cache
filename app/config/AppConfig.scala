@@ -33,6 +33,7 @@ class AppConfig @Inject() (config: Configuration) {
 
   val apiUrl: String = config.get[Service]("microservice.services.common-transit-convention-traders").baseUrl
 
-  val encryptionKey: String      = config.get[String]("encryption.key")
-  val encryptionEnabled: Boolean = config.get[Boolean]("encryption.enabled")
+  val encryptionKey: String        = config.get[String]("encryption.key")
+  val encryptionEnabled: Boolean   = config.get[Boolean]("encryption.enabled")
+  lazy val replaceIndexes: Boolean = config.get[Boolean]("feature-flags.replace-indexes")
 }
