@@ -18,9 +18,9 @@ package controllers
 
 import base.{AppWithDefaultMockFixtures, SpecBase}
 import models.AuditType.ArrivalNotification
-import models.{Message, Messages, SubmissionStatus, Version}
+import models.{Message, Messages, Phase, SubmissionStatus}
 import org.mockito.ArgumentMatchers.{any, eq as eqTo}
-import org.mockito.Mockito.{never, reset, verify, when}
+import org.mockito.Mockito.*
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
@@ -81,13 +81,13 @@ class SubmissionControllerSpec extends SpecBase with AppWithDefaultMockFixtures 
 
         val result = route(app, request).value
 
-        status(result) shouldBe OK
-        contentAsJson(result) shouldBe body
+        status(result) shouldEqual OK
+        contentAsJson(result) shouldEqual body
 
         verify(mockCacheRepository).get(eqTo(mrn), eqTo(eoriNumber))
         verify(mockCacheRepository).set(eqTo(userAnswers.metadata.copy(submissionStatus = SubmissionStatus.Submitted)))
         verify(mockLockRepository).unlock(eqTo(eoriNumber), eqTo(mrn))
-        verify(mockApiService).submitDeclaration(eqTo(userAnswers), eqTo(Version.Phase5))(any())
+        verify(mockApiService).submitDeclaration(eqTo(userAnswers), eqTo(Phase.Phase5))(any())
         verify(mockAuditService).audit(eqTo(ArrivalNotification), eqTo(userAnswers))(any())
       }
     }
@@ -106,10 +106,10 @@ class SubmissionControllerSpec extends SpecBase with AppWithDefaultMockFixtures 
 
         val result = route(app, request).value
 
-        status(result) shouldBe BAD_REQUEST
+        status(result) shouldEqual BAD_REQUEST
 
         verify(mockCacheRepository).get(eqTo(mrn), eqTo(eoriNumber))
-        verify(mockApiService).submitDeclaration(eqTo(userAnswers), eqTo(Version.Phase5))(any())
+        verify(mockApiService).submitDeclaration(eqTo(userAnswers), eqTo(Phase.Phase5))(any())
       }
 
       "submission is unsuccessful" in {
@@ -125,10 +125,10 @@ class SubmissionControllerSpec extends SpecBase with AppWithDefaultMockFixtures 
 
         val result = route(app, request).value
 
-        status(result) shouldBe INTERNAL_SERVER_ERROR
+        status(result) shouldEqual INTERNAL_SERVER_ERROR
 
         verify(mockCacheRepository).get(eqTo(mrn), eqTo(eoriNumber))
-        verify(mockApiService).submitDeclaration(eqTo(userAnswers), eqTo(Version.Phase5))(any())
+        verify(mockApiService).submitDeclaration(eqTo(userAnswers), eqTo(Phase.Phase5))(any())
       }
 
       "document not found in cache" in {
@@ -139,7 +139,7 @@ class SubmissionControllerSpec extends SpecBase with AppWithDefaultMockFixtures 
 
         val result = route(app, request).value
 
-        status(result) shouldBe NOT_FOUND
+        status(result) shouldEqual NOT_FOUND
 
         verify(mockCacheRepository).get(eqTo(mrn), eqTo(eoriNumber))
         verify(mockApiService, never()).submitDeclaration(any(), any())(any())
@@ -153,7 +153,7 @@ class SubmissionControllerSpec extends SpecBase with AppWithDefaultMockFixtures 
 
         val result = route(app, request).value
 
-        status(result) shouldBe BAD_REQUEST
+        status(result) shouldEqual BAD_REQUEST
 
         verify(mockCacheRepository, never()).get(any(), any())
         verify(mockApiService, never()).submitDeclaration(any(), any())(any())
@@ -168,47 +168,66 @@ class SubmissionControllerSpec extends SpecBase with AppWithDefaultMockFixtures 
       "messages found" in {
         val messages = Messages(Seq(Message("IE007", LocalDateTime.now())))
 
-        when(mockApiService.get(any())(any(), any()))
+        when(mockApiService.get(any(), any())(any(), any()))
           .thenReturn(Future.successful(Some(messages)))
 
         val request = FakeRequest(GET, routes.SubmissionController.get(mrn).url)
+          .withHeaders("API-Version" -> "1.0")
 
         val result = route(app, request).value
 
-        status(result) shouldBe OK
-        contentAsJson(result) shouldBe Json.toJson(messages)
+        status(result) shouldEqual OK
+        contentAsJson(result) shouldEqual Json.toJson(messages)
 
-        verify(mockApiService).get(eqTo(mrn))(any(), any())
+        verify(mockApiService).get(eqTo(mrn), eqTo(Phase.Phase5))(any(), any())
       }
     }
 
     "return 204" when {
       "no messages found" in {
-        when(mockApiService.get(any())(any(), any()))
+        when(mockApiService.get(any(), any())(any(), any()))
           .thenReturn(Future.successful(Some(Messages(Nil))))
 
         val request = FakeRequest(GET, routes.SubmissionController.get(mrn).url)
+          .withHeaders("API-Version" -> "1.0")
 
         val result = route(app, request).value
 
-        status(result) shouldBe NO_CONTENT
+        status(result) shouldEqual NO_CONTENT
 
-        verify(mockApiService).get(eqTo(mrn))(any(), any())
+        verify(mockApiService).get(eqTo(mrn), eqTo(Phase.Phase5))(any(), any())
+      }
+    }
+
+    "return 400" when {
+      "invalid API-Version header" in {
+        when(mockApiService.get(any(), any())(any(), any()))
+          .thenReturn(Future.successful(None))
+
+        val request = FakeRequest(GET, routes.SubmissionController.get(mrn).url)
+          .withHeaders("API-Version" -> "foo")
+
+        val result = route(app, request).value
+
+        status(result) shouldEqual BAD_REQUEST
+
+        verifyNoInteractions(mockApiService)
       }
     }
 
     "return 404" when {
       "no arrival found" in {
-        when(mockApiService.get(any())(any(), any()))
+        when(mockApiService.get(any(), any())(any(), any()))
           .thenReturn(Future.successful(None))
 
         val request = FakeRequest(GET, routes.SubmissionController.get(mrn).url)
+          .withHeaders("API-Version" -> "1.0")
 
         val result = route(app, request).value
 
-        status(result) shouldBe NOT_FOUND
+        status(result) shouldEqual NOT_FOUND
 
-        verify(mockApiService).get(eqTo(mrn))(any(), any())
+        verify(mockApiService).get(eqTo(mrn), eqTo(Phase.Phase5))(any(), any())
       }
     }
   }

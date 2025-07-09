@@ -18,7 +18,7 @@ package api.submission
 
 import base.{AppWithDefaultMockFixtures, SpecBase}
 import generated.*
-import models.{UserAnswers, Version}
+import models.{Phase, UserAnswers}
 import play.api.libs.json.{JsValue, Json}
 
 class TransitOperationSpec extends SpecBase with AppWithDefaultMockFixtures {
@@ -68,7 +68,7 @@ class TransitOperationSpec extends SpecBase with AppWithDefaultMockFixtures {
 
             val uA: UserAnswers = json.as[UserAnswers]
 
-            val converted = TransitOperation.transform(uA, Version.Phase5)
+            val converted = TransitOperation.transform(uA, Phase.Phase5)
 
             val expected = TransitOperationType01(
               MRN = mrn,
@@ -117,7 +117,7 @@ class TransitOperationSpec extends SpecBase with AppWithDefaultMockFixtures {
 
             val uA: UserAnswers = json.as[UserAnswers]
 
-            val converted = TransitOperation.transform(uA, Version.Phase5)
+            val converted = TransitOperation.transform(uA, Phase.Phase5)
 
             val expected = TransitOperationType01(
               MRN = mrn,
@@ -167,7 +167,7 @@ class TransitOperationSpec extends SpecBase with AppWithDefaultMockFixtures {
 
           val uA: UserAnswers = json.as[UserAnswers]
 
-          val converted = TransitOperation.transform(uA, Version.Phase6)
+          val converted = TransitOperation.transform(uA, Phase.Phase6)
 
           val expected = TransitOperationType01(
             MRN = mrn,
@@ -218,7 +218,7 @@ class TransitOperationSpec extends SpecBase with AppWithDefaultMockFixtures {
 
           val uA: UserAnswers = json.as[UserAnswers]
 
-          an[Exception] should be thrownBy TransitOperation.transform(uA, Version.Phase5)
+          an[Exception] should be thrownBy TransitOperation.transform(uA, Phase.Phase5)
         }
 
         "undefined procedure" in {
@@ -257,7 +257,7 @@ class TransitOperationSpec extends SpecBase with AppWithDefaultMockFixtures {
 
           val uA: UserAnswers = json.as[UserAnswers]
 
-          an[Exception] should be thrownBy TransitOperation.transform(uA, Version.Phase5)
+          an[Exception] should be thrownBy TransitOperation.transform(uA, Phase.Phase5)
         }
       }
     }

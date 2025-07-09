@@ -85,10 +85,10 @@ class SubmissionController @Inject() (
       }
   }
 
-  def get(mrn: String): Action[AnyContent] = actions.authenticate().async {
+  def get(mrn: String): Action[AnyContent] = actions.authenticateAndGetVersion().async {
     implicit request =>
       import request.*
-      apiService.get(mrn).map {
+      apiService.get(mrn, phase).map {
         case Some(Messages(Nil)) =>
           logger.info(log("get", "No messages found for MRN", eoriNumber, mrn))
           NoContent

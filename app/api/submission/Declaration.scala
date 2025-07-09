@@ -17,7 +17,7 @@
 package api.submission
 
 import generated.*
-import models.{UserAnswers, Version}
+import models.{Phase, UserAnswers}
 import scalaxb.DataRecord
 import scalaxb.`package`.toXML
 
@@ -28,10 +28,10 @@ class Declaration @Inject() (header: Header) {
 
   private val scope: NamespaceBinding = scalaxb.toScope(Some("ncts") -> "http://ncts.dgtaxud.ec")
 
-  def transform(userAnswers: UserAnswers, version: Version): NodeSeq =
+  def transform(userAnswers: UserAnswers, version: Phase): NodeSeq =
     toXML(IE007(userAnswers, version), s"ncts:${CC007C.toString}", scope)
 
-  private def IE007(userAnswers: UserAnswers, version: Version): CC007CType = {
+  private def IE007(userAnswers: UserAnswers, version: Phase): CC007CType = {
     val message: MESSAGESequence   = header.message(userAnswers)
     val transitOperation           = TransitOperation.transform(userAnswers, version)
     val authorisations             = Authorisations.transform(userAnswers)
@@ -50,6 +50,6 @@ class Declaration @Inject() (header: Header) {
     )
   }
 
-  def attributes(version: Version): Map[String, DataRecord[?]] =
+  def attributes(version: Phase): Map[String, DataRecord[?]] =
     Map("@PhaseID" -> DataRecord(PhaseIDtype.fromString(version.id.toString, scope)))
 }
