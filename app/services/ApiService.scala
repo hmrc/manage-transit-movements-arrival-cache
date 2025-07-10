@@ -19,7 +19,7 @@ package services
 import api.submission.Declaration
 import cats.implicits.toTraverseOps
 import connectors.ApiConnector
-import models.{Messages, UserAnswers}
+import models.{Messages, Phase, UserAnswers}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
 import javax.inject.Inject
@@ -30,13 +30,13 @@ class ApiService @Inject() (
   declaration: Declaration
 ) {
 
-  def submitDeclaration(userAnswers: UserAnswers)(implicit hc: HeaderCarrier): Future[HttpResponse] =
-    apiConnector.submitDeclaration(declaration.transform(userAnswers))
+  def submitDeclaration(userAnswers: UserAnswers, version: Phase)(implicit hc: HeaderCarrier): Future[HttpResponse] =
+    apiConnector.submitDeclaration(declaration.transform(userAnswers, version), version)
 
-  def get(mrn: String)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Option[Messages]] =
-    apiConnector.getArrival(mrn).flatMap {
+  def get(mrn: String, version: Phase)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Option[Messages]] =
+    apiConnector.getArrival(mrn, version).flatMap {
       _.traverse {
-        arrival => apiConnector.getMessages(arrival.id)
+        arrival => apiConnector.getMessages(arrival.id, version)
       }
     }
 }

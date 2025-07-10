@@ -16,9 +16,9 @@
 
 package api.submission
 
-import generated.{EndorsementType01, _}
+import generated.*
 import models.UserAnswers
-import play.api.libs.functional.syntax._
+import play.api.libs.functional.syntax.*
 import play.api.libs.json.{__, Reads}
 
 object Consignment {
@@ -30,10 +30,8 @@ object Consignment {
 
 object consignmentType01 {
 
-  implicit val reads: Reads[ConsignmentType01] = (
-    (__ \ "locationOfGoods").read[LocationOfGoodsType01](locationOfGoodsType01.reads) and
-      (__ \ "incidents").readArray[IncidentType01](incidentType01.reads)
-  )(ConsignmentType01.apply)
+  implicit val reads: Reads[ConsignmentType01] =
+    (__ \ "locationOfGoods").read[LocationOfGoodsType01](locationOfGoodsType01.reads).map(ConsignmentType01(_))
 }
 
 object locationOfGoodsType01 {
@@ -48,17 +46,17 @@ object locationOfGoodsType01 {
         (__ \ "qualifierOfIdentificationDetails" \ "unlocode").readNullable[String] and
         (__ \ "qualifierOfIdentificationDetails" \ "customsOffice").readNullable[CustomsOfficeType01](customsOfficeType01.reads) and
         (__ \ "qualifierOfIdentificationDetails" \ "coordinates").readNullable[GNSSType](gnssType.reads) and
-        (__ \ "qualifierOfIdentificationDetails" \ "identificationNumber").readNullable[EconomicOperatorType03](economicOperatorType03.reads) and
-        (__ \ "qualifierOfIdentificationDetails").read[Option[AddressType14]](addressType14.reads) and
-        Reads.pure[Option[PostcodeAddressType02]](None) and
-        (__ \ "contactPerson").readNullable[ContactPersonType06](contactPersonType06.reads)
+        (__ \ "qualifierOfIdentificationDetails" \ "identificationNumber").readNullable[EconomicOperatorType02](economicOperatorType02.reads) and
+        (__ \ "qualifierOfIdentificationDetails").read[Option[AddressType06]](addressType06.reads) and
+        Reads.pure[Option[PostcodeAddressType]](None) and
+        (__ \ "contactPerson").readNullable[ContactPersonType01](contactPersonType01.reads)
     )(LocationOfGoodsType01.apply)
 }
 
-object economicOperatorType03 {
+object economicOperatorType02 {
 
-  implicit val reads: Reads[EconomicOperatorType03] =
-    __.read[String].map(EconomicOperatorType03.apply)
+  implicit val reads: Reads[EconomicOperatorType02] =
+    __.read[String].map(EconomicOperatorType02.apply)
 }
 
 object customsOfficeType01 {
@@ -75,139 +73,25 @@ object gnssType {
   )(GNSSType.apply)
 }
 
-object addressType14 {
+object addressType06 {
 
-  implicit val reads: Reads[Option[AddressType14]] = (
+  implicit val reads: Reads[Option[AddressType06]] = (
     (__ \ "address" \ "numberAndStreet").readNullable[String] and
       (__ \ "address" \ "postalCode").readNullable[String] and
       (__ \ "address" \ "city").readNullable[String] and
       (__ \ "country" \ "code").readNullable[String]
   ).tupled.map {
     case (Some(streetAndNumber), postcode, Some(city), Some(country)) =>
-      Some(AddressType14(streetAndNumber, postcode, city, country))
+      Some(AddressType06(streetAndNumber, postcode, city, country))
     case _ => None
   }
-
 }
 
-object addressType01 {
+object contactPersonType01 {
 
-  implicit val reads: Reads[AddressType01] = (
-    (__ \ "numberAndStreet").read[String] and
-      (__ \ "postalCode").readNullable[String] and
-      (__ \ "city").read[String]
-  )(AddressType01.apply)
-
-}
-
-object contactPersonType06 {
-
-  implicit val reads: Reads[ContactPersonType06] = (
+  implicit val reads: Reads[ContactPersonType01] = (
     (__ \ "name").read[String] and
       (__ \ "telephoneNumber").read[String] and
       Reads.pure[Option[String]](None)
-  )(ContactPersonType06.apply)
-
-}
-
-object incidentType01 {
-
-  def reads(index: Int): Reads[IncidentType01] = (
-    Reads.pure[BigInt](index) and
-      (__ \ "incidentCode" \ "code").read[String] and
-      (__ \ "incidentText").read[String] and
-      (__ \ "endorsement").readNullable[EndorsementType01](endorsementType01.reads) and
-      __.read[LocationType01](locationType01.reads) and
-      (__ \ "equipments").readArray[TransportEquipmentType01](transportEquipmentType01.reads) and
-      __.read[Option[TranshipmentType01]](transhipmentType01.reads)
-  )(IncidentType01.apply)
-
-}
-
-object endorsementType01 {
-
-  def reads: Reads[EndorsementType01] = (
-    (__ \ "date").read[String].map(stringToXMLGregorianCalendar) and
-      (__ \ "authority").read[String] and
-      (__ \ "location").read[String] and
-      (__ \ "country" \ "code").read[String]
-  )(EndorsementType01.apply)
-
-}
-
-object locationType01 {
-
-  def reads: Reads[LocationType01] = (
-    (__ \ "qualifierOfIdentification" \ "qualifier").read[String] and
-      (__ \ "unLocode").readNullable[String] and
-      (__ \ "incidentCountry" \ "code").read[String] and
-      (__ \ "coordinates").readNullable[GNSSType](gnssType.reads) and
-      (__ \ "address").readNullable[AddressType01](addressType01.reads)
-  )(LocationType01.apply)
-
-}
-
-object transportEquipmentType01 {
-
-  def apply(
-    sequenceNumber: BigInt,
-    containerIdentificationNumber: Option[String],
-    Seal: Seq[SealType05],
-    GoodsReference: Seq[GoodsReferenceType01]
-  ): TransportEquipmentType01 =
-    TransportEquipmentType01(sequenceNumber, containerIdentificationNumber, Some(Seal.length), Seal, GoodsReference)
-
-  def reads(index: Int): Reads[TransportEquipmentType01] = (
-    Reads.pure[BigInt](index) and
-      (__ \ "containerIdentificationNumber").readNullable[String] and
-      (__ \ "seals").readArray[SealType05](sealType05.reads) and
-      (__ \ "itemNumbers").readArray[GoodsReferenceType01](goodsReferenceType01.reads)
-  )(transportEquipmentType01.apply)
-
-}
-
-object sealType05 {
-
-  def reads(index: Int): Reads[SealType05] = (
-    Reads.pure[BigInt](index) and
-      (__ \ "sealIdentificationNumber").read[String]
-  )(SealType05.apply)
-
-}
-
-object goodsReferenceType01 {
-
-  def reads(index: Int): Reads[GoodsReferenceType01] = (
-    Reads.pure[BigInt](index) and
-      (__ \ "itemNumber").read[String].map(BigInt(_))
-  )(GoodsReferenceType01.apply)
-
-}
-
-object transhipmentType01 {
-
-  def reads: Reads[Option[TranshipmentType01]] = (
-    (__ \ "containerIndicatorYesNo").readWithDefault[Boolean](false) and
-      (__ \ "transportMeans").readNullable[TransportMeansType01](transportMeansType01.reads)
-  ).apply {
-    (containerIndicator, transportMeans) =>
-      transportMeans.map(
-        x =>
-          TranshipmentType01(
-            containerIndicator = containerIndicator,
-            TransportMeans = x
-          )
-      )
-  }
-
-}
-
-object transportMeansType01 {
-
-  def reads: Reads[TransportMeansType01] = (
-    (__ \ "identification" \ "type").read[String] and
-      (__ \ "identificationNumber").read[String] and
-      (__ \ "transportNationality" \ "code").read[String]
-  )(TransportMeansType01.apply)
-
+  )(ContactPersonType01.apply)
 }

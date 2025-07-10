@@ -18,6 +18,7 @@ package connectors
 
 import com.github.tomakehurst.wiremock.client.WireMock.*
 import itbase.{ItSpecBase, WireMockServerHandler}
+import models.Phase.*
 import models.{Arrival, Message, Messages}
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
@@ -73,8 +74,8 @@ class ApiConnectorSpec extends ItSpecBase with WireMockServerHandler {
             .willReturn(okJson(response))
         )
 
-        val res = await(connector.submitDeclaration(payload))
-        res.status shouldBe OK
+        val res = await(connector.submitDeclaration(payload, Phase5))
+        res.status shouldEqual OK
       }
 
       "bad request" in {
@@ -84,8 +85,8 @@ class ApiConnectorSpec extends ItSpecBase with WireMockServerHandler {
             .willReturn(badRequest())
         )
 
-        val res = await(connector.submitDeclaration(payload))
-        res.status shouldBe BAD_REQUEST
+        val res = await(connector.submitDeclaration(payload, Phase5))
+        res.status shouldEqual BAD_REQUEST
       }
 
       "internal server error" in {
@@ -95,8 +96,8 @@ class ApiConnectorSpec extends ItSpecBase with WireMockServerHandler {
             .willReturn(serverError())
         )
 
-        val res = await(connector.submitDeclaration(payload))
-        res.status shouldBe INTERNAL_SERVER_ERROR
+        val res = await(connector.submitDeclaration(payload, Phase5))
+        res.status shouldEqual INTERNAL_SERVER_ERROR
       }
     }
 
@@ -141,8 +142,8 @@ class ApiConnectorSpec extends ItSpecBase with WireMockServerHandler {
             .willReturn(okJson(response))
         )
 
-        val res = await(connector.getArrival(mrn))
-        res shouldBe Some(
+        val res = await(connector.getArrival(mrn, Phase5))
+        res shouldEqual Some(
           Arrival(
             id = "63651574c3447b12",
             movementReferenceNumber = mrn
@@ -170,8 +171,8 @@ class ApiConnectorSpec extends ItSpecBase with WireMockServerHandler {
             .willReturn(okJson(response))
         )
 
-        val res = await(connector.getArrival(mrn))
-        res shouldBe None
+        val res = await(connector.getArrival(mrn, Phase5))
+        res shouldEqual None
       }
     }
 
@@ -219,8 +220,8 @@ class ApiConnectorSpec extends ItSpecBase with WireMockServerHandler {
             .willReturn(okJson(response))
         )
 
-        val res = await(connector.getMessages(arrivalId))
-        res shouldBe Messages(
+        val res = await(connector.getMessages(arrivalId, Phase5))
+        res shouldEqual Messages(
           Seq(
             Message("IE007", LocalDateTime.of(2022, 11, 10, 15, 32, 51, 459000000))
           )

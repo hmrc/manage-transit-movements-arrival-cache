@@ -119,6 +119,31 @@ class HeaderSpec extends SpecBase with AppWithDefaultMockFixtures with ScalaChec
           }
         }
       }
+
+      "fail to convert to API format" when {
+        "undefined office of departure" in {
+          forAll(Gen.alphaNumStr) {
+            messageIdentification =>
+              when(mockDateTimeService.now).thenReturn(dateTime)
+              when(mockMessageIdentificationService.randomIdentifier).thenReturn(messageIdentification)
+
+              val json: JsValue = Json.parse(s"""
+                   |{
+                   |  "_id" : "$uuid",
+                   |  "mrn" : "$mrn",
+                   |  "eoriNumber" : "$eoriNumber",
+                   |  "isSubmitted" : false,
+                   |  "data" : {},
+                   |  "createdAt" : "2022-09-05T15:58:44.188Z",
+                   |  "lastUpdated" : "2022-09-07T10:33:23.472Z",
+                   |  "submissionStatus" : "notSubmitted"
+                   |}
+                   |""".stripMargin)
+
+              an[Exception] should be thrownBy header.message(json.as[UserAnswers])
+          }
+        }
+      }
     }
   }
 }

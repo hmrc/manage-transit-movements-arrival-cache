@@ -16,20 +16,19 @@
 
 package api.submission
 
-import generated.TransitOperationType02
-import models.UserAnswers
-import play.api.libs.functional.syntax._
-import play.api.libs.json.{__, Reads}
+import generated.*
+import models.{Phase, UserAnswers}
+import play.api.libs.json.Reads
 
 import java.time.LocalDateTime
 
 object TransitOperation {
 
-  def transform(uA: UserAnswers): TransitOperationType02 =
-    uA.metadata.data.as[TransitOperationType02](transitOperationType02.reads(uA.mrn))
+  def transform(uA: UserAnswers, version: Phase): TransitOperationType01 =
+    uA.metadata.data.as[TransitOperationType01](transitOperationType01.reads(uA.mrn, version))
 }
 
-object transitOperationType02 {
+object transitOperationType01 {
 
   val isSimplifiedReader: Reads[Boolean] = (identificationPath \ "isSimplifiedProcedure").read[String].map {
     case "simplified" => true
@@ -37,16 +36,16 @@ object transitOperationType02 {
     case x            => throw new Exception(s"Invalid procedure type value: $x")
   }
 
-  def reads(mrn: String): Reads[TransitOperationType02] = (
-    isSimplifiedReader and
-      (__ \ "incidentFlag").readWithDefault[Boolean](false)
-  ).apply {
-    (isSimplified, isIncident) =>
-      TransitOperationType02(
-        MRN = mrn,
-        arrivalNotificationDateAndTime = LocalDateTime.now(),
-        simplifiedProcedure = isSimplified,
-        incidentFlag = isIncident
-      )
-  }
+  def reads(mrn: String, version: Phase): Reads[TransitOperationType01] =
+    isSimplifiedReader.map {
+      isSimplified =>
+        TransitOperationType01(
+          MRN = mrn,
+          arrivalNotificationDateAndTime = LocalDateTime.now(),
+          simplifiedProcedure = isSimplified,
+          incidentFlag = version match
+            case Phase.Phase5 => Some(Number0)
+            case Phase.Phase6 => None
+        )
+    }
 }

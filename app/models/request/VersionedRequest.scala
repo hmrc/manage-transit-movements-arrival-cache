@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2025 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,24 +14,12 @@
  * limitations under the License.
  */
 
-package generators
+package models.request
 
-import models.{Phase, SubmissionStatus}
-import org.scalacheck.{Arbitrary, Gen}
+import models.Phase
+import play.api.mvc.WrappedRequest
 
-trait ModelGenerators {
+case class VersionedRequest[A](request: AuthenticatedRequest[A], phase: Phase) extends WrappedRequest[A](request) {
 
-  implicit lazy val arbitrarySubmissionState: Arbitrary[SubmissionStatus] = Arbitrary {
-    val values = Seq(
-      SubmissionStatus.NotSubmitted,
-      SubmissionStatus.Submitted,
-      SubmissionStatus.Amending
-    )
-    Gen.oneOf(values)
-  }
-
-  implicit lazy val arbitraryVersion: Arbitrary[Phase] =
-    Arbitrary {
-      Gen.oneOf(Phase.Phase5, Phase.Phase6)
-    }
+  val eoriNumber: String = request.eoriNumber
 }
