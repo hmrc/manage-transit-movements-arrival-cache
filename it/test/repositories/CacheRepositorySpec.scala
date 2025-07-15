@@ -77,23 +77,23 @@ class CacheRepositorySpec extends CacheRepositorySpecBase {
 
       val result = repository.get(userAnswers1.mrn, userAnswers1.eoriNumber).futureValue
 
-      result.value.mrn shouldBe userAnswers1.mrn
-      result.value.eoriNumber shouldBe userAnswers1.eoriNumber
-      result.value.metadata shouldBe userAnswers1.metadata
+      result.value.mrn shouldEqual userAnswers1.mrn
+      result.value.eoriNumber shouldEqual userAnswers1.eoriNumber
+      result.value.metadata shouldEqual userAnswers1.metadata
     }
 
     "return None when no UserAnswers match LocalReferenceNumber" in {
 
       val result = repository.get(userAnswers3.mrn, userAnswers1.eoriNumber).futureValue
 
-      result shouldBe None
+      result should not be defined
     }
 
     "return None when no UserAnswers match EoriNumber" in {
 
       val result = repository.get(userAnswers1.mrn, userAnswers3.eoriNumber).futureValue
 
-      result shouldBe None
+      result should not be defined
     }
   }
 
@@ -105,13 +105,13 @@ class CacheRepositorySpec extends CacheRepositorySpecBase {
 
       val setResult = repository.set(userAnswers3.metadata).futureValue
 
-      setResult shouldBe true
+      setResult shouldEqual true
 
       val getResult = findOne(userAnswers3.mrn, userAnswers3.eoriNumber).get
 
-      getResult.mrn shouldBe userAnswers3.mrn
-      getResult.eoriNumber shouldBe userAnswers3.eoriNumber
-      getResult.metadata shouldBe userAnswers3.metadata
+      getResult.mrn shouldEqual userAnswers3.mrn
+      getResult.eoriNumber shouldEqual userAnswers3.eoriNumber
+      getResult.metadata shouldEqual userAnswers3.metadata
     }
 
     "update document when it already exists" in {
@@ -123,16 +123,16 @@ class CacheRepositorySpec extends CacheRepositorySpecBase {
       )
       val setResult = repository.set(metadata).futureValue
 
-      setResult shouldBe true
+      setResult shouldEqual true
 
       val secondGet = findOne(userAnswers1.mrn, userAnswers1.eoriNumber).get
 
-      firstGet.id shouldBe secondGet.id
-      firstGet.mrn shouldBe secondGet.mrn
-      firstGet.eoriNumber shouldBe secondGet.eoriNumber
+      firstGet.id shouldEqual secondGet.id
+      firstGet.mrn shouldEqual secondGet.mrn
+      firstGet.eoriNumber shouldEqual secondGet.eoriNumber
       firstGet.metadata shouldNot equal(secondGet.metadata)
-      firstGet.createdAt shouldBe secondGet.createdAt
-      firstGet.lastUpdated `isBefore` secondGet.lastUpdated shouldBe true
+      firstGet.createdAt shouldEqual secondGet.createdAt
+      firstGet.lastUpdated `isBefore` secondGet.lastUpdated shouldEqual true
     }
   }
 
@@ -144,7 +144,7 @@ class CacheRepositorySpec extends CacheRepositorySpecBase {
 
       val removeResult = repository.remove(userAnswers1.mrn, userAnswers1.eoriNumber).futureValue
 
-      removeResult shouldBe true
+      removeResult shouldEqual true
 
       findOne(userAnswers1.mrn, userAnswers1.eoriNumber) should not be defined
     }
@@ -155,7 +155,7 @@ class CacheRepositorySpec extends CacheRepositorySpecBase {
 
       val removeResult = repository.remove(userAnswers3.mrn, userAnswers3.eoriNumber).futureValue
 
-      removeResult shouldBe true
+      removeResult shouldEqual true
     }
   }
 
@@ -169,14 +169,14 @@ class CacheRepositorySpec extends CacheRepositorySpecBase {
 
         result match {
           case UserAnswersSummary(eoriNumber, userAnswers, totalMovements, totalMatchingMovements) =>
-            eoriNumber shouldBe userAnswers4.eoriNumber
-            totalMovements shouldBe 2
-            totalMatchingMovements shouldBe 2
-            userAnswers.length shouldBe 2
-            userAnswers.head.mrn shouldBe userAnswers4.mrn
-            userAnswers.head.eoriNumber shouldBe userAnswers4.eoriNumber
-            userAnswers(1).mrn shouldBe userAnswers5.mrn
-            userAnswers(1).eoriNumber shouldBe userAnswers5.eoriNumber
+            eoriNumber shouldEqual userAnswers4.eoriNumber
+            totalMovements shouldEqual 2
+            totalMatchingMovements shouldEqual 2
+            userAnswers.length shouldEqual 2
+            userAnswers.head.mrn shouldEqual userAnswers4.mrn
+            userAnswers.head.eoriNumber shouldEqual userAnswers4.eoriNumber
+            userAnswers(1).mrn shouldEqual userAnswers5.mrn
+            userAnswers(1).eoriNumber shouldEqual userAnswers5.eoriNumber
         }
       }
 
@@ -184,7 +184,7 @@ class CacheRepositorySpec extends CacheRepositorySpecBase {
 
         val result = repository.getAll(userAnswers3.eoriNumber).futureValue
 
-        result.userAnswers shouldBe Seq.empty
+        result.userAnswers shouldEqual Seq.empty
       }
     }
 
@@ -198,12 +198,12 @@ class CacheRepositorySpec extends CacheRepositorySpecBase {
 
         result match {
           case UserAnswersSummary(eoriNumber, userAnswers, totalMovements, totalMatchingMovements) =>
-            eoriNumber shouldBe userAnswers4.eoriNumber
-            totalMovements shouldBe 3
-            totalMatchingMovements shouldBe 1
-            userAnswers.length shouldBe 1
-            userAnswers.head.mrn shouldBe userAnswers4.mrn
-            userAnswers.head.eoriNumber shouldBe userAnswers4.eoriNumber
+            eoriNumber shouldEqual userAnswers4.eoriNumber
+            totalMovements shouldEqual 3
+            totalMatchingMovements shouldEqual 1
+            userAnswers.length shouldEqual 1
+            userAnswers.head.mrn shouldEqual userAnswers4.mrn
+            userAnswers.head.eoriNumber shouldEqual userAnswers4.eoriNumber
         }
       }
 
@@ -215,14 +215,14 @@ class CacheRepositorySpec extends CacheRepositorySpecBase {
 
         result match {
           case UserAnswersSummary(eoriNumber, userAnswers, totalMovements, totalMatchingMovements) =>
-            eoriNumber shouldBe userAnswers4.eoriNumber
-            totalMovements shouldBe 3
-            totalMatchingMovements shouldBe 2
-            userAnswers.length shouldBe 2
-            userAnswers.head.mrn shouldBe userAnswers4.mrn
-            userAnswers.head.eoriNumber shouldBe userAnswers4.eoriNumber
-            userAnswers(1).mrn shouldBe userAnswers5.mrn
-            userAnswers(1).eoriNumber shouldBe userAnswers5.eoriNumber
+            eoriNumber shouldEqual userAnswers4.eoriNumber
+            totalMovements shouldEqual 3
+            totalMatchingMovements shouldEqual 2
+            userAnswers.length shouldEqual 2
+            userAnswers.head.mrn shouldEqual userAnswers4.mrn
+            userAnswers.head.eoriNumber shouldEqual userAnswers4.eoriNumber
+            userAnswers(1).mrn shouldEqual userAnswers5.mrn
+            userAnswers(1).eoriNumber shouldEqual userAnswers5.eoriNumber
         }
 
       }
@@ -231,7 +231,7 @@ class CacheRepositorySpec extends CacheRepositorySpecBase {
 
         val result = repository.getAll(userAnswers4.eoriNumber, Some("INVALID_SEARCH")).futureValue
 
-        result.userAnswers shouldBe Seq.empty
+        result.userAnswers shouldEqual Seq.empty
       }
     }
 
@@ -268,12 +268,12 @@ class CacheRepositorySpec extends CacheRepositorySpecBase {
 
         result match {
           case UserAnswersSummary(eoriNumber, userAnswers, totalMovements, totalMatchingMovements) =>
-            eoriNumber shouldBe userAnswers1.eoriNumber
-            totalMovements shouldBe 4
-            totalMatchingMovements shouldBe 4
-            userAnswers.length shouldBe 2
-            userAnswers.head.mrn shouldBe userAnswers1.mrn
-            userAnswers(1).mrn shouldBe userAnswers2.mrn
+            eoriNumber shouldEqual userAnswers1.eoriNumber
+            totalMovements shouldEqual 4
+            totalMatchingMovements shouldEqual 4
+            userAnswers.length shouldEqual 2
+            userAnswers.head.mrn shouldEqual userAnswers1.mrn
+            userAnswers(1).mrn shouldEqual userAnswers2.mrn
         }
 
       }
@@ -321,12 +321,12 @@ class CacheRepositorySpec extends CacheRepositorySpecBase {
 
         result match {
           case UserAnswersSummary(eoriNumber, userAnswers, totalMovements, totalMatchingMovements) =>
-            eoriNumber shouldBe userAnswers1.eoriNumber
-            totalMovements shouldBe 6
-            totalMatchingMovements shouldBe 3
-            userAnswers.length shouldBe 2
-            userAnswers.head.mrn shouldBe userAnswers4.mrn
-            userAnswers(1).mrn shouldBe userAnswers5.mrn
+            eoriNumber shouldEqual userAnswers1.eoriNumber
+            totalMovements shouldEqual 6
+            totalMatchingMovements shouldEqual 3
+            userAnswers.length shouldEqual 2
+            userAnswers.head.mrn shouldEqual userAnswers4.mrn
+            userAnswers(1).mrn shouldEqual userAnswers5.mrn
         }
       }
     }
@@ -378,33 +378,33 @@ class CacheRepositorySpec extends CacheRepositorySpecBase {
 
         result1 match {
           case UserAnswersSummary(eoriNumber, userAnswers, totalMovements, totalMatchingMovements) =>
-            eoriNumber shouldBe userAnswers1.eoriNumber
-            totalMovements shouldBe 6
-            totalMatchingMovements shouldBe 6
-            userAnswers.length shouldBe 2
-            userAnswers.head.mrn shouldBe userAnswers3.mrn
-            userAnswers(1).mrn shouldBe userAnswers4.mrn
+            eoriNumber shouldEqual userAnswers1.eoriNumber
+            totalMovements shouldEqual 6
+            totalMatchingMovements shouldEqual 6
+            userAnswers.length shouldEqual 2
+            userAnswers.head.mrn shouldEqual userAnswers3.mrn
+            userAnswers(1).mrn shouldEqual userAnswers4.mrn
         }
 
         result2 match {
           case UserAnswersSummary(eoriNumber, userAnswers, totalMovements, totalMatchingMovements) =>
-            eoriNumber shouldBe userAnswers1.eoriNumber
-            totalMovements shouldBe 6
-            totalMatchingMovements shouldBe 6
-            userAnswers.length shouldBe 2
-            userAnswers.head.mrn shouldBe userAnswers5.mrn
-            userAnswers(1).mrn shouldBe userAnswers6.mrn
+            eoriNumber shouldEqual userAnswers1.eoriNumber
+            totalMovements shouldEqual 6
+            totalMatchingMovements shouldEqual 6
+            userAnswers.length shouldEqual 2
+            userAnswers.head.mrn shouldEqual userAnswers5.mrn
+            userAnswers(1).mrn shouldEqual userAnswers6.mrn
         }
 
         result3 match {
           case UserAnswersSummary(eoriNumber, userAnswers, totalMovements, totalMatchingMovements) =>
-            eoriNumber shouldBe userAnswers1.eoriNumber
-            totalMovements shouldBe 6
-            totalMatchingMovements shouldBe 6
-            userAnswers.length shouldBe 3
-            userAnswers.head.mrn shouldBe userAnswers4.mrn
-            userAnswers(1).mrn shouldBe userAnswers5.mrn
-            userAnswers(2).mrn shouldBe userAnswers6.mrn
+            eoriNumber shouldEqual userAnswers1.eoriNumber
+            totalMovements shouldEqual 6
+            totalMatchingMovements shouldEqual 6
+            userAnswers.length shouldEqual 3
+            userAnswers.head.mrn shouldEqual userAnswers4.mrn
+            userAnswers(1).mrn shouldEqual userAnswers5.mrn
+            userAnswers(2).mrn shouldEqual userAnswers6.mrn
         }
       }
 
@@ -451,11 +451,11 @@ class CacheRepositorySpec extends CacheRepositorySpecBase {
 
         result match {
           case UserAnswersSummary(eoriNumber, userAnswers, totalMovements, totalMatchingMovements) =>
-            eoriNumber shouldBe userAnswers1.eoriNumber
-            totalMovements shouldBe 6
-            totalMatchingMovements shouldBe 3
-            userAnswers.length shouldBe 1
-            userAnswers.head.mrn shouldBe userAnswers6.mrn
+            eoriNumber shouldEqual userAnswers1.eoriNumber
+            totalMovements shouldEqual 6
+            totalMatchingMovements shouldEqual 3
+            userAnswers.length shouldEqual 1
+            userAnswers.head.mrn shouldEqual userAnswers6.mrn
         }
       }
     }
@@ -505,12 +505,12 @@ class CacheRepositorySpec extends CacheRepositorySpecBase {
 
         result match {
           case UserAnswersSummary(_, userAnswers, _, _) =>
-            userAnswers.head.mrn shouldBe userAnswers1.mrn
-            userAnswers(1).mrn shouldBe userAnswers2.mrn
-            userAnswers(2).mrn shouldBe userAnswers3.mrn
-            userAnswers(3).mrn shouldBe userAnswers4.mrn
-            userAnswers(4).mrn shouldBe userAnswers5.mrn
-            userAnswers(5).mrn shouldBe userAnswers6.mrn
+            userAnswers.head.mrn shouldEqual userAnswers1.mrn
+            userAnswers(1).mrn shouldEqual userAnswers2.mrn
+            userAnswers(2).mrn shouldEqual userAnswers3.mrn
+            userAnswers(3).mrn shouldEqual userAnswers4.mrn
+            userAnswers(4).mrn shouldEqual userAnswers5.mrn
+            userAnswers(5).mrn shouldEqual userAnswers6.mrn
         }
 
       }
@@ -527,12 +527,12 @@ class CacheRepositorySpec extends CacheRepositorySpecBase {
 
         result match {
           case UserAnswersSummary(_, userAnswers, _, _) =>
-            userAnswers.head.mrn shouldBe userAnswers6.mrn
-            userAnswers(1).mrn shouldBe userAnswers5.mrn
-            userAnswers(2).mrn shouldBe userAnswers4.mrn
-            userAnswers(3).mrn shouldBe userAnswers3.mrn
-            userAnswers(4).mrn shouldBe userAnswers2.mrn
-            userAnswers(5).mrn shouldBe userAnswers1.mrn
+            userAnswers.head.mrn shouldEqual userAnswers6.mrn
+            userAnswers(1).mrn shouldEqual userAnswers5.mrn
+            userAnswers(2).mrn shouldEqual userAnswers4.mrn
+            userAnswers(3).mrn shouldEqual userAnswers3.mrn
+            userAnswers(4).mrn shouldEqual userAnswers2.mrn
+            userAnswers(5).mrn shouldEqual userAnswers1.mrn
         }
 
       }
@@ -549,12 +549,12 @@ class CacheRepositorySpec extends CacheRepositorySpecBase {
 
         result match {
           case UserAnswersSummary(_, userAnswers, _, _) =>
-            userAnswers.head.mrn shouldBe userAnswers2.mrn
-            userAnswers(1).mrn shouldBe userAnswers3.mrn
-            userAnswers(2).mrn shouldBe userAnswers4.mrn
-            userAnswers(3).mrn shouldBe userAnswers1.mrn
-            userAnswers(4).mrn shouldBe userAnswers6.mrn
-            userAnswers(5).mrn shouldBe userAnswers5.mrn
+            userAnswers.head.mrn shouldEqual userAnswers2.mrn
+            userAnswers(1).mrn shouldEqual userAnswers3.mrn
+            userAnswers(2).mrn shouldEqual userAnswers4.mrn
+            userAnswers(3).mrn shouldEqual userAnswers1.mrn
+            userAnswers(4).mrn shouldEqual userAnswers6.mrn
+            userAnswers(5).mrn shouldEqual userAnswers5.mrn
         }
 
       }
@@ -571,12 +571,12 @@ class CacheRepositorySpec extends CacheRepositorySpecBase {
 
         result match {
           case UserAnswersSummary(_, userAnswers, _, _) =>
-            userAnswers.head.mrn shouldBe userAnswers5.mrn
-            userAnswers(1).mrn shouldBe userAnswers6.mrn
-            userAnswers(2).mrn shouldBe userAnswers1.mrn
-            userAnswers(3).mrn shouldBe userAnswers4.mrn
-            userAnswers(4).mrn shouldBe userAnswers3.mrn
-            userAnswers(5).mrn shouldBe userAnswers2.mrn
+            userAnswers.head.mrn shouldEqual userAnswers5.mrn
+            userAnswers(1).mrn shouldEqual userAnswers6.mrn
+            userAnswers(2).mrn shouldEqual userAnswers1.mrn
+            userAnswers(3).mrn shouldEqual userAnswers4.mrn
+            userAnswers(4).mrn shouldEqual userAnswers3.mrn
+            userAnswers(5).mrn shouldEqual userAnswers2.mrn
         }
 
       }
@@ -594,12 +594,12 @@ class CacheRepositorySpec extends CacheRepositorySpecBase {
 
         result match {
           case UserAnswersSummary(_, userAnswers, _, _) =>
-            userAnswers.head.mrn shouldBe userAnswers5.mrn
-            userAnswers(1).mrn shouldBe userAnswers6.mrn
-            userAnswers(2).mrn shouldBe userAnswers1.mrn
-            userAnswers(3).mrn shouldBe userAnswers4.mrn
-            userAnswers(4).mrn shouldBe userAnswers3.mrn
-            userAnswers(5).mrn shouldBe userAnswers2.mrn
+            userAnswers.head.mrn shouldEqual userAnswers5.mrn
+            userAnswers(1).mrn shouldEqual userAnswers6.mrn
+            userAnswers(2).mrn shouldEqual userAnswers1.mrn
+            userAnswers(3).mrn shouldEqual userAnswers4.mrn
+            userAnswers(4).mrn shouldEqual userAnswers3.mrn
+            userAnswers(5).mrn shouldEqual userAnswers2.mrn
         }
 
       }
@@ -609,18 +609,18 @@ class CacheRepositorySpec extends CacheRepositorySpecBase {
   "ensureIndexes" must {
     "ensure the correct indexes" in {
       val indexes = repository.collection.listIndexes().toFuture().futureValue
-      indexes.length shouldBe 3
+      indexes.length shouldEqual 3
 
-      indexes.head.get("name").get shouldBe BsonString("_id_")
+      indexes.head.get("name").get shouldEqual BsonString("_id_")
 
       def findIndex(name: String): Document = indexes.find(_.get("name").get == BsonString(name)).get
 
       val createdAtIndex = findIndex("user-answers-created-at-index")
-      createdAtIndex.get("key").get shouldBe BsonDocument("createdAt" -> 1)
-      createdAtIndex.get("expireAfterSeconds").get.asNumber().intValue() shouldBe 2592000
+      createdAtIndex.get("key").get shouldEqual BsonDocument("createdAt" -> 1)
+      createdAtIndex.get("expireAfterSeconds").get.asNumber().intValue() shouldEqual 2592000
 
       val eoriMrnIndex = findIndex("eoriNumber-mrn-index")
-      eoriMrnIndex.get("key").get shouldBe BsonDocument("eoriNumber" -> 1, "mrn" -> 1)
+      eoriMrnIndex.get("key").get shouldEqual BsonDocument("eoriNumber" -> 1, "mrn" -> 1)
     }
   }
 }

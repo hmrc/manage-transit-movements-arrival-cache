@@ -55,12 +55,12 @@ class UserAnswersSpec extends SpecBase with AppWithDefaultMockFixtures {
 
       "read correctly" in {
         val result = json.as[UserAnswers]
-        result shouldBe userAnswers
+        result shouldEqual userAnswers
       }
 
       "write correctly" in {
         val result = Json.toJson(userAnswers)
-        result shouldBe json
+        result shouldEqual json
       }
 
       "be readable as a LocalDateTime for backwards compatibility" in {
@@ -104,12 +104,12 @@ class UserAnswersSpec extends SpecBase with AppWithDefaultMockFixtures {
 
             "read correctly" in {
               val result = json.as[UserAnswers]
-              result shouldBe userAnswers
+              result shouldEqual userAnswers
             }
 
             "write and read correctly" in {
               val result = Json.toJson(userAnswers).as[UserAnswers]
-              result shouldBe userAnswers
+              result shouldEqual userAnswers
             }
           }
         }
@@ -146,12 +146,12 @@ class UserAnswersSpec extends SpecBase with AppWithDefaultMockFixtures {
 
           "read correctly" in {
             val result = json.as[UserAnswers]
-            result shouldBe userAnswers
+            result shouldEqual userAnswers
           }
 
           "write correctly" in {
             val result = Json.toJson(userAnswers)
-            result shouldBe json
+            result shouldEqual json
           }
         }
       }

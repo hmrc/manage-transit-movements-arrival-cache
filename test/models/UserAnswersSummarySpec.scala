@@ -91,7 +91,7 @@ class UserAnswersSummarySpec extends SpecBase {
           )
         )
 
-      userAnswersSummary.toHateoas(dateTimeService.expiresInDays) shouldBe expectedResult
+      userAnswersSummary.toHateoas(dateTimeService.expiresInDays) shouldEqual expectedResult
     }
   }
 }

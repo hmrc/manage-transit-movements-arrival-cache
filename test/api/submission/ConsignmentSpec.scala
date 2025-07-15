@@ -81,7 +81,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures {
                 )
               )
 
-              converted shouldBe expected
+              converted shouldEqual expected
 
             }
           }
@@ -150,7 +150,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures {
             )
           )
 
-          converted shouldBe expected
+          converted shouldEqual expected
 
         }
       }

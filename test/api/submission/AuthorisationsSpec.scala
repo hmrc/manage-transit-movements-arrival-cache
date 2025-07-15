@@ -116,7 +116,7 @@ class AuthorisationsSpec extends SpecBase with AppWithDefaultMockFixtures {
           )
         )
 
-        converted shouldBe expected
+        converted shouldEqual expected
       }
 
       "Authorization Type should be ACE when ProcedureType is Simplified and should convert to API format" in {
@@ -208,7 +208,7 @@ class AuthorisationsSpec extends SpecBase with AppWithDefaultMockFixtures {
           )
         )
 
-        converted shouldBe expected
+        converted shouldEqual expected
       }
 
       "Authorization Type should Not be set when ProcedureType is Normal and should convert to API format" in {
@@ -293,7 +293,7 @@ class AuthorisationsSpec extends SpecBase with AppWithDefaultMockFixtures {
 
         val expected = List.empty
 
-        converted shouldBe expected
+        converted shouldEqual expected
       }
 
     }
