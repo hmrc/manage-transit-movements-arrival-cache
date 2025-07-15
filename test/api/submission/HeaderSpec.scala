@@ -93,12 +93,12 @@ class HeaderSpec extends SpecBase with AppWithDefaultMockFixtures with ScalaChec
 
               val result = header.message(uA("GB"))
 
-              result.messageSender shouldBe eoriNumber
-              result.messageRecipient shouldBe "NTA.GB"
-              result.preparationDateAndTime shouldBe XMLCalendar("2020-01-01T00:00:00")
-              result.messageIdentification shouldBe messageIdentification
-              result.messageType shouldBe CC007C
-              result.correlationIdentifier shouldBe None
+              result.messageSender shouldEqual eoriNumber
+              result.messageRecipient shouldEqual "NTA.GB"
+              result.preparationDateAndTime shouldEqual XMLCalendar("2020-01-01T00:00:00")
+              result.messageIdentification shouldEqual messageIdentification
+              result.messageType shouldEqual CC007C
+              result.correlationIdentifier should not be defined
           }
         }
 
@@ -110,12 +110,12 @@ class HeaderSpec extends SpecBase with AppWithDefaultMockFixtures with ScalaChec
 
               val result = header.message(uA("XI"))
 
-              result.messageSender shouldBe eoriNumber
-              result.messageRecipient shouldBe "NTA.XI"
-              result.preparationDateAndTime shouldBe XMLCalendar("2020-01-01T00:00:00")
-              result.messageIdentification shouldBe messageIdentification
-              result.messageType shouldBe CC007C
-              result.correlationIdentifier shouldBe None
+              result.messageSender shouldEqual eoriNumber
+              result.messageRecipient shouldEqual "NTA.XI"
+              result.preparationDateAndTime shouldEqual XMLCalendar("2020-01-01T00:00:00")
+              result.messageIdentification shouldEqual messageIdentification
+              result.messageType shouldEqual CC007C
+              result.correlationIdentifier should not be defined
           }
         }
       }

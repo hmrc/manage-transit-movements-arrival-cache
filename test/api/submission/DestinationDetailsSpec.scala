@@ -112,7 +112,7 @@ class DestinationDetailsSpec extends SpecBase with AppWithDefaultMockFixtures {
           referenceNumber = "GB000051"
         )
 
-        converted shouldBe expected
+        converted shouldEqual expected
       }
 
     }
@@ -129,7 +129,7 @@ class DestinationDetailsSpec extends SpecBase with AppWithDefaultMockFixtures {
           identificationNumber = "GB123456789000"
         )
 
-        converted shouldBe expected
+        converted shouldEqual expected
       }
 
     }
