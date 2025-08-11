@@ -16,41 +16,39 @@
 
 package services
 
-import base.{AppWithDefaultMockFixtures, SpecBase}
+import base.SpecBase
 import com.codahale.metrics.{Counter, MetricRegistry}
 import org.mockito.ArgumentMatchers.{any, eq as eqTo}
 import org.mockito.Mockito.{reset, verify, when}
 import org.scalacheck.Gen
+import org.scalatest.BeforeAndAfterEach
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import play.api.http.Status.OK
-import play.api.inject.bind
-import play.api.inject.guice.GuiceApplicationBuilder
+import play.api.mvc.{BaseController, ControllerComponents}
+import play.api.test.Helpers.stubControllerComponents
 import uk.gov.hmrc.http.HttpResponse
 import uk.gov.hmrc.play.bootstrap.metrics.Metrics
 
-class MetricsServiceSpec extends SpecBase with AppWithDefaultMockFixtures with ScalaCheckPropertyChecks {
+class MetricsServiceSpec extends SpecBase with BeforeAndAfterEach with ScalaCheckPropertyChecks {
 
   private val mockMetrics = mock[Metrics]
 
   private val mockMetricRegistry = mock[MetricRegistry]
 
-  override def guiceApplicationBuilder(): GuiceApplicationBuilder =
-    super
-      .guiceApplicationBuilder()
-      .overrides(bind[Metrics].toInstance(mockMetrics))
-
-  private val service = app.injector.instanceOf[MetricsService]
+  private val service: MetricsService & Any = new MetricsService(mockMetrics) with BaseController {
+    override val controllerComponents: ControllerComponents = stubControllerComponents()
+  }
 
   override def beforeEach(): Unit = {
     super.beforeEach()
     reset(mockMetrics)
     reset(mockMetricRegistry)
-    when(mockMetrics.defaultRegistry).thenReturn(mockMetricRegistry)
   }
 
   "MetricsService" when {
     "increment" when {
       "2xx response" in {
+        when(mockMetrics.defaultRegistry).thenReturn(mockMetricRegistry)
         when(mockMetricRegistry.counter(any())).thenReturn(new Counter())
 
         val response = HttpResponse(OK, "")
@@ -64,7 +62,7 @@ class MetricsServiceSpec extends SpecBase with AppWithDefaultMockFixtures with S
         forAll(Gen.choose(400, 499)) {
           status =>
             beforeEach()
-
+            when(mockMetrics.defaultRegistry).thenReturn(mockMetricRegistry)
             when(mockMetricRegistry.counter(any())).thenReturn(new Counter())
 
             val response = HttpResponse(status, "")
@@ -79,7 +77,7 @@ class MetricsServiceSpec extends SpecBase with AppWithDefaultMockFixtures with S
         forAll(Gen.choose(500, 599)) {
           status =>
             beforeEach()
-
+            when(mockMetrics.defaultRegistry).thenReturn(mockMetricRegistry)
             when(mockMetricRegistry.counter(any())).thenReturn(new Counter())
 
             val response = HttpResponse(status, "")

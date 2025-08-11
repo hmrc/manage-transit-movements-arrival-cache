@@ -16,14 +16,27 @@
 
 package base
 
+import config.AppConfig
 import controllers.actions.{AuthenticateActionProvider, FakeAuthenticateActionProvider}
 import org.scalatest.{BeforeAndAfterEach, TestSuite}
+import models.SensitiveFormats
+import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.Application
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
+import play.api.mvc.AnyContent
+import play.api.test.FakeRequest
 
-trait AppWithDefaultMockFixtures extends BeforeAndAfterEach {
+import java.time.Clock
+
+trait AppWithDefaultMockFixtures extends BeforeAndAfterEach with GuiceOneAppPerSuite {
   self: TestSuite & SpecBase =>
+
+  def fakeRequest: FakeRequest[AnyContent] = FakeRequest("", "")
+
+  lazy val appConfig: AppConfig                        = app.injector.instanceOf[AppConfig]
+  implicit lazy val clock: Clock                       = app.injector.instanceOf[Clock]
+  implicit lazy val sensitiveFormats: SensitiveFormats = app.injector.instanceOf[SensitiveFormats]
 
   override def fakeApplication(): Application =
     guiceApplicationBuilder()

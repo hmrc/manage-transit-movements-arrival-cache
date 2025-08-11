@@ -16,12 +16,12 @@
 
 package api.submission
 
-import base.{AppWithDefaultMockFixtures, SpecBase}
+import base.SpecBase
 import generated.*
 import models.{Phase, UserAnswers}
 import play.api.libs.json.{JsValue, Json}
 
-class TransitOperationSpec extends SpecBase with AppWithDefaultMockFixtures {
+class TransitOperationSpec extends SpecBase {
 
   "TransitOperation" when {
 
