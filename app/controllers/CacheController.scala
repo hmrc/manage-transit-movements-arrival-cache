@@ -22,7 +22,7 @@ import play.api.Logging
 import play.api.libs.json.{JsError, JsSuccess, JsValue, Json}
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import repositories.CacheRepository
-import services.DateTimeService
+import services.*
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
 import javax.inject.{Inject, Singleton}
@@ -34,7 +34,7 @@ class CacheController @Inject() (
   cc: ControllerComponents,
   actions: Actions,
   cacheRepository: CacheRepository,
-  dateTimeService: DateTimeService
+  userAnswersSummaryService: UserAnswersSummaryService
 )(implicit ec: ExecutionContext)
     extends BackendController(cc)
     with Logging {
@@ -118,9 +118,8 @@ class CacheController @Inject() (
       implicit request =>
         cacheRepository
           .getAll(request.eoriNumber, mrn, limit, skip, sortBy)
-          .map(
-            result => Ok(result.toHateoas(dateTimeService.expiresInDays))
-          )
+          .map(userAnswersSummaryService.toHateoas)
+          .map(Ok(_))
           .recover {
             case NonFatal(e) =>
               logger.error("Failed to read user answers summary from mongo", e)

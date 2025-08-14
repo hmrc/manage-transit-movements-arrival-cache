@@ -14,25 +14,27 @@
  * limitations under the License.
  */
 
-package models
+package services
 
 import base.SpecBase
+import models.{Metadata, SubmissionStatus, UserAnswers, UserAnswersSummary}
+import org.mockito.ArgumentMatchers.any
+import org.mockito.Mockito.when
 import play.api.libs.json.Json
-import services.DateTimeService
 
 import java.time.Instant
 import java.time.temporal.ChronoUnit.DAYS
 import java.util.UUID
 
-class UserAnswersSummarySpec extends SpecBase {
+class UserAnswersSummaryServiceSpec extends SpecBase {
 
-  private val dateTimeService = app.injector.instanceOf[DateTimeService]
+  private val mockDateTimeService = mock[DateTimeService]
 
   "toHateoas" must {
 
     "turn a UserAnswersSummary to hateos json object" in {
 
-      val now = Instant.now(clock)
+      val now = Instant.now()
       val id1 = UUID.randomUUID()
       val id2 = UUID.randomUUID()
 
@@ -61,6 +63,12 @@ class UserAnswersSummarySpec extends SpecBase {
       )
 
       val userAnswersSummary = UserAnswersSummary(eoriNumber, Seq(userAnswers1, userAnswers2), 2, 2)
+
+      val service = new UserAnswersSummaryService(mockDateTimeService)
+
+      when(mockDateTimeService.expiresInDays(any()))
+        .thenReturn(30L)
+        .thenReturn(29L)
 
       val expectedResult =
         Json.obj(
@@ -91,7 +99,7 @@ class UserAnswersSummarySpec extends SpecBase {
           )
         )
 
-      userAnswersSummary.toHateoas(dateTimeService.expiresInDays) shouldEqual expectedResult
+      service.toHateoas(userAnswersSummary) shouldEqual expectedResult
     }
   }
 }

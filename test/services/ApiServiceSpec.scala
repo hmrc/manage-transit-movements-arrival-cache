@@ -17,17 +17,16 @@
 package services
 
 import api.submission.Declaration
-import base.{AppWithDefaultMockFixtures, SpecBase}
+import base.SpecBase
 import connectors.ApiConnector
 import generators.Generators
 import models.{Arrival, Message, Messages, Phase}
 import org.mockito.ArgumentMatchers.{any, eq as eqTo}
 import org.mockito.Mockito.*
 import org.scalacheck.Arbitrary.arbitrary
+import org.scalatest.BeforeAndAfterEach
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import play.api.http.Status.OK
-import play.api.inject.bind
-import play.api.inject.guice.GuiceApplicationBuilder
 import uk.gov.hmrc.http.HttpResponse
 
 import java.time.LocalDateTime
@@ -35,18 +34,10 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.xml.NodeSeq
 
-class ApiServiceSpec extends SpecBase with AppWithDefaultMockFixtures with ScalaCheckPropertyChecks with Generators {
+class ApiServiceSpec extends SpecBase with BeforeAndAfterEach with ScalaCheckPropertyChecks with Generators {
 
   private lazy val mockApiConnector = mock[ApiConnector]
   private lazy val mockDeclaration  = mock[Declaration]
-
-  override def guiceApplicationBuilder(): GuiceApplicationBuilder =
-    super
-      .guiceApplicationBuilder()
-      .overrides(
-        bind[ApiConnector].toInstance(mockApiConnector),
-        bind[Declaration].toInstance(mockDeclaration)
-      )
 
   private val xml: NodeSeq =
     <ncts:CC007C PhaseID="NCTS5.1" xmlns:ncts="http://ncts.dgtaxud.ec">
@@ -57,12 +48,9 @@ class ApiServiceSpec extends SpecBase with AppWithDefaultMockFixtures with Scala
     super.beforeEach()
     reset(mockApiConnector)
     reset(mockDeclaration)
-
-    when(mockDeclaration.transform(any(), any()))
-      .thenReturn(xml)
   }
 
-  private val service = app.injector.instanceOf[ApiService]
+  private val service = new ApiService(mockApiConnector, mockDeclaration)
 
   "submitDeclaration" must {
     "call connector" in {
@@ -72,6 +60,9 @@ class ApiServiceSpec extends SpecBase with AppWithDefaultMockFixtures with Scala
 
           val userAnswers    = emptyUserAnswers
           val expectedResult = HttpResponse(OK, "")
+
+          when(mockDeclaration.transform(any(), any()))
+            .thenReturn(xml)
 
           when(mockApiConnector.submitDeclaration(any(), any())(any())).thenReturn(Future.successful(expectedResult))
 

@@ -16,7 +16,7 @@
 
 package controllers.actions
 
-import base.SpecBase
+import base.{AppWithDefaultMockFixtures, SpecBase}
 import models.Phase
 import models.request.{AuthenticatedRequest, VersionedRequest}
 import play.api.mvc.*
@@ -25,7 +25,7 @@ import play.api.mvc.Results.BadRequest
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class VersionedActionSpec extends SpecBase {
+class VersionedActionSpec extends SpecBase with AppWithDefaultMockFixtures {
 
   private class Harness extends VersionedAction {
 
