@@ -67,7 +67,7 @@ class ApiConnectorSpec extends ItSpecBase with WireMockServerHandler {
         .toString()
         .stripMargin
 
-      "success" in {
+      "success when phase 5" in {
         server.stubFor(
           post(urlEqualTo(url))
             .withHeader(ACCEPT, equalTo("application/vnd.hmrc.2.1+json"))
@@ -78,7 +78,18 @@ class ApiConnectorSpec extends ItSpecBase with WireMockServerHandler {
         res.status shouldEqual OK
       }
 
-      "bad request" in {
+      "success when phase 6" in {
+        server.stubFor(
+          post(urlEqualTo(url))
+            .withHeader(ACCEPT, equalTo("application/vnd.hmrc.3.0+json"))
+            .willReturn(okJson(response))
+        )
+
+        val res = await(connector.submitDeclaration(payload, Phase6))
+        res.status shouldEqual OK
+      }
+
+      "bad request when phase 5" in {
         server.stubFor(
           post(urlEqualTo(url))
             .withHeader(ACCEPT, equalTo("application/vnd.hmrc.2.1+json"))
@@ -89,7 +100,18 @@ class ApiConnectorSpec extends ItSpecBase with WireMockServerHandler {
         res.status shouldEqual BAD_REQUEST
       }
 
-      "internal server error" in {
+      "bad request when phase 6" in {
+        server.stubFor(
+          post(urlEqualTo(url))
+            .withHeader(ACCEPT, equalTo("application/vnd.hmrc.3.0+json"))
+            .willReturn(badRequest())
+        )
+
+        val res = await(connector.submitDeclaration(payload, Phase6))
+        res.status shouldEqual BAD_REQUEST
+      }
+
+      "internal server error when phase 5" in {
         server.stubFor(
           post(urlEqualTo(url))
             .withHeader(ACCEPT, equalTo("application/vnd.hmrc.2.1+json"))
@@ -99,13 +121,24 @@ class ApiConnectorSpec extends ItSpecBase with WireMockServerHandler {
         val res = await(connector.submitDeclaration(payload, Phase5))
         res.status shouldEqual INTERNAL_SERVER_ERROR
       }
+
+      "internal server error when phase 6" in {
+        server.stubFor(
+          post(urlEqualTo(url))
+            .withHeader(ACCEPT, equalTo("application/vnd.hmrc.3.0+json"))
+            .willReturn(serverError())
+        )
+
+        val res = await(connector.submitDeclaration(payload, Phase6))
+        res.status shouldEqual INTERNAL_SERVER_ERROR
+      }
     }
 
     "getArrival" when {
       val mrn = "27WF9X1FQ9RCKN0TM3"
       val url = s"/movements/arrivals?movementReferenceNumber=$mrn"
 
-      "success" in {
+      "success when phase 5" in {
         val response: String =
           s"""
              |{
@@ -151,7 +184,53 @@ class ApiConnectorSpec extends ItSpecBase with WireMockServerHandler {
         )
       }
 
-      "no messages found" in {
+      "success when phase 6" in {
+        val response: String =
+          s"""
+             |{
+             |  "_links": {
+             |    "self": {
+             |      "href": "/customs/transits/movements/arrivals"
+             |    }
+             |  },
+             |  "totalCount": 1,
+             |  "arrivals": [
+             |    {
+             |      "_links": {
+             |        "self": {
+             |          "href": "/customs/transits/movements/arrivals/$arrivalId"
+             |        },
+             |        "messages": {
+             |          "href": "/customs/transits/movements/arrivals/$arrivalId/messages"
+             |        }
+             |      },
+             |      "id": "63651574c3447b12",
+             |      "movementReferenceNumber": "$mrn",
+             |      "created": "2022-11-04T13:36:52.332Z",
+             |      "updated": "2022-11-04T13:36:52.332Z",
+             |      "enrollmentEORINumber": "9999912345",
+             |      "movementEORINumber": "GB1234567890"
+             |    }
+             |  ]
+             |}
+             |""".stripMargin
+
+        server.stubFor(
+          get(urlEqualTo(url))
+            .withHeader(ACCEPT, equalTo("application/vnd.hmrc.3.0+json"))
+            .willReturn(okJson(response))
+        )
+
+        val res = await(connector.getArrival(mrn, Phase6))
+        res shouldEqual Some(
+          Arrival(
+            id = "63651574c3447b12",
+            movementReferenceNumber = mrn
+          )
+        )
+      }
+
+      "no messages found when phase 5" in {
         val response: String =
           s"""
              |{
@@ -172,6 +251,30 @@ class ApiConnectorSpec extends ItSpecBase with WireMockServerHandler {
         )
 
         val res = await(connector.getArrival(mrn, Phase5))
+        res shouldEqual None
+      }
+
+      "no messages found when phase 6" in {
+        val response: String =
+          s"""
+             |{
+             |  "_links": {
+             |    "self": {
+             |      "href": "/customs/transits/movements/arrivals"
+             |    }
+             |  },
+             |  "totalCount": 0,
+             |  "arrivals": []
+             |}
+             |""".stripMargin
+
+        server.stubFor(
+          get(urlEqualTo(url))
+            .withHeader(ACCEPT, equalTo("application/vnd.hmrc.3.0+json"))
+            .willReturn(okJson(response))
+        )
+
+        val res = await(connector.getArrival(mrn, Phase6))
         res shouldEqual None
       }
     }
@@ -213,7 +316,7 @@ class ApiConnectorSpec extends ItSpecBase with WireMockServerHandler {
           |}
           |""".stripMargin
 
-      "success" in {
+      "success when phase 5" in {
         server.stubFor(
           get(urlEqualTo(url))
             .withHeader(ACCEPT, equalTo("application/vnd.hmrc.2.1+json"))
@@ -221,6 +324,21 @@ class ApiConnectorSpec extends ItSpecBase with WireMockServerHandler {
         )
 
         val res = await(connector.getMessages(arrivalId, Phase5))
+        res shouldEqual Messages(
+          Seq(
+            Message("IE007", LocalDateTime.of(2022, 11, 10, 15, 32, 51, 459000000))
+          )
+        )
+      }
+
+      "success when phase 6" in {
+        server.stubFor(
+          get(urlEqualTo(url))
+            .withHeader(ACCEPT, equalTo("application/vnd.hmrc.3.0+json"))
+            .willReturn(okJson(response))
+        )
+
+        val res = await(connector.getMessages(arrivalId, Phase6))
         res shouldEqual Messages(
           Seq(
             Message("IE007", LocalDateTime.of(2022, 11, 10, 15, 32, 51, 459000000))
